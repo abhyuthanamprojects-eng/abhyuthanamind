@@ -1,0 +1,40 @@
+/*
+ * Brand color override for the MaterialM theme.
+ * Change ONLY the two lines below to re-brand the whole admin panel later
+ * (--brand-primary-rgb must stay in sync with --brand-primary, comma-separated, no "rgb()").
+ */
+:root {
+  --brand-primary: #2F7D4F;
+  --brand-primary-rgb: 47, 125, 79;
+
+  --bs-primary: var(--brand-primary);
+  --bs-primary-rgb: var(--brand-primary-rgb);
+  --bs-primary-text-emphasis: color-mix(in srgb, var(--brand-primary) 40%, black);
+  --bs-primary-bg-subtle: color-mix(in srgb, var(--brand-primary) 20%, white);
+  --bs-primary-border-subtle: color-mix(in srgb, var(--brand-primary) 40%, white);
+  --bs-link-color: var(--brand-primary);
+  --bs-link-color-rgb: var(--brand-primary-rgb);
+  --bs-link-hover-color: color-mix(in srgb, var(--brand-primary) 85%, black);
+  --bs-link-hover-color-rgb: var(--brand-primary-rgb);
+}
+
+.btn-primary {
+  --bs-btn-bg: var(--brand-primary);
+  --bs-btn-border-color: var(--brand-primary);
+  --bs-btn-hover-bg: color-mix(in srgb, var(--brand-primary) 85%, black);
+  --bs-btn-hover-border-color: color-mix(in srgb, var(--brand-primary) 80%, black);
+  --bs-btn-active-bg: color-mix(in srgb, var(--brand-primary) 80%, black);
+  --bs-btn-active-border-color: color-mix(in srgb, var(--brand-primary) 75%, black);
+  /* literal RGB triplet: rgba(var(--bs-btn-focus-shadow-rgb), .5) can't take a color-mix() result */
+  --bs-btn-focus-shadow-rgb: 78, 145, 105;
+}
+
+.btn-outline-primary {
+  --bs-btn-color: var(--brand-primary);
+  --bs-btn-border-color: var(--brand-primary);
+  --bs-btn-hover-bg: var(--brand-primary);
+  --bs-btn-hover-border-color: var(--brand-primary);
+  --bs-btn-active-bg: var(--brand-primary);
+  --bs-btn-active-border-color: var(--brand-primary);
+  --bs-btn-focus-shadow-rgb: 78, 145, 105;
+}
