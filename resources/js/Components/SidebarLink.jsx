@@ -7,7 +7,7 @@ export default function SidebarLink({ active = false, icon = null, className = '
                 {...props}
                 className={'sidebar-link' + (active ? ' active' : '') + ' ' + className}
             >
-                <span className="d-flex align-items-center">{icon}</span>
+                {icon}
                 <span className="hide-menu">{children}</span>
             </Link>
         </li>

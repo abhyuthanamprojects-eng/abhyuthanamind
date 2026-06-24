@@ -4,7 +4,7 @@ import AdminHeader from '@/Components/Admin/AdminHeader';
 import { AdminTablePagination } from '@/Components/Admin/AdminTable';
 import { ChevronRight, HelpCircle } from 'lucide-react';
 
-export default function Index({ tickets, filters }) {
+export default function Index({ tickets, filters, statusCounts }) {
     const handleFilter = (key, value) => {
         router.get(route('admin.help-support.index'), { ...filters, [key]: value }, { preserveState: true });
     };
@@ -41,6 +41,9 @@ export default function Index({ tickets, filters }) {
                                 }`}
                             >
                                 {s.replace('_', ' ')}
+                                {statusCounts?.[s] !== undefined && (
+                                    <span className="badge bg-light text-dark rounded-pill ms-2">{statusCounts[s]}</span>
+                                )}
                             </button>
                         ))}
                     </div>

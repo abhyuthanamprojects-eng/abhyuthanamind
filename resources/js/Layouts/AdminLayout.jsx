@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { Link, Head, usePage, router } from '@inertiajs/react';
-import { LayoutGrid, Settings, FileText, Mail, HelpCircle, Menu, Search, User, LogOut, CheckCircle2, XCircle } from 'lucide-react';
+import {
+    LayoutGrid, Settings, FileText, Mail, HelpCircle, Menu, Search, User, LogOut, CheckCircle2, XCircle, MoreHorizontal, X, Bell,
+    SlidersHorizontal, AlertTriangle, BookMarked, Type, Smile, Globe2,
+} from 'lucide-react';
 import SidebarLink from '@/Components/SidebarLink';
 import Dropdown from '@/Components/Dropdown';
 import DropdownLink from '@/Components/DropdownLink';
@@ -14,77 +17,137 @@ export default function AdminLayout({ children }) {
     const isAdmin = user.roles.some(r => r.name === 'admin');
 
     return (
-        <div className="page-wrapper" id="main-wrapper" data-layout="vertical" data-sidebartype="full">
+        <div
+            className={`page-wrapper${showingSidebar ? ' show-sidebar' : ''}`}
+            id="main-wrapper"
+            data-layout="vertical"
+            data-sidebartype="full"
+            data-sidebar-position="fixed"
+            data-header-position="fixed"
+        >
             <Head>
                 <link rel="stylesheet" href="/admin-theme/css/styles.min.css" />
-                <link rel="stylesheet" href="/admin-theme/css/overrides.css" />
+                <style>{`
+                    #main-wrapper[data-layout="vertical"][data-sidebar-position="fixed"] .left-sidebar { top: 0 !important; }
+                    #main-wrapper[data-layout="vertical"][data-header-position="fixed"] .app-header {
+                        top: 0 !important;
+                        left: 260px !important;
+                        width: calc(100% - 260px) !important;
+                        box-shadow: 0 1px 10px rgba(0,0,0,0.06);
+                    }
+                    @media (max-width: 1199px) {
+                        #main-wrapper[data-header-position="fixed"] .app-header { left: 0 !important; width: 100% !important; }
+                    }
+                    .body-wrapper .container-fluid { padding-top: 94px !important; }
+                    @media (max-width: 991.98px) {
+                        .body-wrapper .container-fluid { padding-top: 100px !important; }
+                    }
+                    .app-header .navbar { flex-wrap: nowrap !important; }
+                    .app-header .navbar-nav { flex-direction: row !important; }
+                    .app-header .navbar-nav .nav-link { height: auto !important; line-height: normal !important; }
+                `}</style>
             </Head>
 
             {/* Sidebar Overlay for Mobile */}
             <div
-                className={`fixed z-20 inset-0 bg-black/50 transition-opacity lg:hidden ${
-                    showingSidebar ? 'block' : 'hidden'
-                }`}
+                className={`position-fixed top-0 start-0 w-100 h-100 d-xl-none ${showingSidebar ? 'd-block' : 'd-none'}`}
+                style={{ zIndex: 10, backgroundColor: 'rgba(0,0,0,0.5)' }}
                 onClick={() => setShowingSidebar(false)}
             ></div>
 
             {/* Sidebar */}
-            <aside
-                className={`left-sidebar fixed z-30 inset-y-0 left-0 transition duration-300 transform lg:translate-x-0 lg:static lg:inset-0 ${
-                    showingSidebar ? 'translate-x-0 ease-out' : '-translate-x-full ease-in'
-                }`}
-            >
-                <div className="brand-logo d-flex align-items-center justify-content-center py-4">
-                    <a href="/" className="text-nowrap logo-img">
-                        <ApplicationLogo className="w-auto" style={{ height: '40px' }} />
-                    </a>
+            <aside className="left-sidebar">
+                <div>
+                    <div className="brand-logo d-flex align-items-center justify-content-between">
+                        <a href="/" className="text-nowrap logo-img">
+                            <ApplicationLogo className="w-auto" style={{ height: '40px' }} />
+                        </a>
+                        <div className="close-btn d-xl-none d-block sidebartoggler cursor-pointer" onClick={() => setShowingSidebar(false)}>
+                            <X size={18} />
+                        </div>
+                    </div>
+
+                    <nav className="sidebar-nav scroll-sidebar" data-simplebar="">
+                        <ul id="sidebarnav">
+                            <li className="nav-small-cap">
+                                <MoreHorizontal size={16} className="nav-small-cap-icon fs-4" />
+                                <span className="hide-menu">Main menu</span>
+                            </li>
+
+                            <SidebarLink href={route('dashboard')} active={route().current('dashboard')} icon={<LayoutGrid size={18} />}>
+                                Dashboard
+                            </SidebarLink>
+
+                            {isAdmin && (
+                                <>
+                                    <SidebarLink href={route('admin.app-settings.index')} active={route().current('admin.app-settings.*')} icon={<Settings size={18} />}>
+                                        App Settings
+                                    </SidebarLink>
+
+                                    <li className="nav-small-cap">
+                                        <MoreHorizontal size={16} className="nav-small-cap-icon fs-4" />
+                                        <span className="hide-menu">Content</span>
+                                    </li>
+
+                                    <SidebarLink href={route('admin.pages.index')} active={route().current('admin.pages.*')} icon={<FileText size={18} />}>
+                                        Static Pages
+                                    </SidebarLink>
+
+                                    <SidebarLink href={route('admin.contacts.index')} active={route().current('admin.contacts.*')} icon={<Mail size={18} />}>
+                                        Contact Queries
+                                    </SidebarLink>
+
+                                    <SidebarLink href={route('admin.help-support.index')} active={route().current('admin.help-support.*')} icon={<HelpCircle size={18} />}>
+                                        Help & Support
+                                    </SidebarLink>
+                                </>
+                            )}
+
+                            <li><span className="sidebar-divider lg"></span></li>
+                            <li className="nav-small-cap">
+                                <MoreHorizontal size={16} className="nav-small-cap-icon fs-4" />
+                                <span className="hide-menu">UI</span>
+                            </li>
+                            <SidebarLink href={route('admin.theme.buttons')} active={route().current('admin.theme.buttons')} icon={<SlidersHorizontal size={18} />}>Buttons</SidebarLink>
+                            <SidebarLink href={route('admin.theme.alerts')} active={route().current('admin.theme.alerts')} icon={<AlertTriangle size={18} />}>Alerts</SidebarLink>
+                            <SidebarLink href={route('admin.theme.card')} active={route().current('admin.theme.card')} icon={<BookMarked size={18} />}>Card</SidebarLink>
+                            <SidebarLink href={route('admin.theme.forms')} active={route().current('admin.theme.forms')} icon={<FileText size={18} />}>Forms</SidebarLink>
+                            <SidebarLink href={route('admin.theme.typography')} active={route().current('admin.theme.typography')} icon={<Type size={18} />}>Typography</SidebarLink>
+
+                            <li><span className="sidebar-divider lg"></span></li>
+                            <li className="nav-small-cap">
+                                <MoreHorizontal size={16} className="nav-small-cap-icon fs-4" />
+                                <span className="hide-menu">Extra</span>
+                            </li>
+                            <SidebarLink href={route('admin.theme.icons')} active={route().current('admin.theme.icons')} icon={<Smile size={18} />}>Tabler Icon</SidebarLink>
+                            <SidebarLink href={route('admin.theme.sample-page')} active={route().current('admin.theme.sample-page')} icon={<Globe2 size={18} />}>Sample Page</SidebarLink>
+                        </ul>
+                    </nav>
                 </div>
-
-                <nav className="sidebar-nav scroll-sidebar">
-                    <ul id="sidebarnav">
-                        <li className="nav-small-cap">
-                            <span className="hide-menu">Main menu</span>
-                        </li>
-
-                        <SidebarLink href={route('dashboard')} active={route().current('dashboard')} icon={<LayoutGrid size={18} />}>
-                            Dashboard
-                        </SidebarLink>
-
-                        {isAdmin && (
-                            <>
-                                <SidebarLink href={route('admin.app-settings.index')} active={route().current('admin.app-settings.*')} icon={<Settings size={18} />}>
-                                    App Settings
-                                </SidebarLink>
-
-                                <li className="nav-small-cap">
-                                    <span className="hide-menu">Content</span>
-                                </li>
-
-                                <SidebarLink href={route('admin.pages.index')} active={route().current('admin.pages.*')} icon={<FileText size={18} />}>
-                                    Static Pages
-                                </SidebarLink>
-
-                                <SidebarLink href={route('admin.contacts.index')} active={route().current('admin.contacts.*')} icon={<Mail size={18} />}>
-                                    Contact Queries
-                                </SidebarLink>
-
-                                <SidebarLink href={route('admin.help-support.index')} active={route().current('admin.help-support.*')} icon={<HelpCircle size={18} />}>
-                                    Help & Support
-                                </SidebarLink>
-                            </>
-                        )}
-                    </ul>
-                </nav>
             </aside>
 
             <div className="body-wrapper">
                 <header className="app-header">
                     <nav className="navbar navbar-expand-lg navbar-light">
-                        <ul className="navbar-nav">
+                        <ul className="navbar-nav align-items-center">
                             <li className="nav-item d-block d-xl-none">
                                 <a className="nav-link sidebartoggler" href="javascript:void(0)" onClick={(e) => { e.preventDefault(); setShowingSidebar(true); }}>
                                     <Menu size={20} />
                                 </a>
+                            </li>
+                            <li className="nav-item dropdown">
+                                <Dropdown>
+                                    <Dropdown.Trigger>
+                                        <button type="button" className="nav-link border-0 bg-transparent position-relative">
+                                            <Bell size={20} />
+                                        </button>
+                                    </Dropdown.Trigger>
+                                    <Dropdown.Content width="auto" contentClasses="dropdown-menu dropdown-menu-animate-up show position-static border-0 shadow">
+                                        <div className="message-body">
+                                            <a href="javascript:void(0)" className="dropdown-item">No new notifications</a>
+                                        </div>
+                                    </Dropdown.Content>
+                                </Dropdown>
                             </li>
                             <li className="nav-item d-none d-md-block">
                                 <div className="d-flex align-items-center position-relative">
