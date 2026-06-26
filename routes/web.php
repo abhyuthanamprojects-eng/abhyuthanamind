@@ -95,26 +95,50 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         return Inertia::render('Admin/ComingSoon', [
             'title' => 'Scrap Rate Management',
             'description' => 'Manage the items, categories and rates shown on the public Scrap Rate page.',
+            'icon' => 'IndianRupee',
+            'fields' => ['Item name', 'Category', 'Rate', 'Unit', 'Image', 'Active / Inactive', 'Sort order'],
         ]);
     })->name('admin.scrap-rate.index');
     Route::get('testimonials', function () {
         return Inertia::render('Admin/ComingSoon', [
             'title' => 'Testimonials',
             'description' => 'Manage customer testimonials shown on the public website.',
+            'icon' => 'Star',
+            'fields' => ['Customer name', 'Designation', 'Company', 'Review text', 'Outcome / impact', 'Image', 'Rating', 'Active / Inactive'],
         ]);
     })->name('admin.testimonials.index');
     Route::get('certificates', function () {
         return Inertia::render('Admin/ComingSoon', [
             'title' => 'Certificates',
             'description' => 'Manage certification documents shown on the public website.',
+            'icon' => 'Award',
+            'fields' => ['Certificate name', 'Type', 'Image / PDF', 'Issue date', 'Expiry date', 'Display on website', 'Status'],
         ]);
     })->name('admin.certificates.index');
     Route::get('customers', function () {
         return Inertia::render('Admin/ComingSoon', [
             'title' => 'Customers / Leads',
             'description' => 'Track customers and leads generated from the website and app.',
+            'icon' => 'Users',
+            'fields' => ['Name', 'Company', 'Type', 'City', 'Status', 'Estimated value', 'Last contact'],
         ]);
     })->name('admin.customers.index');
+    Route::get('media', function () {
+        return Inertia::render('Admin/ComingSoon', [
+            'title' => 'Media / Gallery',
+            'description' => 'Manage facility, certificate and service images used across the website.',
+            'icon' => 'Images',
+            'fields' => ['Image upload', 'Tag / category', 'Preview grid', 'Delete', 'Copy path'],
+        ]);
+    })->name('admin.media.index');
+    Route::get('reports', function () {
+        return Inertia::render('Admin/ComingSoon', [
+            'title' => 'Reports / Analytics',
+            'description' => 'Pickup volume, lead conversion and scrap category analytics.',
+            'icon' => 'BarChart3',
+            'fields' => ['Monthly pickups', 'Lead conversion', 'Scrap category mix', 'Revenue trend'],
+        ]);
+    })->name('admin.reports.index');
 
     // UI component reference pages (theme showcase)
     Route::inertia('theme/buttons', 'Admin/Theme/Buttons')->name('admin.theme.buttons');

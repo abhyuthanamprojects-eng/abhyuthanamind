@@ -1,6 +1,67 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, X } from 'lucide-react';
+import { Search, X, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+/* ---------- Form section ---------- */
+export function FormSection({ title, description, children, className }) {
+    return (
+        <div className={cn('border-b border-border pb-6 last:border-0 last:pb-0', className)}>
+            {(title || description) && (
+                <div className="mb-4">
+                    {title && <h3 className="text-sm font-bold text-navy">{title}</h3>}
+                    {description && <p className="mt-1 text-xs text-muted-foreground">{description}</p>}
+                </div>
+            )}
+            {children}
+        </div>
+    );
+}
+
+/* ---------- Confirm dialog ---------- */
+export function ConfirmDialog({
+    open, onClose, onConfirm, title = 'Are you sure?', message, confirmLabel = 'Delete', tone = 'danger', processing = false,
+}) {
+    const toneClasses = tone === 'danger'
+        ? 'bg-rose-600 hover:bg-rose-700'
+        : 'bg-brand hover:bg-brand-dark';
+
+    return (
+        <AnimatePresence>
+            {open && (
+                <>
+                    <motion.div
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                        onClick={onClose}
+                        className="fixed inset-0 z-[60] bg-navy/40 backdrop-blur-sm"
+                    />
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95, y: 8 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 8 }}
+                        transition={{ type: 'spring', damping: 26, stiffness: 320 }}
+                        className="fixed left-1/2 top-1/2 z-[60] w-full max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-3xl bg-card p-6 shadow-card"
+                    >
+                        <span className="grid size-11 place-items-center rounded-2xl bg-rose-100 text-rose-600">
+                            <AlertTriangle className="size-5" />
+                        </span>
+                        <h3 className="mt-4 text-base font-bold text-navy">{title}</h3>
+                        {message && <p className="mt-1.5 text-sm text-muted-foreground">{message}</p>}
+                        <div className="mt-6 flex justify-end gap-3">
+                            <button onClick={onClose} className="rounded-2xl border border-border px-4 py-2.5 text-sm font-semibold text-navy transition hover:bg-muted">
+                                Cancel
+                            </button>
+                            <button
+                                onClick={onConfirm}
+                                disabled={processing}
+                                className={cn('rounded-2xl px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition disabled:opacity-60', toneClasses)}
+                            >
+                                {processing ? 'Working…' : confirmLabel}
+                            </button>
+                        </div>
+                    </motion.div>
+                </>
+            )}
+        </AnimatePresence>
+    );
+}
 
 /* ---------- Page header ---------- */
 export function PageHeader({ title, subtitle, action }) {

@@ -26,5 +26,5 @@
     "resources/js/**/*.d.ts",
     "vite.config.js"
   ],
-  "exclude": ["node_modules", "resources/js/_old_public_backup"]
+  "exclude": ["node_modules"]
 }

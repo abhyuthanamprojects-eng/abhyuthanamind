@@ -1,39 +1,27 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import AdminLayout from '@/Layouts/AdminLayout';
 import DeleteUserForm from './Partials/DeleteUserForm';
 import UpdatePasswordForm from './Partials/UpdatePasswordForm';
 import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm';
-import { Head } from '@inertiajs/react';
+import { PageHeader, Panel } from '@/Components/Admin/AdminUI';
 
 export default function Edit({ mustVerifyEmail, status }) {
     return (
-        <AuthenticatedLayout
-            header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Profile
-                </h2>
-            }
-        >
-            <Head title="Profile" />
+        <AdminLayout title="Profile">
+            <PageHeader title="Profile" subtitle="Manage your account information, password and security." />
 
-            <div className="py-12">
-                <div className="mx-auto max-w-7xl space-y-6 sm:px-6 lg:px-8">
-                    <div className="bg-white p-4 shadow sm:rounded-lg sm:p-8">
-                        <UpdateProfileInformationForm
-                            mustVerifyEmail={mustVerifyEmail}
-                            status={status}
-                            className="max-w-xl"
-                        />
-                    </div>
+            <div className="max-w-2xl space-y-6">
+                <Panel>
+                    <UpdateProfileInformationForm mustVerifyEmail={mustVerifyEmail} status={status} />
+                </Panel>
 
-                    <div className="bg-white p-4 shadow sm:rounded-lg sm:p-8">
-                        <UpdatePasswordForm className="max-w-xl" />
-                    </div>
+                <Panel>
+                    <UpdatePasswordForm />
+                </Panel>
 
-                    <div className="bg-white p-4 shadow sm:rounded-lg sm:p-8">
-                        <DeleteUserForm className="max-w-xl" />
-                    </div>
-                </div>
+                <Panel>
+                    <DeleteUserForm />
+                </Panel>
             </div>
-        </AuthenticatedLayout>
+        </AdminLayout>
     );
 }

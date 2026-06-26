@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link, Head, usePage } from '@inertiajs/react';
-import { Bell, Search, Menu, X, ChevronDown, LogOut, CheckCircle2, XCircle } from 'lucide-react';
+import { Bell, Search, Menu, X, ChevronDown, LogOut, User, CheckCircle2, XCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { adminNav } from '@/lib/admin-nav';
 import { cn } from '@/lib/utils';
@@ -50,6 +50,64 @@ function Brand() {
                 <img src="/images/logo.png" alt="ABHYUTHANAM" width={130} height={36} className="h-8 w-auto" />
             </span>
         </Link>
+    );
+}
+
+function ProfileMenu({ user, initials, roleLabel }) {
+    const [open, setOpen] = useState(false);
+    const ref = useRef(null);
+
+    useEffect(() => {
+        const onClick = (e) => {
+            if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+        };
+        document.addEventListener('mousedown', onClick);
+        return () => document.removeEventListener('mousedown', onClick);
+    }, []);
+
+    return (
+        <div ref={ref} className="relative">
+            <button
+                type="button"
+                onClick={() => setOpen((v) => !v)}
+                className="flex items-center gap-2 rounded-2xl border border-border bg-card px-2 py-1.5 pr-3 transition hover:bg-muted"
+            >
+                <span className="grid size-8 place-items-center rounded-xl bg-brand text-sm font-bold text-brand-foreground">{initials}</span>
+                <span className="hidden text-left sm:block">
+                    <span className="block text-xs font-semibold leading-tight text-navy">{user?.name}</span>
+                    <span className="block text-[0.65rem] capitalize leading-tight text-muted-foreground">{roleLabel}</span>
+                </span>
+                <ChevronDown className={cn('hidden size-4 text-muted-foreground transition-transform sm:block', open && 'rotate-180')} />
+            </button>
+
+            <AnimatePresence>
+                {open && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -6, scale: 0.97 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -6, scale: 0.97 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute right-0 z-30 mt-2 w-48 overflow-hidden rounded-2xl border border-border bg-card p-1.5 shadow-card"
+                    >
+                        <Link
+                            href={route('profile.edit')}
+                            onClick={() => setOpen(false)}
+                            className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium text-navy transition hover:bg-muted"
+                        >
+                            <User className="size-4 text-muted-foreground" /> Profile
+                        </Link>
+                        <Link
+                            href={route('logout')}
+                            method="post"
+                            as="button"
+                            className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium text-rose-600 transition hover:bg-rose-50"
+                        >
+                            <LogOut className="size-4" /> Logout
+                        </Link>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
     );
 }
 
@@ -128,14 +186,7 @@ export default function AdminLayout({ title, children }) {
                             <button className="relative grid size-10 place-items-center rounded-xl text-navy hover:bg-muted">
                                 <Bell className="size-5" />
                             </button>
-                            <Link href={route('profile.edit')} className="flex items-center gap-2 rounded-2xl border border-border bg-card px-2 py-1.5 pr-3 transition hover:bg-muted">
-                                <span className="grid size-8 place-items-center rounded-xl bg-brand text-sm font-bold text-brand-foreground">{initials}</span>
-                                <span className="hidden text-left sm:block">
-                                    <span className="block text-xs font-semibold leading-tight text-navy">{user?.name}</span>
-                                    <span className="block text-[0.65rem] capitalize leading-tight text-muted-foreground">{roleLabel}</span>
-                                </span>
-                                <ChevronDown className="hidden size-4 text-muted-foreground sm:block" />
-                            </Link>
+                            <ProfileMenu user={user} initials={initials} roleLabel={roleLabel} />
                         </div>
                     </div>
                 </header>

@@ -59,8 +59,13 @@ export default function Show({ pickup }) {
                             <ul className="space-y-2">
                                 {pickup.items.map((item) => (
                                     <li key={item.id} className="flex items-center justify-between rounded-2xl border border-border px-4 py-2.5 text-sm">
-                                        <span className="font-medium text-navy">{item.name || item.category}</span>
-                                        <span className="text-muted-foreground">{item.quantity} {item.unit}</span>
+                                        <div>
+                                            <span className="font-medium text-navy">{item.product_name}</span>
+                                            {item.condition && <span className="ml-2 text-xs capitalize text-muted-foreground">({item.condition})</span>}
+                                        </div>
+                                        <span className="text-muted-foreground">
+                                            {item.quantity ? `${item.quantity} qty` : ''}{item.weight ? ` · ${item.weight} kg` : ''}
+                                        </span>
                                     </li>
                                 ))}
                             </ul>
