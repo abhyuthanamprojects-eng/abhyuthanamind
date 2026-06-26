@@ -4,8 +4,8 @@ import { useState, useRef } from "react";
 import { Handshake, Upload, CheckCircle2, IndianRupee, TrendingUp, Users, ArrowLeft, FileText } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Navbar } from "@/components/site/Navbar";
-import { Footer } from "@/components/site/Footer";
+import { Header } from "@/Frontend/components/Header";
+import { Footer } from "@/Frontend/components/Footer";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -151,7 +151,7 @@ function PartnerPage() {
   if (submitted) {
     return (
       <main className="min-h-screen bg-background">
-        <Navbar />
+        <Header />
         <section className="pt-32 pb-20">
           <div className="mx-auto w-[min(700px,94%)] text-center">
             <motion.div
@@ -192,7 +192,7 @@ function PartnerPage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <Navbar />
+      <Header />
 
       {/* Hero */}
       <section className="relative overflow-hidden pt-32 pb-12">

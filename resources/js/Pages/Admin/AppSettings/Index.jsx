@@ -1,8 +1,17 @@
 import AdminLayout from '@/Layouts/AdminLayout';
-import { Head, useForm, router } from '@inertiajs/react';
+import { useForm, router } from '@inertiajs/react';
 import { useState } from 'react';
-import AdminHeader from '@/Components/Admin/AdminHeader';
-import { Settings } from 'lucide-react';
+import { ArrowUp, ArrowDown, Trash2 } from 'lucide-react';
+import { PageHeader, Panel } from '@/Components/Admin/AdminUI';
+import { cn } from '@/lib/utils';
+
+const tabs = [
+    ['features', 'Feature Toggles'],
+    ['config', 'General Config'],
+    ['intervals', 'Performance & Intervals'],
+    ['msg91', 'SMS Gateway'],
+    ['banners', 'Home Banners'],
+];
 
 export default function Index({ settings, homeBanners = [] }) {
     const normalizeCsvValue = (value) => Array.isArray(value) ? value.join(', ') : (value ?? '');
@@ -22,31 +31,31 @@ export default function Index({ settings, homeBanners = [] }) {
     };
 
     const Toggle = ({ name, label, description }) => (
-        <div className="d-flex align-items-center justify-content-between gap-3 p-3 bg-light rounded border">
-            <div className="flex-grow-1">
-                <label className="fw-semibold d-block">{label}</label>
-                <p className="text-secondary fs-2 mb-0">{description}</p>
+        <div className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-eco/40 p-4">
+            <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-navy">{label}</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
             </div>
-            <div className="form-check form-switch m-0">
-                <input
-                    type="checkbox"
-                    role="switch"
-                    className="form-check-input"
-                    checked={!!data[name]}
-                    onChange={() => setData(name, !data[name])}
-                />
-            </div>
+            <button
+                type="button"
+                role="switch"
+                aria-checked={!!data[name]}
+                onClick={() => setData(name, !data[name])}
+                className={cn('relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition', data[name] ? 'bg-brand' : 'bg-muted')}
+            >
+                <span className={cn('inline-block size-5 rounded-full bg-white shadow transition', data[name] ? 'translate-x-5' : 'translate-x-1')} />
+            </button>
         </div>
     );
 
-    const Input = ({ name, label, type = "text", description, ...props }) => (
-        <div className="d-flex flex-column gap-1">
-            <label className="fw-semibold">{label}</label>
+    const Input = ({ name, label, type = 'text', description, ...props }) => (
+        <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-semibold text-navy">{label}</label>
             <input
                 {...props}
                 type={type}
                 value={data[name] ?? ''}
-                onChange={e => setData(name, e.target.value)}
+                onChange={(e) => setData(name, e.target.value)}
                 onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                         e.preventDefault();
@@ -54,152 +63,132 @@ export default function Index({ settings, homeBanners = [] }) {
                     }
                     props.onKeyDown?.(e);
                 }}
-                className="form-control"
+                className="h-11 w-full rounded-2xl border border-border bg-card px-4 text-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
             />
-            {description && <p className="text-secondary fs-2 mb-0">{description}</p>}
-            {errors[name] && <p className="text-danger fs-2 mt-1 mb-0">{errors[name]}</p>}
+            {description && <p className="text-xs text-muted-foreground">{description}</p>}
+            {errors[name] && <p className="text-xs font-medium text-rose-600">{errors[name]}</p>}
         </div>
     );
 
     return (
-        <AdminLayout>
-            <Head title="App Settings" />
+        <AdminLayout title="App Settings">
+            <PageHeader title="App Settings" subtitle="Manage mobile app feature flags and global configurations." />
 
-            <div className="mx-auto" style={{ maxWidth: '64rem' }}>
-                <AdminHeader
-                    title="App Settings"
-                    subtitle="Manage mobile app feature flags and global configurations."
-                    icon={<Settings size={20} />}
-                />
+            <div className="mb-4 flex flex-wrap gap-2">
+                {tabs.map(([key, label]) => (
+                    <button
+                        key={key}
+                        type="button"
+                        onClick={() => setActiveTab(key)}
+                        className={cn(
+                            'rounded-2xl px-4 py-2 text-sm font-semibold transition',
+                            activeTab === key ? 'bg-brand text-brand-foreground shadow-soft' : 'border border-border bg-card text-navy hover:bg-muted',
+                        )}
+                    >
+                        {label}
+                    </button>
+                ))}
+            </div>
 
-                <div className="card w-100">
-                    <div className="card-header bg-transparent p-0">
-                        <ul className="nav nav-tabs px-3">
-                            {[
-                                ['features', 'Feature Toggles'],
-                                ['config', 'General Config'],
-                                ['intervals', 'Performance & Intervals'],
-                                ['msg91', 'SMS Gateway'],
-                                ['banners', 'Home Banners'],
-                            ].map(([key, label]) => (
-                                <li className="nav-item" key={key}>
-                                    <button
-                                        type="button"
-                                        onClick={() => setActiveTab(key)}
-                                        className={`nav-link ${activeTab === key ? 'active' : ''}`}
-                                    >
-                                        {label}
-                                    </button>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    {activeTab === 'banners' && (
-                        <div className="card-body">
-                            <HomeBanners banners={homeBanners} />
-                        </div>
-                    )}
-
-                    {activeTab !== 'banners' && (
-                    <form onSubmit={submit} className="card-body">
+            {activeTab === 'banners' ? (
+                <Panel>
+                    <HomeBanners banners={homeBanners} />
+                </Panel>
+            ) : (
+                <Panel>
+                    <form onSubmit={submit}>
                         {activeTab === 'features' && (
-                            <div className="row g-3">
-                                <div className="col-12 col-md-6"><Toggle name="donation_enabled" label="Donations" description="Enable scrap donation feature in app" /></div>
-                                <div className="col-12 col-md-6"><Toggle name="scrap_pickup_enabled" label="Scrap Pickup" description="Enable scrap pickup booking feature" /></div>
-                                <div className="col-12 col-md-6"><Toggle name="reschedule_enabled" label="Rescheduling" description="Allow customers to reschedule bookings" /></div>
-                                <div className="col-12 col-md-6"><Toggle name="verification_required" label="KYC Verification" description="Require KYC for certain features" /></div>
-                                <div className="col-12 col-md-6"><Toggle name="manual_item_add_edit_enabled" label="Manual Item Edit" description="Allow users to edit items during pickup" /></div>
-                                <div className="col-12 col-md-6"><Toggle name="bill_generation_enabled" label="Bill Generation" description="Auto-generate digital bills after pickup" /></div>
-                                <div className="col-12 col-md-6"><Toggle name="scrap_proof_images_required" label="Mandatory Scrap Proof Images" description="Require all proof labels before scrap booking submit" /></div>
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <Toggle name="donation_enabled" label="Donations" description="Enable scrap donation feature in app" />
+                                <Toggle name="scrap_pickup_enabled" label="Scrap Pickup" description="Enable scrap pickup booking feature" />
+                                <Toggle name="reschedule_enabled" label="Rescheduling" description="Allow customers to reschedule bookings" />
+                                <Toggle name="verification_required" label="KYC Verification" description="Require KYC for certain features" />
+                                <Toggle name="manual_item_add_edit_enabled" label="Manual Item Edit" description="Allow users to edit items during pickup" />
+                                <Toggle name="bill_generation_enabled" label="Bill Generation" description="Auto-generate digital bills after pickup" />
+                                <Toggle name="scrap_proof_images_required" label="Mandatory Scrap Proof Images" description="Require all proof labels before scrap booking submit" />
                             </div>
                         )}
 
                         {activeTab === 'config' && (
-                            <div className="row g-3">
-                                <div className="col-12 col-md-6"><Input name="app_version" label="App Version" description="Current stable version (e.g. 1.0.5)" /></div>
-                                <div className="col-12 col-md-6"><Input name="customer_support_number" label="Customer Support Number" /></div>
-                                <div className="col-12 col-md-6"><Input name="support_phone" label="Secondary Support Phone" /></div>
-                                <div className="col-12 col-md-6"><Input name="feedback_url" label="Feedback Link (Sent via SMS)" description="The URL sent to customers for feedback after pickup" /></div>
-                                <div className="col-12 col-md-6"><Input name="default_city_id" label="Default City ID" type="number" /></div>
-                                <div className="col-12 col-md-6"><Input name="minimum_free_pickup_amount" label="Minimum Free Pickup Amount (₹)" type="number" description="If estimated amount is below this, shipping charge will be deducted." /></div>
-                                <div className="col-12 col-md-6"><Input name="low_value_shipping_charge" label="Low Value Shipping Charge (₹)" type="number" description="Shipping deduction applied when booking value is below minimum free pickup amount." /></div>
-                                <div className="col-12 col-md-6"><Input name="warehouse_service_pincodes_limit" label="Warehouse Service Pincode Limit" type="number" description="Maximum number of service pincodes allowed per warehouse." /></div>
-                                <div className="col-12 col-md-6"><Input name="donation_products" label="Donation Products (comma separated)" description="Example: Cloth, Shoes, Toys, Books" /></div>
+                            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                                <Input name="app_version" label="App Version" description="Current stable version (e.g. 1.0.5)" />
+                                <Input name="customer_support_number" label="Customer Support Number" />
+                                <Input name="support_phone" label="Secondary Support Phone" />
+                                <Input name="feedback_url" label="Feedback Link (Sent via SMS)" description="The URL sent to customers for feedback after pickup" />
+                                <Input name="default_city_id" label="Default City ID" type="number" />
+                                <Input name="minimum_free_pickup_amount" label="Minimum Free Pickup Amount (₹)" type="number" description="If estimated amount is below this, shipping charge will be deducted." />
+                                <Input name="low_value_shipping_charge" label="Low Value Shipping Charge (₹)" type="number" description="Shipping deduction applied when booking value is below minimum free pickup amount." />
+                                <Input name="warehouse_service_pincodes_limit" label="Warehouse Service Pincode Limit" type="number" description="Maximum number of service pincodes allowed per warehouse." />
+                                <Input name="donation_products" label="Donation Products (comma separated)" description="Example: Cloth, Shoes, Toys, Books" />
 
-                                <div className="col-12 border-top pt-3 mt-2">
-                                    <h6 className="fw-semibold mb-1">App Update / Force Update</h6>
-                                    <p className="text-secondary fs-2 mb-3">Controls the old-version update popup shown to users.</p>
+                                <div className="col-span-full border-t border-border pt-4">
+                                    <h3 className="text-sm font-bold text-navy">App Update / Force Update</h3>
+                                    <p className="mt-1 text-xs text-muted-foreground">Controls the old-version update popup shown to users.</p>
                                 </div>
-                                <div className="col-12 col-md-6"><Input name="latest_version" label="Latest Version" description="Newest version available on the stores (e.g. 2.1.0)" /></div>
-                                <div className="col-12 col-md-6"><Input name="min_version" label="Minimum Supported Version" description="Versions below this are forced to update" /></div>
-                                <div className="col-12 col-md-6"><Toggle name="force_update" label="Force Update" description="If enabled, users below Minimum Supported Version cannot use the app until they update" /></div>
-                                <div className="col-12 col-md-6"><Input name="android_url" label="Android Play Store URL" /></div>
-                                <div className="col-12 col-md-6"><Input name="ios_url" label="iOS App Store URL" /></div>
+                                <Input name="latest_version" label="Latest Version" description="Newest version available on the stores (e.g. 2.1.0)" />
+                                <Input name="min_version" label="Minimum Supported Version" description="Versions below this are forced to update" />
+                                <Toggle name="force_update" label="Force Update" description="If enabled, users below Minimum Supported Version cannot use the app until they update" />
+                                <Input name="android_url" label="Android Play Store URL" />
+                                <Input name="ios_url" label="iOS App Store URL" />
 
-                                <div className="col-12">
-                                    <div className="rounded border border-info bg-info-subtle p-3">
-                                        <label className="fw-semibold">Corporate Categories</label>
-                                        <p className="mt-1 mb-1 text-info-emphasis">{normalizeCsvValue(settings.corporate_categories) || 'No corporate categories enabled.'}</p>
-                                        <p className="mt-1 mb-0 text-info fs-2">Use Category Types and enable "Show In Corporate Booking" for the corporate flow.</p>
-                                    </div>
+                                <div className="col-span-full rounded-2xl border border-sky-200 bg-sky-50 p-4">
+                                    <p className="text-sm font-semibold text-sky-900">Corporate Categories</p>
+                                    <p className="mt-1 text-sm text-sky-800">{normalizeCsvValue(settings.corporate_categories) || 'No corporate categories enabled.'}</p>
+                                    <p className="mt-1 text-xs text-sky-700">Use Category Types and enable "Show In Corporate Booking" for the corporate flow.</p>
                                 </div>
-                                <div className="col-12 col-md-6"><Input name="corporate_meeting_types" label="Corporate Meeting Types (comma separated)" description="Example: in_person, google_meet, skype" /></div>
-                                <div className="col-12 col-md-6"><Input name="scrap_proof_image_labels" label="Scrap Proof Image Labels (comma separated)" description="Example: front, back, left, right" /></div>
+                                <Input name="corporate_meeting_types" label="Corporate Meeting Types (comma separated)" description="Example: in_person, google_meet, skype" />
+                                <Input name="scrap_proof_image_labels" label="Scrap Proof Image Labels (comma separated)" description="Example: front, back, left, right" />
                             </div>
                         )}
 
                         {activeTab === 'intervals' && (
-                            <div className="row g-3">
-                                <div className="col-12 col-md-6"><Input name="pickup_boy_location_interval_seconds" label="Location Update Interval" type="number" description="Seconds between pickup boy GPS updates" /></div>
-                                <div className="col-12 col-md-6"><Input name="tracking_refresh_interval_seconds" label="Tracking Refresh Interval" type="number" description="Seconds for customer tracking map refresh" /></div>
-                                <div className="col-12 col-md-6"><Input name="dashboard_refresh_interval_seconds" label="Dashboard Sync Interval" type="number" description="Seconds for data re-sync on mobile home" /></div>
-                                <div className="col-12 col-md-6"><Input name="max_reschedule_hours_before_slot" label="Reschedule Buffer (Hours)" type="number" description="Minimum hours before slot to allow reschedule" /></div>
+                            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                                <Input name="pickup_boy_location_interval_seconds" label="Location Update Interval" type="number" description="Seconds between pickup boy GPS updates" />
+                                <Input name="tracking_refresh_interval_seconds" label="Tracking Refresh Interval" type="number" description="Seconds for customer tracking map refresh" />
+                                <Input name="dashboard_refresh_interval_seconds" label="Dashboard Sync Interval" type="number" description="Seconds for data re-sync on mobile home" />
+                                <Input name="max_reschedule_hours_before_slot" label="Reschedule Buffer (Hours)" type="number" description="Minimum hours before slot to allow reschedule" />
                             </div>
                         )}
 
                         {activeTab === 'msg91' && (
-                            <div className="row g-3">
-                                <div className="col-12">
-                                    <div className="rounded border border-info bg-info-subtle p-3">
-                                        <p className="text-info-emphasis fs-2 fw-medium mb-0">
-                                            Configure your MSG91 (SMS Gateway) credentials here. These settings will override any values set in the environment files.
-                                        </p>
-                                    </div>
+                            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                                <div className="col-span-full rounded-2xl border border-sky-200 bg-sky-50 p-4">
+                                    <p className="text-sm font-medium text-sky-900">
+                                        Configure your MSG91 (SMS Gateway) credentials here. These settings will override any values set in the environment files.
+                                    </p>
                                 </div>
-                                <div className="col-12 col-md-6"><Input name="msg91_auth_key" label="Auth Key" description="Your MSG91 API Authentication Key" /></div>
-                                <div className="col-12 col-md-6"><Input name="msg91_sender_id" label="Sender ID" description="6-character approved Sender ID (e.g., SCRPI)" /></div>
-                                <div className="col-12 col-md-6"><Input name="msg91_otp_template_id" label="OTP Template ID" description="DLT approved template ID for OTPs" /></div>
-                                <div className="col-12 col-md-6"><Input name="msg91_sms_template_id" label="SMS Flow ID" description="Default Flow/Template ID for transactional SMS" /></div>
+                                <Input name="msg91_auth_key" label="Auth Key" description="Your MSG91 API Authentication Key" />
+                                <Input name="msg91_sender_id" label="Sender ID" description="6-character approved Sender ID (e.g., SCRPI)" />
+                                <Input name="msg91_otp_template_id" label="OTP Template ID" description="DLT approved template ID for OTPs" />
+                                <Input name="msg91_sms_template_id" label="SMS Flow ID" description="Default Flow/Template ID for transactional SMS" />
 
-                                <div className="col-12 border-top pt-3 mt-2">
-                                    <h6 className="fw-semibold mb-3">Event Specific Templates (Flow IDs)</h6>
+                                <div className="col-span-full border-t border-border pt-4">
+                                    <h3 className="text-sm font-bold text-navy">Event Specific Templates (Flow IDs)</h3>
                                 </div>
 
-                                <div className="col-12 col-md-6"><Input name="msg91_pickup_booked_template_id" label="Pickup Booked Template ID" /></div>
-                                <div className="col-12 col-md-6"><Input name="msg91_pickup_completed_template_id" label="Pickup Completed Template ID" /></div>
-                                <div className="col-12 col-md-6"><Input name="msg91_payment_feedback_template_id" label="Payment & Feedback Template ID" /></div>
-                                <div className="col-12 col-md-6"><Input name="msg91_pickup_rescheduled_template_id" label="Pickup Rescheduled Template ID" /></div>
+                                <Input name="msg91_pickup_booked_template_id" label="Pickup Booked Template ID" />
+                                <Input name="msg91_pickup_completed_template_id" label="Pickup Completed Template ID" />
+                                <Input name="msg91_payment_feedback_template_id" label="Payment & Feedback Template ID" />
+                                <Input name="msg91_pickup_rescheduled_template_id" label="Pickup Rescheduled Template ID" />
 
-                                <div className="col-12 border-top pt-3">
+                                <div className="col-span-full border-t border-border pt-4">
                                     <Input name="msg91_country_code" label="Country Code" description="Default country code (e.g., 91 for India)" />
                                 </div>
                             </div>
                         )}
 
-                        <div className="mt-4 d-flex justify-content-end">
+                        <div className="mt-6 flex justify-end">
                             <button
                                 type="submit"
                                 disabled={processing}
-                                className="btn btn-primary"
+                                className="rounded-2xl bg-brand px-5 py-2.5 text-sm font-semibold text-brand-foreground shadow-soft transition hover:bg-brand-dark disabled:opacity-60"
                             >
-                                {processing ? 'Saving...' : 'Save Changes'}
+                                {processing ? 'Saving…' : 'Save Changes'}
                             </button>
                         </div>
                     </form>
-                    )}
-                </div>
-            </div>
+                </Panel>
+            )}
         </AdminLayout>
     );
 }
@@ -310,116 +299,86 @@ function HomeBanners({ banners = [] }) {
         });
     };
 
+    const fileInputClass = 'block w-full text-xs text-muted-foreground file:mr-3 file:rounded-xl file:border-0 file:bg-accent file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-accent-foreground';
+    const textInputClass = 'h-9 w-full rounded-xl border border-border bg-card px-3 text-xs outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20';
+
     return (
         <div>
-            <div className="mb-3">
-                <h6 className="fw-semibold mb-1">Home Screen Banner Slider</h6>
-                <p className="text-secondary fs-2 mb-0">Add any number of images shown in the rotating banner on the customer app home screen. Tapping any banner takes the user to the category selection screen.</p>
+            <div className="mb-5">
+                <h3 className="text-sm font-bold text-navy">Home Screen Banner Slider</h3>
+                <p className="mt-1 text-xs text-muted-foreground">Add any number of images shown in the rotating banner on the customer app home screen. Tapping any banner takes the user to the category selection screen.</p>
             </div>
 
-            <div className="row g-3 mb-4">
+            <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {banners.map((banner, index) => (
-                    <div key={banner.id} className="col-12 col-md-4 d-flex flex-column gap-2">
-                        <div className="ratio ratio-16x9 rounded border bg-light overflow-hidden">
-                            <img src={banner.image_url} alt={`Banner ${index + 1}`} className="w-100 h-100 object-fit-cover" />
+                    <div key={banner.id} className="flex flex-col gap-2 rounded-2xl border border-border p-3">
+                        <div className="aspect-video overflow-hidden rounded-xl bg-muted">
+                            <img src={banner.image_url} alt={`Banner ${index + 1}`} className="h-full w-full object-cover" />
                         </div>
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => handleImageReplace(banner, e.target.files?.[0] ?? null)}
-                            className="form-control form-control-sm"
-                        />
-                        {replaceErrors[banner.id] && (
-                            <p className="text-danger fs-2 mb-0">{replaceErrors[banner.id]}</p>
-                        )}
+                        <input type="file" accept="image/*" onChange={(e) => handleImageReplace(banner, e.target.files?.[0] ?? null)} className={fileInputClass} />
+                        {replaceErrors[banner.id] && <p className="text-xs font-medium text-rose-600">{replaceErrors[banner.id]}</p>}
                         <input
                             type="text"
                             value={textDrafts[banner.id] ?? ''}
-                            onChange={(e) => setTextDrafts((prev) => ({
-                                ...prev,
-                                [banner.id]: e.target.value,
-                            }))}
+                            onChange={(e) => setTextDrafts((prev) => ({ ...prev, [banner.id]: e.target.value }))}
                             placeholder="Optional overlay text (e.g. Sell your scrap today!)"
                             maxLength={120}
-                            className="form-control form-control-sm"
+                            className={textInputClass}
                         />
-                        <div className="d-flex align-items-center justify-content-between gap-2">
-                            <p className="text-secondary fs-2 mb-0">
-                                Change text and click save.
-                            </p>
+                        <div className="flex items-center justify-between gap-2">
+                            <p className="text-xs text-muted-foreground">Change text and click save.</p>
                             <button
                                 type="button"
                                 onClick={() => handleTextUpdate(banner, textDrafts[banner.id] ?? '')}
                                 disabled={savingTextId === banner.id}
-                                className="btn btn-sm btn-primary"
+                                className="rounded-xl bg-brand px-3 py-1.5 text-xs font-semibold text-brand-foreground transition hover:bg-brand-dark disabled:opacity-60"
                             >
-                                {savingTextId === banner.id ? 'Saving...' : 'Save Text'}
+                                {savingTextId === banner.id ? 'Saving…' : 'Save Text'}
                             </button>
                         </div>
-                        <div className="d-flex align-items-center justify-content-between">
-                            <div className="d-flex gap-2">
-                                <button
-                                    type="button"
-                                    onClick={() => handleMove(index, -1)}
-                                    disabled={index === 0}
-                                    className="btn btn-sm btn-link p-0 fw-semibold"
-                                >
-                                    ↑ Move up
+                        <div className="flex items-center justify-between border-t border-border pt-2">
+                            <div className="flex gap-1">
+                                <button type="button" onClick={() => handleMove(index, -1)} disabled={index === 0} className="grid size-7 place-items-center rounded-lg text-muted-foreground transition hover:bg-muted disabled:opacity-40">
+                                    <ArrowUp className="size-3.5" />
                                 </button>
-                                <button
-                                    type="button"
-                                    onClick={() => handleMove(index, 1)}
-                                    disabled={index === banners.length - 1}
-                                    className="btn btn-sm btn-link p-0 fw-semibold"
-                                >
-                                    ↓ Move down
+                                <button type="button" onClick={() => handleMove(index, 1)} disabled={index === banners.length - 1} className="grid size-7 place-items-center rounded-lg text-muted-foreground transition hover:bg-muted disabled:opacity-40">
+                                    <ArrowDown className="size-3.5" />
                                 </button>
                             </div>
-                            <button
-                                type="button"
-                                onClick={() => handleRemove(banner)}
-                                className="btn btn-sm btn-link p-0 fw-semibold text-danger"
-                            >
-                                Remove
+                            <button type="button" onClick={() => handleRemove(banner)} className="flex items-center gap-1 text-xs font-semibold text-rose-600 hover:underline">
+                                <Trash2 className="size-3.5" /> Remove
                             </button>
                         </div>
                     </div>
                 ))}
             </div>
 
-            <form onSubmit={handleAdd} className="border-top pt-3">
-                <h6 className="fw-semibold mb-2">Add New Banner</h6>
-                <div className="d-flex flex-column gap-2" style={{ maxWidth: '28rem' }}>
-                    <div className="ratio ratio-16x9 rounded border border-dashed bg-light overflow-hidden d-flex align-items-center justify-content-center">
+            <form onSubmit={handleAdd} className="border-t border-border pt-5">
+                <h3 className="mb-3 text-sm font-bold text-navy">Add New Banner</h3>
+                <div className="flex max-w-md flex-col gap-2.5">
+                    <div className="flex aspect-video items-center justify-center overflow-hidden rounded-2xl border border-dashed border-border bg-eco/40">
                         {newPreview ? (
-                            <img src={newPreview} alt="New banner preview" className="w-100 h-100 object-fit-cover" />
+                            <img src={newPreview} alt="New banner preview" className="h-full w-full object-cover" />
                         ) : (
-                            <span className="text-secondary fs-2">No image selected</span>
+                            <span className="text-xs text-muted-foreground">No image selected</span>
                         )}
                     </div>
-                    <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => handleNewFileChange(e.target.files?.[0] ?? null)}
-                        className="form-control form-control-sm"
-                    />
-                    {newFileError && (
-                        <p className="text-danger fs-2 mb-0">{newFileError}</p>
-                    )}
+                    <input type="file" accept="image/*" onChange={(e) => handleNewFileChange(e.target.files?.[0] ?? null)} className={fileInputClass} />
+                    {newFileError && <p className="text-xs font-medium text-rose-600">{newFileError}</p>}
                     <input
                         type="text"
                         value={newText}
                         onChange={(e) => setNewText(e.target.value)}
                         placeholder="Optional overlay text (e.g. Sell your scrap today!)"
                         maxLength={120}
-                        className="form-control form-control-sm"
+                        className={textInputClass}
                     />
                     <button
                         type="submit"
                         disabled={processing || !newFile}
-                        className="btn btn-primary align-self-start"
+                        className="self-start rounded-2xl bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground shadow-soft transition hover:bg-brand-dark disabled:opacity-60"
                     >
-                        {processing ? 'Adding...' : 'Add Banner'}
+                        {processing ? 'Adding…' : 'Add Banner'}
                     </button>
                 </div>
             </form>

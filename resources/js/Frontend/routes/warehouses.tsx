@@ -2,8 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { MapPin, Warehouse, Phone, Info, Globe, Shield } from "lucide-react";
-import { Navbar } from "@/components/site/Navbar";
-import { Footer } from "@/components/site/Footer";
+import { Header } from "@/Frontend/components/Header";
+import { Footer } from "@/Frontend/components/Footer";
 
 export const Route = createFileRoute("/warehouses")({
   head: () => ({
@@ -52,7 +52,7 @@ function WarehousesPage() {
 
   return (
     <main className="min-h-screen bg-background text-foreground">
-      <Navbar />
+      <Header />
       
       {/* Hero Section */}
       <section className="relative overflow-hidden pt-32 pb-16">

@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { ShieldCheck, Lock, Eye, Database, UserCheck, Mail, ArrowLeft } from "lucide-react";
-import { Navbar } from "@/components/site/Navbar";
-import { Footer } from "@/components/site/Footer";
+import { Header } from "@/Frontend/components/Header";
+import { Footer } from "@/Frontend/components/Footer";
 
 export const Route = createFileRoute("/privacy")({
   head: () => ({
@@ -89,7 +89,7 @@ const sections = [
 function PrivacyPage() {
   return (
     <main className="min-h-screen bg-background">
-      <Navbar />
+      <Header />
 
       {/* Hero */}
       <section className="relative overflow-hidden pt-32 pb-16">

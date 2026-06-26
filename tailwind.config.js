@@ -57,7 +57,29 @@ export default {
                     800: '#1E3A5F',
                     900: '#152B47',
                 },
-            }
+
+                /* Admin design-system aliases (shared visual language with public site) */
+                brand: '#2F7D4F',
+                'brand-foreground': '#ffffff',
+                'brand-dark': '#1F5C39',
+                navy: '#1E3A5F',
+                'navy-foreground': '#F7FAF8',
+                eco: '#F1F8F4',
+                background: '#FBF8F1',
+                foreground: '#1F2D27',
+                card: '#ffffff',
+                'card-foreground': '#1F2D27',
+                border: '#D6DDD2',
+                muted: '#F3F6F2',
+                'muted-foreground': '#6B7A70',
+                accent: '#E8F1EB',
+                'accent-foreground': '#1F5C39',
+            },
+
+            boxShadow: {
+                soft: '0 4px 20px -4px rgba(31, 92, 57, 0.18)',
+                card: '0 8px 30px -10px rgba(30, 58, 95, 0.15)',
+            },
         },
     },
 

@@ -31,6 +31,24 @@ Route::get('/terms', function () {
 Route::get('/cancellation', function () {
     return view('frontend');
 });
+Route::get('/about', function () {
+    return view('frontend');
+});
+Route::get('/services/{serviceId}', function () {
+    return view('frontend');
+});
+Route::get('/industries/{industryId}', function () {
+    return view('frontend');
+});
+Route::get('/process', function () {
+    return view('frontend');
+});
+Route::get('/scrap-rate', function () {
+    return view('frontend');
+});
+Route::get('/schedule-pickup', function () {
+    return view('frontend');
+});
 
 // Channel Partner Registration
 Route::get('register/partner', [\App\Http\Controllers\Auth\PartnerRegistrationController::class, 'create'])->name('partner.register');
@@ -67,6 +85,36 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('help-support/{id}', [\App\Http\Controllers\Admin\HelpSupportController::class, 'show'])->name('admin.help-support.show');
     Route::post('help-support/{id}/status', [\App\Http\Controllers\Admin\HelpSupportController::class, 'updateStatus'])->name('admin.help-support.update-status');
     Route::delete('help-support/{id}', [\App\Http\Controllers\Admin\HelpSupportController::class, 'destroy'])->name('admin.help-support.destroy');
+
+    // Pickup Requests (real data, read-only admin view)
+    Route::get('pickup-requests', [\App\Http\Controllers\Admin\PickupRequestAdminController::class, 'index'])->name('admin.pickups.index');
+    Route::get('pickup-requests/{pickupRequest}', [\App\Http\Controllers\Admin\PickupRequestAdminController::class, 'show'])->name('admin.pickups.show');
+
+    // Modules pending backend integration — UI-ready placeholders
+    Route::get('scrap-rate-management', function () {
+        return Inertia::render('Admin/ComingSoon', [
+            'title' => 'Scrap Rate Management',
+            'description' => 'Manage the items, categories and rates shown on the public Scrap Rate page.',
+        ]);
+    })->name('admin.scrap-rate.index');
+    Route::get('testimonials', function () {
+        return Inertia::render('Admin/ComingSoon', [
+            'title' => 'Testimonials',
+            'description' => 'Manage customer testimonials shown on the public website.',
+        ]);
+    })->name('admin.testimonials.index');
+    Route::get('certificates', function () {
+        return Inertia::render('Admin/ComingSoon', [
+            'title' => 'Certificates',
+            'description' => 'Manage certification documents shown on the public website.',
+        ]);
+    })->name('admin.certificates.index');
+    Route::get('customers', function () {
+        return Inertia::render('Admin/ComingSoon', [
+            'title' => 'Customers / Leads',
+            'description' => 'Track customers and leads generated from the website and app.',
+        ]);
+    })->name('admin.customers.index');
 
     // UI component reference pages (theme showcase)
     Route::inertia('theme/buttons', 'Admin/Theme/Buttons')->name('admin.theme.buttons');
