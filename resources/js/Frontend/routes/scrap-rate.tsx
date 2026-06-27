@@ -1,13 +1,38 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Info, Phone, ArrowRight, Search, Refrigerator, Laptop, Layers,
   Tv, Printer, BatteryCharging, Boxes, IndianRupee, ShoppingBag,
 } from "lucide-react";
 import { SiteLayout, PageHero } from "@/Frontend/components/SiteLayout";
 import { Reveal, motion } from "@/Frontend/components/anim";
-import { company, scrapCategories } from "@/Frontend/lib/site-data";
+import { company, scrapCategories as staticScrapCategories } from "@/Frontend/lib/site-data";
 import { scrapItemImage, scrapFallbackImage } from "@/Frontend/lib/scrap-images";
+
+type ScrapItemView = { name: string; rate: string; unit: string; imageUrl: string | null };
+type ScrapCategoryView = { slug: string; title: string; icon: string; items: ScrapItemView[] };
+
+const normalizeCategories = (rows: any[]): ScrapCategoryView[] =>
+  rows
+    .map((c) => ({
+      slug: c.slug,
+      title: c.title,
+      icon: c.icon ?? "Boxes",
+      items: (c.items ?? []).map((i: any) => ({
+        name: i.name,
+        rate: `₹${Number(i.rate).toLocaleString("en-IN")}`,
+        unit: i.unit,
+        imageUrl: i.image_url ?? null,
+      })),
+    }))
+    .filter((c) => c.items.length > 0);
+
+const fallbackCategories: ScrapCategoryView[] = staticScrapCategories.map((c) => ({
+  slug: c.slug,
+  title: c.title,
+  icon: c.icon,
+  items: c.items.map((i) => ({ name: i.name, rate: i.rate, unit: i.unit, imageUrl: null })),
+}));
 
 export const Route = createFileRoute("/scrap-rate")({
   head: () => ({
@@ -28,17 +53,34 @@ const icons: Record<string, typeof Refrigerator> = {
 function ScrapRate() {
   const [active, setActive] = useState("all");
   const [query, setQuery] = useState("");
+  const [categories, setCategories] = useState<ScrapCategoryView[]>(fallbackCategories);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/scrap-rate")
+      .then((res) => (res.ok ? res.json() : Promise.reject(res)))
+      .then((json) => {
+        const rows = normalizeCategories(json?.data ?? []);
+        if (!cancelled && rows.length > 0) setCategories(rows);
+      })
+      .catch(() => {
+        // keep fallback static categories on error
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return scrapCategories
+    return categories
       .filter((c) => active === "all" || c.slug === active)
       .map((c) => ({
         ...c,
         items: q ? c.items.filter((i) => i.name.toLowerCase().includes(q)) : c.items,
       }))
       .filter((c) => c.items.length > 0);
-  }, [active, query]);
+  }, [categories, active, query]);
 
   return (
     <SiteLayout>
@@ -77,7 +119,7 @@ function ScrapRate() {
           {/* Category tabs */}
           <div className="mt-6 flex flex-wrap gap-2.5">
             <Tab label="All Categories" activeKey={active} value="all" onClick={setActive} />
-            {scrapCategories.map((c) => (
+            {categories.map((c) => (
               <Tab key={c.slug} label={c.title} activeKey={active} value={c.slug} onClick={setActive} />
             ))}
           </div>
@@ -107,7 +149,7 @@ function ScrapRate() {
                       >
                         <div className="relative aspect-square overflow-hidden bg-eco">
                           <img
-                            src={scrapItemImage(item.name) ?? scrapFallbackImage}
+                            src={item.imageUrl ?? scrapItemImage(item.name) ?? scrapFallbackImage}
                             alt={item.name}
                             loading="lazy"
                             width={768}
@@ -122,7 +164,7 @@ function ScrapRate() {
                           <h3 className="line-clamp-2 min-h-[2.5rem] text-sm font-bold text-navy">{item.name}</h3>
                           <div className="mt-2 flex items-baseline gap-1">
                             <span className="flex items-center text-xl font-extrabold text-brand">
-                              <IndianRupee className="size-4" />{item.rate.replace("₹", "")}
+                              <IndianRupee className="size-4" />{item.rate.replace(/[₹,]/g, "")}
                             </span>
                             {item.unit && <span className="text-xs font-medium text-muted-foreground">/{item.unit}</span>}
                           </div>

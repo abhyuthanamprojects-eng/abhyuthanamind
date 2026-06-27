@@ -83,6 +83,7 @@ const statTones = {
     blue: 'bg-sky-100 text-sky-700',
     rose: 'bg-rose-100 text-rose-700',
     navy: 'bg-navy/10 text-navy',
+    violet: 'bg-violet-100 text-violet-700',
 };
 export function StatCard({ icon: Icon, label, value, trend, tone = 'brand', i = 0 }) {
     return (
@@ -109,8 +110,14 @@ const badgeTones = {
     New: 'bg-sky-100 text-sky-700',
     Pending: 'bg-amber-100 text-amber-700',
     pending: 'bg-amber-100 text-amber-700',
+    approved: 'bg-accent text-accent-foreground',
+    rejected: 'bg-rose-100 text-rose-700',
     'In Progress': 'bg-violet-100 text-violet-700',
     in_progress: 'bg-violet-100 text-violet-700',
+    confirmed: 'bg-sky-100 text-sky-700',
+    driver_on_the_way: 'bg-violet-100 text-violet-700',
+    picked_up: 'bg-indigo-100 text-indigo-700',
+    processing: 'bg-indigo-100 text-indigo-700',
     Completed: 'bg-accent text-accent-foreground',
     completed: 'bg-accent text-accent-foreground',
     resolved: 'bg-accent text-accent-foreground',

@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { MapPin, Phone, Mail, Clock, Send, Building2, Factory, ArrowRight, ExternalLink } from "lucide-react";
+import { toast } from "sonner";
 import { SiteLayout, PageHero } from "@/Frontend/components/SiteLayout";
 import { company, companyMeta } from "@/Frontend/lib/site-data";
 
@@ -18,6 +19,55 @@ export const Route = createFileRoute("/contact")({
 
 function Contact() {
   const [sent, setSent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setErrors({});
+
+    const fd = new FormData(e.currentTarget);
+    const payload = {
+      name: String(fd.get("name") || "").trim(),
+      phone: String(fd.get("phone") || "").trim() || null,
+      email: String(fd.get("email") || "").trim(),
+      subject: String(fd.get("subject") || "").trim() || null,
+      message: String(fd.get("message") || "").trim(),
+    };
+
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const result = await res.json();
+
+      if (!res.ok) {
+        if (result.errors) {
+          const fieldErrors: Record<string, string> = {};
+          Object.entries(result.errors).forEach(([key, msgs]) => {
+            fieldErrors[key] = Array.isArray(msgs) ? String(msgs[0]) : String(msgs);
+          });
+          setErrors(fieldErrors);
+          toast.error(Object.values(fieldErrors)[0] ?? "Please check the form and try again.");
+        } else {
+          toast.error(result.message || "Something went wrong. Please try again.");
+        }
+        return;
+      }
+
+      setSent(true);
+      formRef.current?.reset();
+    } catch {
+      toast.error("Network error. Please check your connection and try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const cards = [
     { icon: Factory, title: "Plant Address", lines: [companyMeta.plantAddress] },
     { icon: Building2, title: "Corporate Office", lines: [companyMeta.corporateAddress] },
@@ -48,18 +98,21 @@ function Contact() {
           <div className="rounded-3xl border border-border bg-card p-8 shadow-card">
             <h2 className="text-2xl font-bold text-navy">Send an Enquiry</h2>
             <p className="mt-1 text-sm text-muted-foreground">Fill the form and our team will get back to you.</p>
-            <form className="mt-6 space-y-4" onSubmit={(e) => { e.preventDefault(); setSent(true); }}>
+            <form ref={formRef} className="mt-6 space-y-4" onSubmit={handleSubmit}>
               <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Full Name" name="name" />
-                <Field label="Phone" name="phone" type="tel" />
+                <Field label="Full Name" name="name" error={errors.name} />
+                <Field label="Phone" name="phone" type="tel" error={errors.phone} />
               </div>
-              <Field label="Email" name="email" type="email" />
-              <Field label="Subject" name="subject" />
+              <Field label="Email" name="email" type="email" error={errors.email} />
+              <Field label="Subject" name="subject" error={errors.subject} />
               <div>
                 <label className="mb-1.5 block text-sm font-semibold text-navy">Message</label>
-                <textarea required rows={4} className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/20" />
+                <textarea name="message" required rows={4} className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/20" />
+                {errors.message && <p className="mt-1 text-xs font-medium text-destructive">{errors.message}</p>}
               </div>
-              <button type="submit" className="btn-primary w-full justify-center">Submit Enquiry <Send className="size-4" /></button>
+              <button type="submit" disabled={submitting} className="btn-primary w-full justify-center disabled:opacity-60">
+                {submitting ? "Submitting…" : "Submit Enquiry"} <Send className="size-4" />
+              </button>
               {sent && <p className="text-center text-sm font-semibold text-brand">Thank you! Your enquiry has been received.</p>}
             </form>
           </div>
@@ -84,11 +137,12 @@ function Contact() {
   );
 }
 
-function Field({ label, name, type = "text" }: { label: string; name: string; type?: string }) {
+function Field({ label, name, type = "text", error }: { label: string; name: string; type?: string; error?: string }) {
   return (
     <div>
       <label className="mb-1.5 block text-sm font-semibold text-navy">{label}</label>
       <input required name={name} type={type} className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/20" />
+      {error && <p className="mt-1 text-xs font-medium text-destructive">{error}</p>}
     </div>
   );
 }

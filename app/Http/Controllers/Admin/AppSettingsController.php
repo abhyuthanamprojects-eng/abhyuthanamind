@@ -46,7 +46,7 @@ class AppSettingsController extends Controller
             'default_city_id' => AppSetting::get('default_city_id', 1),
             'minimum_free_pickup_amount' => AppSetting::get('minimum_free_pickup_amount', 1500),
             'low_value_shipping_charge' => AppSetting::get('low_value_shipping_charge', 100),
-            'warehouse_service_pincodes_limit' => AppSetting::get('warehouse_service_pincodes_limit', 10),
+            'serviceable_pincodes' => AppSetting::get('serviceable_pincodes', []),
             'donation_products' => AppSetting::get('donation_products', ['Cloth', 'Shoes', 'Toys', 'Books']),
             'corporate_categories' => $corporateCategories,
             'corporate_meeting_types' => AppSetting::get('corporate_meeting_types', ['in_person', 'google_meet', 'skype']),
@@ -103,7 +103,6 @@ class AppSettingsController extends Controller
             'default_city_id',
             'minimum_free_pickup_amount',
             'low_value_shipping_charge',
-            'warehouse_service_pincodes_limit',
         ];
 
         $stringFields = [
@@ -130,6 +129,7 @@ class AppSettingsController extends Controller
             'donation_products',
             'corporate_meeting_types',
             'scrap_proof_image_labels',
+            'serviceable_pincodes',
         ];
 
         foreach ($booleanFields as $key) {

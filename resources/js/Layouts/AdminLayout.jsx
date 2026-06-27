@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Link, Head, usePage } from '@inertiajs/react';
 import { Bell, Search, Menu, X, ChevronDown, LogOut, User, CheckCircle2, XCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Toaster } from 'sonner';
 import { adminNav } from '@/lib/admin-nav';
 import { cn } from '@/lib/utils';
 
@@ -207,6 +208,7 @@ export default function AdminLayout({ title, children }) {
                     {children}
                 </main>
             </div>
+            <Toaster richColors position="top-right" />
         </div>
     );
 }

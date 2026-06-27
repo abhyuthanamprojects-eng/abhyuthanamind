@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\PhoneNumberHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Page;
 use App\Models\ContactMessage;
@@ -34,12 +35,19 @@ class PageController extends Controller
      */
     public function submitContact(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $data = $request->all();
+        if (!empty($data['phone'])) {
+            $data['phone'] = PhoneNumberHelper::normalizeIndianMobile($data['phone']) ?? $data['phone'];
+        }
+
+        $validator = Validator::make($data, [
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'phone' => 'nullable|string|regex:/^[6-9]\d{9}$/',
             'subject' => 'nullable|string|max:255',
             'message' => 'required|string',
+        ], [
+            'phone.regex' => 'Please enter a valid 10-digit Indian mobile number.',
         ]);
 
         if ($validator->fails()) {
@@ -47,7 +55,7 @@ class PageController extends Controller
         }
 
         try {
-            $contact = ContactMessage::create($request->all());
+            $contact = ContactMessage::create($data);
 
             // Send notification email to support team
             try {

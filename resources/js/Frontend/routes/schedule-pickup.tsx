@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   ShieldCheck, BadgeCheck, Clock, Lock, ArrowRight, Phone, Mail,
-  MapPin, CheckCircle2, Send, Truck,
+  MapPin, CheckCircle2, Send, Truck, Copy, Link as LinkIcon,
 } from "lucide-react";
+import { toast } from "sonner";
 import { SiteLayout, PageHero } from "@/Frontend/components/SiteLayout";
 import { Reveal, motion } from "@/Frontend/components/anim";
 import { company, companyMeta, scrapCategoryOptions } from "@/Frontend/lib/site-data";
@@ -40,8 +41,83 @@ const steps = [
 
 function SchedulePickup() {
   const [sent, setSent] = useState(false);
+  const [booking, setBooking] = useState<{ booking_id: string; tracking_url: string } | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const formRef = useRef<HTMLFormElement>(null);
   const { category, item } = Route.useSearch();
   const presetCategory = scrapCategoryOptions.includes(category ?? "") ? category : "";
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setErrors({});
+
+    const fd = new FormData(e.currentTarget);
+    const payload = {
+      customer_type: String(fd.get("customerType") || ""),
+      full_name: String(fd.get("name") || "").trim(),
+      mobile_number: String(fd.get("phone") || "").trim(),
+      email: String(fd.get("email") || "").trim() || null,
+      company_name: String(fd.get("company") || "").trim() || null,
+      city: String(fd.get("city") || "").trim(),
+      pickup_address: String(fd.get("address") || "").trim(),
+      scrap_category: String(fd.get("scrapCategory") || ""),
+      approximate_quantity: String(fd.get("quantity") || "").trim() || null,
+      preferred_contact_method: String(fd.get("contactMethod") || "") || null,
+      preferred_pickup_date: String(fd.get("date") || ""),
+      preferred_pickup_time: String(fd.get("time") || ""),
+      description: String(fd.get("description") || "").trim() || null,
+      selected_scrap_item: item || null,
+    };
+
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/pickup-requests/public", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const result = await res.json();
+
+      if (!res.ok) {
+        if (result.errors) {
+          const backendToFrontendName: Record<string, string> = {
+            customer_type: "customerType",
+            full_name: "name",
+            mobile_number: "phone",
+            email: "email",
+            company_name: "company",
+            city: "city",
+            pickup_address: "address",
+            scrap_category: "scrapCategory",
+            approximate_quantity: "quantity",
+            preferred_contact_method: "contactMethod",
+            preferred_pickup_date: "date",
+            preferred_pickup_time: "time",
+            description: "description",
+          };
+          const fieldErrors: Record<string, string> = {};
+          Object.entries(result.errors).forEach(([key, msgs]) => {
+            const fieldName = backendToFrontendName[key] ?? key;
+            fieldErrors[fieldName] = Array.isArray(msgs) ? String(msgs[0]) : String(msgs);
+          });
+          setErrors(fieldErrors);
+          toast.error(Object.values(fieldErrors)[0] ?? "Please check the form and try again.");
+        } else {
+          toast.error(result.message || "Something went wrong. Please try again.");
+        }
+        return;
+      }
+
+      setBooking(result.data ?? null);
+      setSent(true);
+      formRef.current?.reset();
+    } catch {
+      toast.error("Network error. Please check your connection and try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   if (sent) {
     return (
@@ -60,8 +136,46 @@ function SchedulePickup() {
               </span>
               <h2 className="mt-6 text-2xl font-extrabold text-navy">Request received!</h2>
               <p className="mt-3 text-muted-foreground">
-                Thank you for choosing ABHYUTHANAM RECYCLER. Our team will contact you shortly to confirm your pickup.
+                Your pickup request has been submitted. Please save your booking ID and tracking link to check status.
               </p>
+
+              {booking && (
+                <div className="mt-6 rounded-2xl border border-border bg-eco p-5 text-left">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Booking ID</p>
+                      <p className="text-lg font-extrabold text-navy">{booking.booking_id}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText(booking.booking_id);
+                        toast.success("Booking ID copied.");
+                      }}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold text-navy hover:bg-background"
+                    >
+                      <Copy className="size-3.5" /> Copy
+                    </button>
+                  </div>
+                  <div className="mt-4 flex items-center justify-between gap-3 border-t border-border/60 pt-4">
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Track Status</p>
+                      <p className="truncate text-sm font-medium text-brand">{booking.tracking_url}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText(booking.tracking_url);
+                        toast.success("Tracking link copied.");
+                      }}
+                      className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold text-navy hover:bg-background"
+                    >
+                      <LinkIcon className="size-3.5" /> Copy Link
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <div className="mt-7 flex flex-wrap justify-center gap-3">
                 <Link to="/" className="btn-primary">Back to Home <ArrowRight className="size-4" /></Link>
                 <button onClick={() => setSent(false)} className="btn-outline">Submit Another</button>
@@ -120,7 +234,8 @@ function SchedulePickup() {
             {/* Right form */}
             <Reveal delay={0.1}>
               <form
-                onSubmit={(e) => { e.preventDefault(); setSent(true); }}
+                ref={formRef}
+                onSubmit={handleSubmit}
                 className="rounded-3xl border border-border bg-card p-7 shadow-card sm:p-9"
               >
                 <h2 className="text-2xl font-extrabold text-navy">Pickup Request</h2>
@@ -136,50 +251,54 @@ function SchedulePickup() {
                       </label>
                     ))}
                   </div>
+                  {errors.customerType && <p className="mt-1 text-xs font-medium text-destructive">{errors.customerType}</p>}
                 </div>
 
                 <div className="mt-5 grid gap-4 sm:grid-cols-2">
-                  <Field label="Full Name" name="name" required />
-                  <Field label="Mobile Number" name="phone" type="tel" required />
-                  <Field label="Email" name="email" type="email" required />
-                  <Field label="Company Name" name="company" />
-                  <Field label="City" name="city" required />
+                  <Field label="Full Name" name="name" required error={errors.name} />
+                  <Field label="Mobile Number" name="phone" type="tel" required error={errors.phone} />
+                  <Field label="Email" name="email" type="email" required error={errors.email} />
+                  <Field label="Company Name" name="company" error={errors.company} />
+                  <Field label="City" name="city" required error={errors.city} />
                   <div>
                     <Label>Scrap Category <Req /></Label>
-                    <select key={presetCategory} required defaultValue={presetCategory} className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm text-navy outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/20">
+                    <select name="scrapCategory" key={presetCategory} required defaultValue={presetCategory} className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm text-navy outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/20">
                       <option value="" disabled>Select a category</option>
                       {scrapCategoryOptions.map((c) => <option key={c} value={c}>{c}</option>)}
                     </select>
+                    {errors.scrapCategory && <p className="mt-1 text-xs font-medium text-destructive">{errors.scrapCategory}</p>}
                   </div>
                 </div>
 
                 <div className="mt-4">
-                  <Field label="Pickup Address" name="address" required />
+                  <Field label="Pickup Address" name="address" required error={errors.address} />
                 </div>
 
                 <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                  <Field label="Approximate Quantity" name="quantity" placeholder="e.g. 50 kg / 10 units" />
+                  <Field label="Approximate Quantity" name="quantity" placeholder="e.g. 50 kg / 10 units" error={errors.quantity} />
                   <div>
                     <Label>Preferred Contact Method</Label>
-                    <select defaultValue="Phone" className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm text-navy outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/20">
+                    <select name="contactMethod" defaultValue="Phone" className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm text-navy outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/20">
                       <option>Phone</option><option>WhatsApp</option><option>Email</option>
                     </select>
                   </div>
-                  <Field label="Preferred Pickup Date" name="date" type="date" required />
-                  <Field label="Preferred Pickup Time" name="time" type="time" required />
+                  <Field label="Preferred Pickup Date" name="date" type="date" required error={errors.date} />
+                  <Field label="Preferred Pickup Time" name="time" type="time" required error={errors.time} />
                 </div>
 
                 <div className="mt-4">
                   <Label>Description / Scrap Details</Label>
-                  <textarea key={item ?? "blank"} rows={4} defaultValue={item ? `I want to sell: ${item}` : ""} placeholder="Tell us about your scrap or e-waste..." className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/20" />
+                  <textarea name="description" key={item ?? "blank"} rows={4} defaultValue={item ? `I want to sell: ${item}` : ""} placeholder="Tell us about your scrap or e-waste..." className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/20" />
+                  {errors.description && <p className="mt-1 text-xs font-medium text-destructive">{errors.description}</p>}
                 </div>
 
                 <motion.button
                   type="submit"
+                  disabled={submitting}
                   whileTap={{ scale: 0.97 }}
-                  className="btn-primary mt-6 w-full justify-center"
+                  className="btn-primary mt-6 w-full justify-center disabled:opacity-60"
                 >
-                  Submit Pickup Request <Send className="size-4" />
+                  {submitting ? "Submitting…" : "Submit Pickup Request"} <Send className="size-4" />
                 </motion.button>
               </form>
             </Reveal>
@@ -198,7 +317,7 @@ function Label({ children }: { children: React.ReactNode }) {
   return <label className="mb-1.5 block text-sm font-semibold text-navy">{children}</label>;
 }
 
-function Field({ label, name, type = "text", required, placeholder }: { label: string; name: string; type?: string; required?: boolean; placeholder?: string }) {
+function Field({ label, name, type = "text", required, placeholder, error }: { label: string; name: string; type?: string; required?: boolean; placeholder?: string; error?: string }) {
   return (
     <div>
       <Label>{label} {required && <Req />}</Label>
@@ -209,6 +328,7 @@ function Field({ label, name, type = "text", required, placeholder }: { label: s
         placeholder={placeholder}
         className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/20"
       />
+      {error && <p className="mt-1 text-xs font-medium text-destructive">{error}</p>}
     </div>
   );
 }

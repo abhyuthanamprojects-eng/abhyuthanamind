@@ -21,6 +21,7 @@ export default function Index({ settings, homeBanners = [] }) {
         donation_products: normalizeCsvValue(settings.donation_products),
         corporate_meeting_types: normalizeCsvValue(settings.corporate_meeting_types),
         scrap_proof_image_labels: normalizeCsvValue(settings.scrap_proof_image_labels),
+        serviceable_pincodes: normalizeCsvValue(settings.serviceable_pincodes),
     });
 
     const [activeTab, setActiveTab] = useState('features');
@@ -118,7 +119,7 @@ export default function Index({ settings, homeBanners = [] }) {
                                 <Input name="default_city_id" label="Default City ID" type="number" />
                                 <Input name="minimum_free_pickup_amount" label="Minimum Free Pickup Amount (₹)" type="number" description="If estimated amount is below this, shipping charge will be deducted." />
                                 <Input name="low_value_shipping_charge" label="Low Value Shipping Charge (₹)" type="number" description="Shipping deduction applied when booking value is below minimum free pickup amount." />
-                                <Input name="warehouse_service_pincodes_limit" label="Warehouse Service Pincode Limit" type="number" description="Maximum number of service pincodes allowed per warehouse." />
+                                <Input name="serviceable_pincodes" label="Serviceable Pincodes (comma separated)" description="Pincodes where pickup/donation booking is allowed. Leave empty to serve everywhere." />
                                 <Input name="donation_products" label="Donation Products (comma separated)" description="Example: Cloth, Shoes, Toys, Books" />
 
                                 <div className="col-span-full border-t border-border pt-4">

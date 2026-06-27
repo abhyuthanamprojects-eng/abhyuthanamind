@@ -1,19 +1,20 @@
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Link } from '@inertiajs/react';
 import {
-    Truck, Clock, CheckCircle2, MessageSquare, FileText, Users, ArrowRight,
-    IndianRupee, Wrench, Star, Award, Hourglass,
+    Truck, Clock, CheckCircle2, MessageSquare, ArrowRight,
+    IndianRupee, Wrench, Star, Award, Image as ImageIcon,
 } from 'lucide-react';
 import { PageHeader, StatCard, StatusBadge, Panel, EmptyState } from '@/Components/Admin/AdminUI';
 
-const pendingModules = [
-    { label: 'Scrap Rate Items', icon: IndianRupee, route: 'admin.scrap-rate.index' },
-    { label: 'Active Services', icon: Wrench, route: 'admin.pages.index' },
-    { label: 'Testimonials', icon: Star, route: 'admin.testimonials.index' },
-    { label: 'Certificates', icon: Award, route: 'admin.certificates.index' },
-];
+const contentIcons = {
+    'Scrap Rate Items': IndianRupee,
+    'Active Services': Wrench,
+    Testimonials: Star,
+    Certificates: Award,
+    'Media / Gallery': ImageIcon,
+};
 
-export default function Dashboard({ stats, recentPickups, recentQueries }) {
+export default function Dashboard({ stats, contentHealth = [], recentPickups, recentQueries }) {
     return (
         <AdminLayout title="Dashboard">
             <PageHeader title="Dashboard" subtitle="Overview of pickups, queries and website content." />
@@ -23,13 +24,6 @@ export default function Dashboard({ stats, recentPickups, recentQueries }) {
                 <StatCard icon={Clock} label="Pending Pickups" value={stats.pickups_pending} tone="amber" i={1} />
                 <StatCard icon={CheckCircle2} label="Completed Pickups" value={stats.pickups_completed} tone="blue" i={2} />
                 <StatCard icon={MessageSquare} label="Contact Queries" value={stats.contact_queries} trend={stats.contact_queries_pending ? `${stats.contact_queries_pending} pending` : undefined} tone="rose" i={3} />
-            </div>
-
-            <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <StatCard icon={FileText} label="Static Pages" value={stats.pages_count} tone="navy" i={4} />
-                {stats.users_count !== null && (
-                    <StatCard icon={Users} label="System Users" value={stats.users_count} tone="navy" i={5} />
-                )}
             </div>
 
             <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -48,9 +42,9 @@ export default function Dashboard({ stats, recentPickups, recentQueries }) {
                                 <li key={p.id} className="flex items-center justify-between gap-3 rounded-2xl border border-border p-3">
                                     <div className="min-w-0">
                                         <p className="truncate text-sm font-semibold text-navy">{p.customer_name || 'Unknown'}</p>
-                                        <p className="text-xs text-muted-foreground">{p.pickup_code} · {p.city?.name ?? '—'}</p>
+                                        <p className="text-xs text-muted-foreground">{p.booking_id || p.pickup_code} · {p.city?.name ?? '—'}</p>
                                     </div>
-                                    <StatusBadge status={p.status} />
+                                    <StatusBadge status={p.tracking_status} />
                                 </li>
                             ))}
                         </ul>
@@ -85,23 +79,25 @@ export default function Dashboard({ stats, recentPickups, recentQueries }) {
             <Panel className="mt-6">
                 <div className="mb-4 flex items-center justify-between">
                     <h3 className="text-base font-bold text-navy">Website Content Health</h3>
-                    <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-700">Backend integration pending</span>
+                    <span className="rounded-full bg-accent px-2.5 py-1 text-xs font-bold text-accent-foreground">Live</span>
                 </div>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                    {pendingModules.map((m) => {
-                        const Icon = m.icon;
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                    {contentHealth.map((m) => {
+                        const Icon = contentIcons[m.label] ?? Star;
                         return (
                             <Link
                                 key={m.label}
                                 href={route(m.route)}
-                                className="flex items-center gap-3 rounded-2xl border border-dashed border-border bg-eco/40 p-4 transition hover:border-brand/40 hover:bg-eco/70"
+                                className="flex items-center gap-3 rounded-2xl border border-border bg-eco/40 p-4 transition hover:border-brand/40 hover:bg-eco/70"
                             >
                                 <span className="grid size-10 place-items-center rounded-xl bg-accent text-accent-foreground">
                                     <Icon className="size-4.5" />
                                 </span>
                                 <div className="min-w-0">
                                     <p className="truncate text-sm font-semibold text-navy">{m.label}</p>
-                                    <p className="flex items-center gap-1 text-xs text-muted-foreground"><Hourglass className="size-3" /> Not connected yet</p>
+                                    <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                                        <CheckCircle2 className="size-3 text-brand" /> {m.count} total{m.active !== m.count ? ` · ${m.active} active` : ''}
+                                    </p>
                                 </div>
                             </Link>
                         );

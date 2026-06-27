@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasRoles, HasApiTokens, \App\Traits\BelongsToPartner, SoftDeletes;
+    use HasFactory, Notifiable, HasRoles, HasApiTokens, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -48,8 +48,6 @@ class User extends Authenticatable
         'daily_capacity',
         'location_updated_at',
         'last_active_at',
-        'warehouse_id',
-        'channel_partner_id',
         'language',
         'fcm_token',
     ];
@@ -88,40 +86,9 @@ class User extends Authenticatable
         return $this->belongsTo(City::class);
     }
 
-    public function warehouse()
-    {
-        return $this->belongsTo(Warehouse::class);
-    }
-
-    public function getAccessibleWarehouseIds(): array
-    {
-        $ids = \App\Models\Warehouse::where('manager_id', $this->id)->pluck('id')->toArray();
-        if ($this->warehouse_id && !in_array($this->warehouse_id, $ids)) {
-            $ids[] = $this->warehouse_id;
-        }
-        return $ids;
-    }
-
-    public function warehouses()
-    {
-        return $this->belongsToMany(Warehouse::class, 'pickup_boy_warehouse', 'pickup_boy_id', 'warehouse_id')
-            ->withPivot(['status', 'created_by'])
-            ->withTimestamps();
-    }
-
-    public function activeWarehouses()
-    {
-        return $this->warehouses()->wherePivot('status', 'active');
-    }
-
     public function pickupRequests()
     {
         return $this->hasMany(PickupRequest::class, 'customer_id');
-    }
-
-    public function todayAssignments()
-    {
-        return $this->assignments()->whereDate('assigned_at', now()->toDateString());
     }
 
     /**
@@ -144,24 +111,6 @@ class User extends Authenticatable
     }
 
     /**
-     * Get count of active assignments today.
-     */
-    public function getTodayAssignmentsCountAttribute()
-    {
-        return $this->todayAssignments()
-            ->whereNotIn('status', ['cancelled', 'rejected'])
-            ->count();
-    }
-
-    /**
-     * Check if driver has reached daily capacity.
-     */
-    public function getIsCapacityFullAttribute()
-    {
-        return $this->today_assignments_count >= $this->daily_capacity;
-    }
-
-    /**
      * Scope for drivers who are "Online" based on time and manual toggle.
      */
     public function scopeOnline($query)
@@ -174,44 +123,9 @@ class User extends Authenticatable
             ->whereRaw("TIME(CONVERT_TZ(NOW(), 'UTC', 'Asia/Kolkata')) BETWEEN ? AND ?", [$startTime, $endTime]);
     }
 
-    public function referralsGiven()
-    {
-        return $this->hasMany(Referral::class, 'referrer_user_id');
-    }
-
-    public function referralReceived()
-    {
-        return $this->hasOne(Referral::class, 'referred_user_id');
-    }
-
-    public function referralCoupons()
-    {
-        return $this->hasMany(ReferralCoupon::class, 'user_id');
-    }
-
-    public function assignments()
-    {
-        return $this->hasMany(Assignment::class, 'pickup_boy_id');
-    }
-
     public function payments()
     {
         return $this->hasMany(Payment::class);
-    }
-
-    public function kycDocument()
-    {
-        return $this->hasOne(KycDocument::class);
-    }
-
-    public function managedWarehouses()
-    {
-        return $this->hasMany(Warehouse::class, 'manager_id');
-    }
-
-    public function settlements()
-    {
-        return $this->hasMany(Settlement::class, 'partner_id');
     }
 
     public function addresses()
@@ -222,11 +136,6 @@ class User extends Authenticatable
     public function paymentDetails()
     {
         return $this->hasMany(PaymentDetail::class);
-    }
-
-    public function locations()
-    {
-        return $this->hasMany(PickupBoyLocation::class, 'pickup_boy_id');
     }
 
     /**

@@ -1,6 +1,6 @@
 import {
     LayoutDashboard, Truck, MessageSquare, HelpCircle, FileText, Star, Award, Images,
-    IndianRupee, Users, BarChart3, Settings, User,
+    IndianRupee, Users, BarChart3, User, Wrench, Factory, LayoutTemplate,
 } from 'lucide-react';
 
 export const adminNav = [
@@ -18,6 +18,9 @@ export const adminNav = [
         group: 'Website Content',
         items: [
             { label: 'Static Pages', route: 'admin.pages.index', icon: FileText },
+            { label: 'Page Sections (CMS)', route: 'admin.page-sections.index', icon: LayoutTemplate },
+            { label: 'Services', route: 'admin.services.index', icon: Wrench },
+            { label: 'Industries', route: 'admin.industries.index', icon: Factory },
             { label: 'Testimonials', route: 'admin.testimonials.index', icon: Star },
             { label: 'Certificates', route: 'admin.certificates.index', icon: Award },
             { label: 'Media / Gallery', route: 'admin.media.index', icon: Images },
@@ -33,7 +36,6 @@ export const adminNav = [
     {
         group: 'Settings',
         items: [
-            { label: 'App Settings', route: 'admin.app-settings.index', icon: Settings },
             { label: 'Profile', route: 'profile.edit', icon: User },
         ],
     },

@@ -37,11 +37,6 @@ class RequestController extends Controller
 
         $type = RequestType::tryFrom($validated['request_type']);
 
-        // Auto-assign warehouse by city
-        $warehouse = \App\Models\Warehouse::where('city_id', $validated['city_id'])
-            ->where('status', true)
-            ->first();
-
         // Create pickup request
         $pickupRequest = PickupRequest::create([
             'customer_id' => Auth::id(),
@@ -50,8 +45,6 @@ class RequestController extends Controller
             'status_new' => RequestStatus::PENDING_WAREHOUSE->value, // New string column
             'address' => $validated['address'],
             'city_id' => $validated['city_id'],
-            'warehouse_id' => $warehouse?->id,
-            'warehouse_assigned_at' => $warehouse ? now() : null,
             'scheduled_at' => $validated['scheduled_at'],
             'latitude' => $validated['latitude'] ?? null,
             'longitude' => $validated['longitude'] ?? null,
@@ -94,10 +87,7 @@ class RequestController extends Controller
     {
         $request = PickupRequest::with([
             'customer',
-            'warehouse',
             'statusLogs.changedBy',
-            'currentAssignment.pickupBoy',
-            'latestEstimate',
             'items.category',
             'images',
             'warehouseReceivedBy',
@@ -106,7 +96,7 @@ class RequestController extends Controller
 
         // Authorization
         $user = Auth::user();
-        if ($request->customer_id !== $user->id && !$user->hasAnyRole(['admin', 'warehouse', 'payment_admin'])) {
+        if ($request->customer_id !== $user->id && !$user->hasAnyRole(['admin', 'payment_admin'])) {
             return $this->errorResponse('auth.unauthorized', 403);
         }
 
@@ -121,22 +111,11 @@ class RequestController extends Controller
         $user = Auth::user();
         $query = PickupRequest::with([
             'customer',
-            'warehouse',
-            'currentAssignment.pickupBoy',
-            'latestEstimate',
         ]);
 
         // Filter by role
         if ($user->hasRole('customer')) {
             $query->where('customer_id', $user->id);
-        } elseif ($user->hasRole('warehouse')) {
-            // Only own warehouse requests
-            $warehouse = $user->warehouse;
-            if ($warehouse) {
-                $query->where('warehouse_id', $warehouse->id);
-            } else {
-                return $this->errorResponse('auth.no_warehouse_assigned', 403);
-            }
         } elseif (!$user->hasAnyRole(['admin', 'payment_admin'])) {
             return $this->errorResponse('auth.unauthorized', 403);
         }
@@ -248,7 +227,7 @@ class RequestController extends Controller
 
         // Authorization
         $user = Auth::user();
-        if ($request->customer_id !== $user->id && !$user->hasAnyRole(['admin', 'warehouse', 'pickup_boy', 'payment_admin'])) {
+        if ($request->customer_id !== $user->id && !$user->hasAnyRole(['admin', 'pickup_boy', 'payment_admin'])) {
             return $this->errorResponse('auth.unauthorized', 403);
         }
 
@@ -304,26 +283,6 @@ class RequestController extends Controller
                 'email' => $request->customer->email,
             ] : null,
 
-            'warehouse' => $request->warehouse ? [
-                'id' => $request->warehouse->id,
-                'name' => $request->warehouse->name,
-                'location' => $request->warehouse->address,
-            ] : null,
-
-            'pickup_boy' => $request->currentAssignment?->pickupBoy ? [
-                'id' => $request->currentAssignment->pickupBoy->id,
-                'name' => $request->currentAssignment->pickupBoy->name,
-                'phone' => $request->currentAssignment->pickupBoy->phone,
-                'status' => $request->currentAssignment->status,
-            ] : null,
-
-            'estimate' => $request->latestEstimate ? [
-                'id' => $request->latestEstimate->id,
-                'amount' => $request->latestEstimate->estimated_amount,
-                'status' => $request->latestEstimate->status,
-                'created_at' => $request->latestEstimate->created_at,
-            ] : null,
-
             'payment' => [
                 'status' => $request->payment_status,
                 'method' => $request->payment_method,
@@ -333,7 +292,6 @@ class RequestController extends Controller
 
             'timeline' => [
                 'created_at' => $request->created_at?->format('Y-m-d H:i:s'),
-                'warehouse_assigned_at' => $request->warehouse_assigned_at?->format('Y-m-d H:i:s'),
                 'pickup_started_at' => $request->pickup_started_at?->format('Y-m-d H:i:s'),
                 'pickup_completed_at' => $request->pickup_completed_at?->format('Y-m-d H:i:s'),
                 'warehouse_received_at' => $request->warehouse_received_at?->format('Y-m-d H:i:s'),

@@ -4,10 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\City;
-use App\Models\ChannelPartner;
 use App\Models\User;
 use App\Services\OtpService;
-use App\Services\ReferralService;
 use App\Traits\ApiResponseTrait;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -24,12 +22,10 @@ class AuthController extends Controller
     use ApiResponseTrait;
 
     protected $otpService;
-    protected $referralService;
 
-    public function __construct(OtpService $otpService, ReferralService $referralService)
+    public function __construct(OtpService $otpService)
     {
         $this->otpService = $otpService;
-        $this->referralService = $referralService;
     }
 
     #[OA\Post(
@@ -45,7 +41,7 @@ class AuthController extends Controller
                 properties: [
                     new OA\Property(property: "phone", type: "string", example: "9876543210"),
                     new OA\Property(property: "name", type: "string", example: "John Doe"),
-                    new OA\Property(property: "role", type: "string", example: "customer", enum: ["customer", "pickup_boy", "warehouse", "channel_partner"])
+                    new OA\Property(property: "role", type: "string", example: "customer", enum: ["customer", "admin"])
                 ]
             )
         ),
@@ -76,7 +72,7 @@ class AuthController extends Controller
 
         $validator = Validator::make($request->all(), [
             'phone' => 'required|string|regex:/^[6-9]\d{9}$/',
-            'role' => 'required|string|in:pickup_boy,warehouse,channel_partner,admin',
+            'role' => 'required|string|in:admin',
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
             'location_name' => 'nullable|string|max:120',
@@ -195,10 +191,6 @@ class AuthController extends Controller
         $user->update(['name' => $request->name, 'email' => $normalizedEmail]);
         $this->syncUserLocationFromRequest($user, $request);
 
-        if ($request->filled('referral_code')) {
-            Cache::put('referral_pending:' . $phone, strtoupper($request->referral_code), now()->addMinutes(15));
-        }
-
         $otpResult = $this->otpService->sendOtp($phone, ['name' => $user->name ?? 'Customer']);
         if (!$otpResult['success']) {
             return $this->errorResponse('auth.otp_send_failed', 503, ['message' => $otpResult['message']]);
@@ -235,28 +227,16 @@ class AuthController extends Controller
         if (!$user->hasRole('customer')) {
             $user->assignRole('customer');
         }
-        if (!$user->referral_code) {
-            $this->referralService->ensureReferralCode($user);
-        }
 
         $user->otp = null;
         $user->otp_expires_at = null;
         $this->syncUserLocationFromRequest($user, $request);
         $user->save();
 
-        $referralApplied = null;
-        $cacheKey = 'referral_pending:' . $request->phone;
-        $pendingCode = $request->input('referral_code') ?: Cache::get($cacheKey);
-        if ($pendingCode && !$user->referralReceived) {
-            $referralApplied = $this->referralService->applyReferral($pendingCode, $user);
-            Cache::forget($cacheKey);
-        }
-
         $token = $user->createToken($request->device_name)->plainTextToken;
         return $this->successResponse('auth.registration_success', [
             'user' => $user->load('roles'),
             'token' => $token,
-            'referral_applied' => $referralApplied ? true : false,
         ], 200);
     }
 
@@ -320,15 +300,10 @@ class AuthController extends Controller
         $this->syncUserLocationFromRequest($user, $request);
         $user->save();
 
-        if (!$user->referral_code) {
-            $this->referralService->ensureReferralCode($user);
-        }
-
         $token = $user->createToken($request->device_name)->plainTextToken;
         return $this->successResponse('auth.login_success', [
             'user' => $user->load('roles'),
             'token' => $token,
-            'referral_applied' => false,
         ], 200);
     }
 
@@ -378,7 +353,7 @@ class AuthController extends Controller
             'phone' => 'required|string|regex:/^[6-9]\d{9}$/',
             'otp' => 'required|string|digits:6',
             'device_name' => 'required|string',
-            'role' => 'required|string|in:pickup_boy,channel_partner,warehouse,admin',
+            'role' => 'required|string|in:admin',
             'referral_code' => 'nullable|string|size:6',
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
@@ -415,22 +390,6 @@ class AuthController extends Controller
         $this->syncUserLocationFromRequest($user, $request);
         $user->save();
 
-        // Auto-generate referral code if customer + missing
-        if ($user->hasRole('customer') && !$user->referral_code) {
-            $this->referralService->ensureReferralCode($user);
-        }
-
-        // Apply pending referral (only for customers, only once)
-        $referralApplied = null;
-        if ($user->hasRole('customer')) {
-            $cacheKey = 'referral_pending:' . $request->phone;
-            $pendingCode = $request->input('referral_code') ?: Cache::get($cacheKey);
-            if ($pendingCode && !$user->referralReceived) {
-                $referralApplied = $this->referralService->applyReferral($pendingCode, $user);
-                Cache::forget($cacheKey);
-            }
-        }
-
         // Create Token
         $token = $user->createToken($request->device_name)->plainTextToken;
 
@@ -439,7 +398,6 @@ class AuthController extends Controller
         return $this->successResponse('auth.login_success', [
             'user' => $user->load('roles'),
             'token' => $token,
-            'referral_applied' => $referralApplied ? true : false,
         ], 200);
     }
 
@@ -482,7 +440,7 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'phone' => 'required|string|regex:/^[6-9]\d{9}$/',
             'retry_type' => 'nullable|string|in:text,voice',
-            'role' => 'nullable|string|in:pickup_boy,warehouse,channel_partner,admin,customer',
+            'role' => 'nullable|string|in:admin,customer',
         ]);
 
         if ($validator->fails()) {
@@ -594,32 +552,6 @@ class AuthController extends Controller
 
         if ((int) $user->status !== 1) {
             return ['ok' => false, 'message' => 'This account is inactive. Please contact admin.'];
-        }
-
-        if ($role === 'channel_partner') {
-            if (!$user->channel_partner_id) {
-                return ['ok' => false, 'message' => 'Channel partner profile is not linked to this mobile number.'];
-            }
-            $partner = ChannelPartner::find($user->channel_partner_id);
-            if (!$partner || !$partner->login_enabled || $partner->registration_status !== 'approved') {
-                return ['ok' => false, 'message' => 'Channel partner login is not enabled yet.'];
-            }
-        }
-
-        if ($role === 'warehouse') {
-            $hasWarehouse = $user->warehouse_id
-                || $user->managedWarehouses()->exists()
-                || \App\Models\Warehouse::where('manager_id', $user->id)->exists();
-            if (!$hasWarehouse) {
-                return ['ok' => false, 'message' => 'No warehouse is mapped to this mobile number.'];
-            }
-        }
-
-        if ($role === 'pickup_boy') {
-            $hasMapping = $user->warehouse_id || $user->activeWarehouses()->exists();
-            if (!$hasMapping) {
-                return ['ok' => false, 'message' => 'No pickup assignment mapping exists for this mobile number.'];
-            }
         }
 
         return ['ok' => true, 'message' => 'ok'];

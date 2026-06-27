@@ -23,8 +23,7 @@ class AuthMetaController extends Controller
     )]
     public function userTypes()
     {
-        $allowedRoles = ['customer', 'channel_partner', 'pickup_boy', 'warehouse'];
-        // $allowedRoles = ['customer', 'pickup_boy', 'warehouse'];
+        $allowedRoles = ['customer', 'channel_partner', 'pickup_boy'];
 
         $roles = Role::whereIn('name', $allowedRoles)
             ->orderBy('sort_order', 'asc')

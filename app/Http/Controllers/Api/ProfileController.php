@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\KycDocument;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -62,65 +61,6 @@ class ProfileController extends Controller
         ]);
 
         return $this->successResponse('profile.bank_updated', $user);
-    }
-
-    /**
-     * Upload KYC Document.
-     */
-    #[OA\Post(
-        path: "/api/auth/profile/kyc",
-        operationId: "uploadKyc",
-        tags: ["Profile"],
-        summary: "Upload KYC document",
-        security: [["apiAuth" => []]],
-        requestBody: new OA\RequestBody(
-            required: true,
-            content: new OA\MediaType(
-                mediaType: "multipart/form-data",
-                schema: new OA\Schema(
-                    required: ["document_type", "image"],
-                    properties: [
-                        new OA\Property(property: "document_type", type: "string", enum: ["aadhaar_front", "aadhaar_back", "pan_card", "driving_license"]),
-                        new OA\Property(property: "document_number", type: "string"),
-                        new OA\Property(property: "image", type: "string", format: "binary")
-                    ]
-                )
-            )
-        ),
-        responses: [
-            new OA\Response(response: 200, description: "KYC uploaded"),
-            new OA\Response(response: 422, description: "Validation Error")
-        ]
-    )]
-    public function uploadKyc(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'document_type' => 'required|in:aadhaar_front,aadhaar_back,pan_card,driving_license',
-            'document_number' => 'nullable|string|max:50',
-            'image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-        ]);
-
-        if ($validator->fails()) {
-            return $this->validationErrorResponse($validator->errors());
-        }
-
-        $user = $request->user();
-
-        if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('kyc_documents', 'public');
-
-            KycDocument::create([
-                'user_id' => $user->id,
-                'document_type' => $request->document_type,
-                'document_number' => $request->document_number,
-                'image_path' => $path,
-                'status' => 'pending',
-            ]);
-
-            return $this->successResponse('profile.kyc_uploaded', null);
-        }
-
-        return $this->errorResponse('validation.failed', 422);
     }
 
     #[OA\Post(

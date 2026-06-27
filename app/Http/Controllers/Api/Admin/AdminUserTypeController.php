@@ -41,7 +41,7 @@ class AdminUserTypeController extends Controller
             'visible' => 'required|boolean'
         ]);
 
-        $allowedRoles = ['customer', 'channel_partner', 'pickup_boy', 'warehouse'];
+        $allowedRoles = ['customer', 'channel_partner', 'pickup_boy'];
 
         if (!in_array($code, $allowedRoles)) {
             return $this->errorResponse('admin.invalid_role_code', 400);

@@ -9,9 +9,9 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as WarehousesRouteImport } from './routes/warehouses'
 import { Route as TermsconditionRouteImport } from './routes/termscondition'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as SubmitTestimonialRouteImport } from './routes/submit-testimonial'
 import { Route as ScrapRateRouteImport } from './routes/scrap-rate'
 import { Route as SchedulePickupRouteImport } from './routes/schedule-pickup'
 import { Route as ProcessRouteImport } from './routes/process'
@@ -21,14 +21,10 @@ import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CancellationRouteImport } from './routes/cancellation'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TrackPickupTokenRouteImport } from './routes/track-pickup.$token'
 import { Route as ServicesServiceIdRouteImport } from './routes/services.$serviceId'
 import { Route as IndustriesIndustryIdRouteImport } from './routes/industries.$industryId'
 
-const WarehousesRoute = WarehousesRouteImport.update({
-  id: '/warehouses',
-  path: '/warehouses',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const TermsconditionRoute = TermsconditionRouteImport.update({
   id: '/termscondition',
   path: '/termscondition',
@@ -37,6 +33,11 @@ const TermsconditionRoute = TermsconditionRouteImport.update({
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SubmitTestimonialRoute = SubmitTestimonialRouteImport.update({
+  id: '/submit-testimonial',
+  path: '/submit-testimonial',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ScrapRateRoute = ScrapRateRouteImport.update({
@@ -84,6 +85,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TrackPickupTokenRoute = TrackPickupTokenRouteImport.update({
+  id: '/track-pickup/$token',
+  path: '/track-pickup/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ServicesServiceIdRoute = ServicesServiceIdRouteImport.update({
   id: '/services/$serviceId',
   path: '/services/$serviceId',
@@ -105,11 +111,12 @@ export interface FileRoutesByFullPath {
   '/process': typeof ProcessRoute
   '/schedule-pickup': typeof SchedulePickupRoute
   '/scrap-rate': typeof ScrapRateRoute
+  '/submit-testimonial': typeof SubmitTestimonialRoute
   '/terms': typeof TermsRoute
   '/termscondition': typeof TermsconditionRoute
-  '/warehouses': typeof WarehousesRoute
   '/industries/$industryId': typeof IndustriesIndustryIdRoute
   '/services/$serviceId': typeof ServicesServiceIdRoute
+  '/track-pickup/$token': typeof TrackPickupTokenRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -121,11 +128,12 @@ export interface FileRoutesByTo {
   '/process': typeof ProcessRoute
   '/schedule-pickup': typeof SchedulePickupRoute
   '/scrap-rate': typeof ScrapRateRoute
+  '/submit-testimonial': typeof SubmitTestimonialRoute
   '/terms': typeof TermsRoute
   '/termscondition': typeof TermsconditionRoute
-  '/warehouses': typeof WarehousesRoute
   '/industries/$industryId': typeof IndustriesIndustryIdRoute
   '/services/$serviceId': typeof ServicesServiceIdRoute
+  '/track-pickup/$token': typeof TrackPickupTokenRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -138,11 +146,12 @@ export interface FileRoutesById {
   '/process': typeof ProcessRoute
   '/schedule-pickup': typeof SchedulePickupRoute
   '/scrap-rate': typeof ScrapRateRoute
+  '/submit-testimonial': typeof SubmitTestimonialRoute
   '/terms': typeof TermsRoute
   '/termscondition': typeof TermsconditionRoute
-  '/warehouses': typeof WarehousesRoute
   '/industries/$industryId': typeof IndustriesIndustryIdRoute
   '/services/$serviceId': typeof ServicesServiceIdRoute
+  '/track-pickup/$token': typeof TrackPickupTokenRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -156,11 +165,12 @@ export interface FileRouteTypes {
     | '/process'
     | '/schedule-pickup'
     | '/scrap-rate'
+    | '/submit-testimonial'
     | '/terms'
     | '/termscondition'
-    | '/warehouses'
     | '/industries/$industryId'
     | '/services/$serviceId'
+    | '/track-pickup/$token'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -172,11 +182,12 @@ export interface FileRouteTypes {
     | '/process'
     | '/schedule-pickup'
     | '/scrap-rate'
+    | '/submit-testimonial'
     | '/terms'
     | '/termscondition'
-    | '/warehouses'
     | '/industries/$industryId'
     | '/services/$serviceId'
+    | '/track-pickup/$token'
   id:
     | '__root__'
     | '/'
@@ -188,11 +199,12 @@ export interface FileRouteTypes {
     | '/process'
     | '/schedule-pickup'
     | '/scrap-rate'
+    | '/submit-testimonial'
     | '/terms'
     | '/termscondition'
-    | '/warehouses'
     | '/industries/$industryId'
     | '/services/$serviceId'
+    | '/track-pickup/$token'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -205,22 +217,16 @@ export interface RootRouteChildren {
   ProcessRoute: typeof ProcessRoute
   SchedulePickupRoute: typeof SchedulePickupRoute
   ScrapRateRoute: typeof ScrapRateRoute
+  SubmitTestimonialRoute: typeof SubmitTestimonialRoute
   TermsRoute: typeof TermsRoute
   TermsconditionRoute: typeof TermsconditionRoute
-  WarehousesRoute: typeof WarehousesRoute
   IndustriesIndustryIdRoute: typeof IndustriesIndustryIdRoute
   ServicesServiceIdRoute: typeof ServicesServiceIdRoute
+  TrackPickupTokenRoute: typeof TrackPickupTokenRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/warehouses': {
-      id: '/warehouses'
-      path: '/warehouses'
-      fullPath: '/warehouses'
-      preLoaderRoute: typeof WarehousesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/termscondition': {
       id: '/termscondition'
       path: '/termscondition'
@@ -233,6 +239,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/submit-testimonial': {
+      id: '/submit-testimonial'
+      path: '/submit-testimonial'
+      fullPath: '/submit-testimonial'
+      preLoaderRoute: typeof SubmitTestimonialRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/scrap-rate': {
@@ -298,6 +311,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/track-pickup/$token': {
+      id: '/track-pickup/$token'
+      path: '/track-pickup/$token'
+      fullPath: '/track-pickup/$token'
+      preLoaderRoute: typeof TrackPickupTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/services/$serviceId': {
       id: '/services/$serviceId'
       path: '/services/$serviceId'
@@ -325,11 +345,12 @@ const rootRouteChildren: RootRouteChildren = {
   ProcessRoute: ProcessRoute,
   SchedulePickupRoute: SchedulePickupRoute,
   ScrapRateRoute: ScrapRateRoute,
+  SubmitTestimonialRoute: SubmitTestimonialRoute,
   TermsRoute: TermsRoute,
   TermsconditionRoute: TermsconditionRoute,
-  WarehousesRoute: WarehousesRoute,
   IndustriesIndustryIdRoute: IndustriesIndustryIdRoute,
   ServicesServiceIdRoute: ServicesServiceIdRoute,
+  TrackPickupTokenRoute: TrackPickupTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

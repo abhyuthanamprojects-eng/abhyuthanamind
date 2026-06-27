@@ -2,12 +2,13 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   ArrowRight, ShieldCheck, Truck, CheckCircle2, Award, Recycle,
   Laptop, GraduationCap, HeartHandshake, Leaf, Star, Quote, Sparkles, Phone,
-  Linkedin, MapPin, Gem, Smartphone, PlayCircle,
+  Linkedin, MapPin, Gem, Smartphone,
 } from "lucide-react";
 import { SiteLayout } from "@/Frontend/components/SiteLayout";
+import { Testimonials } from "@/Frontend/components/Testimonials";
 import { Reveal, Counter, motion } from "@/Frontend/components/anim";
 import {
-  company, services, industries, whyChoose, counters, advanced, testimonials, founders, scrapify,
+  company, services, industries, whyChoose, counters, advanced, founders, scrapify,
 } from "@/Frontend/lib/site-data";
 import heroImg from "@/Frontend/assets/hero-westix.jpg";
 import rec1 from "@/Frontend/assets/recycle-1.jpg";
@@ -501,51 +502,7 @@ function Index() {
       </div>
 
       {/* Testimonials */}
-      <section className="section bg-eco">
-        <div className="container-px">
-          <Reveal className="mx-auto max-w-2xl text-center">
-            <span className="eyebrow"><Quote className="size-4" /> Reviews</span>
-            <h2 className="mt-4 text-3xl font-extrabold text-navy sm:text-4xl">What our clients say</h2>
-          </Reveal>
-          <Reveal delay={0.1}>
-            <div className="group relative mt-12 overflow-hidden rounded-[2rem] shadow-card">
-              <img src={rec3} alt="Client video testimonial" loading="lazy" width={1280} height={600} className="h-72 w-full object-cover sm:h-96" />
-              <div className="absolute inset-0 bg-gradient-to-t from-navy/90 via-navy/40 to-transparent" />
-              <button aria-label="Play video testimonial" className="absolute inset-0 grid place-items-center">
-                <span className="grid size-20 place-items-center rounded-full bg-brand text-brand-foreground shadow-card transition-transform group-hover:scale-110"><PlayCircle className="size-10" /></span>
-              </button>
-              <div className="absolute bottom-6 left-6 right-6 text-navy-foreground">
-                <p className="max-w-xl text-lg font-semibold leading-snug">“Abhyuthanam helped us manage our e-waste responsibly with complete documentation and transparent reporting.”</p>
-                <p className="mt-2 text-sm text-navy-foreground/70">Enterprise Client · Reverse Logistics & ITAD</p>
-              </div>
-            </div>
-          </Reveal>
-          <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {testimonials.map((t, i) => (
-              <Reveal key={t.name} delay={(i % 3) * 0.1}>
-                <div className="card-soft h-full">
-                  <Quote className="size-8 text-brand/30" />
-                  <div className="mt-3 flex items-center justify-between">
-                    <div className="flex gap-0.5 text-lime">
-                      {Array.from({ length: t.rating ?? 5 }).map((_, k) => <Star key={k} className="size-4 fill-current" />)}
-                    </div>
-                    {t.outcome && <span className="rounded-full bg-brand/10 px-2.5 py-1 text-[11px] font-bold text-brand">{t.outcome}</span>}
-                  </div>
-                  <p className="mt-4 text-sm leading-relaxed text-navy">{t.text}</p>
-                  <div className="mt-6 flex items-center gap-3">
-                    <span className="grid size-11 place-items-center rounded-full bg-brand text-brand-foreground font-bold">{t.name[0]}</span>
-                    <div>
-                      <p className="text-sm font-bold text-navy">{t.name}</p>
-                      <p className="text-xs text-muted-foreground">{t.role} · {t.company}</p>
-                      <p className="text-xs font-medium text-brand">{t.businessType} · {t.location}</p>
-                    </div>
-                  </div>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
+      <Testimonials />
 
       {/* CTA */}
       <section className="container-px py-16">

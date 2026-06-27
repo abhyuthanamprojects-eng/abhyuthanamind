@@ -17,11 +17,11 @@ class RolePermissionSeeder extends Seeder
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         // Create Roles
+        $superAdminRole = Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
         $adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
         $customerRole = Role::firstOrCreate(['name' => 'customer', 'guard_name' => 'web']);
         $pickupBoyRole = Role::firstOrCreate(['name' => 'pickup_boy', 'guard_name' => 'web']);
         $channelPartnerRole = Role::firstOrCreate(['name' => 'channel_partner', 'guard_name' => 'web']);
-        $warehouseRole = Role::firstOrCreate(['name' => 'warehouse', 'guard_name' => 'web']);
 
         // Create Permissions (Granular)
         $permissions = [
@@ -44,8 +44,6 @@ class RolePermissionSeeder extends Seeder
             'assign_pickups',
             'verify_kyc',
             'approve_payments',
-            'view_warehouse',
-            'update_inventory'
         ];
 
         foreach ($permissions as $permission) {
@@ -53,6 +51,7 @@ class RolePermissionSeeder extends Seeder
         }
 
         // Assign Permissions to Roles
+        $superAdminRole->syncPermissions(Permission::all());
         $adminRole->syncPermissions(Permission::all());
 
         $customerRole->syncPermissions([
@@ -64,12 +63,6 @@ class RolePermissionSeeder extends Seeder
         $pickupBoyRole->syncPermissions([
             'view_pickups',
             'edit_pickups'
-        ]);
-
-        $warehouseRole->syncPermissions([
-            'view_warehouse',
-            'update_inventory',
-            'view_pickups'
         ]);
 
         $channelPartnerRole->syncPermissions([

@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             CarbonFootprintSeeder::class,
             FakeDataSeeder::class,
             PageSeeder::class,
+            WebsiteContentSeeder::class,
         ]);
     }
 }

@@ -4,7 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\PickupRequest;
+use App\Models\PickupRequestCertificate;
+use App\Services\MediaCompressionService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class PickupRequestAdminController extends Controller
@@ -14,41 +17,122 @@ class PickupRequestAdminController extends Controller
         $query = PickupRequest::query()->with(['city:id,name', 'customer:id,name,email,phone']);
 
         if ($request->search) {
-            $query->where(function ($q) use ($request) {
-                $q->where('customer_name', 'like', '%' . $request->search . '%')
-                    ->orWhere('customer_phone', 'like', '%' . $request->search . '%')
-                    ->orWhere('pickup_code', 'like', '%' . $request->search . '%');
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('customer_name', 'like', "%{$search}%")
+                    ->orWhere('customer_phone', 'like', "%{$search}%")
+                    ->orWhere('pickup_code', 'like', "%{$search}%")
+                    ->orWhere('booking_id', 'like', "%{$search}%")
+                    ->orWhere('metadata->public_lead->scrap_category', 'like', "%{$search}%")
+                    ->orWhere('metadata->public_lead->city', 'like', "%{$search}%")
+                    ->orWhereHas('city', fn ($cityQuery) => $cityQuery->where('name', 'like', "%{$search}%"));
             });
         }
 
         if ($request->status) {
-            $query->where('status', $request->status);
+            $query->where('tracking_status', $request->status);
         }
 
         if ($request->date) {
             $query->whereDate('scheduled_at', $request->date);
         }
 
+        if ($request->scrap_category) {
+            $query->where('metadata->public_lead->scrap_category', $request->scrap_category);
+        }
+
         $pickups = $query->latest()->paginate(10)->withQueryString();
 
         return Inertia::render('Admin/PickupRequests/Index', [
             'pickups' => $pickups,
-            'filters' => $request->only(['search', 'status', 'date']),
+            'filters' => $request->only(['search', 'status', 'date', 'scrap_category']),
             'stats' => [
                 'total' => PickupRequest::count(),
-                'pending' => PickupRequest::whereIn('status', ['new', 'pending', 'assigned'])->count(),
-                'in_progress' => PickupRequest::whereIn('status', ['in_progress', 'pickup_started', 'warehouse_received'])->count(),
-                'completed' => PickupRequest::where('status', 'completed')->count(),
+                'pending' => PickupRequest::where('tracking_status', 'pending')->count(),
+                'confirmed' => PickupRequest::where('tracking_status', 'confirmed')->count(),
+                'in_progress' => PickupRequest::where('tracking_status', 'in_progress')->count(),
+                'completed' => PickupRequest::where('tracking_status', 'completed')->count(),
+                'cancelled' => PickupRequest::where('tracking_status', 'cancelled')->count(),
             ],
+            'statusOptions' => PickupRequest::TRACKING_STATUSES,
         ]);
     }
 
     public function show(PickupRequest $pickupRequest)
     {
-        $pickupRequest->load(['city:id,name', 'customer:id,name,email,phone', 'items', 'warehouse:id,name']);
+        $pickupRequest->load([
+            'city:id,name',
+            'customer:id,name,email,phone',
+            'items',
+            'warehouse:id,name',
+            'statusHistories.changedBy:id,name',
+            'certificate',
+        ]);
 
         return Inertia::render('Admin/PickupRequests/Show', [
             'pickup' => $pickupRequest,
+            'statusOptions' => PickupRequest::TRACKING_STATUSES,
         ]);
+    }
+
+    public function updateStatus(Request $request, PickupRequest $pickupRequest)
+    {
+        $data = $request->validate([
+            'tracking_status' => 'required|string|in:' . implode(',', array_keys(PickupRequest::TRACKING_STATUSES)),
+            'note' => 'nullable|string|max:1000',
+            'public_note' => 'nullable|string|max:1000',
+        ]);
+
+        $pickupRequest->updateTrackingStatus(
+            $data['tracking_status'],
+            $data['note'] ?? null,
+            $request->user()->id,
+            $data['public_note'] ?? null,
+        );
+
+        return back()->with('success', 'Status updated.');
+    }
+
+    public function uploadCertificate(Request $request, PickupRequest $pickupRequest)
+    {
+        $data = $request->validate([
+            'certificate_file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'certificate_number' => 'nullable|string|max:100',
+            'issued_at' => 'nullable|date',
+            'notes' => 'nullable|string|max:1000',
+        ]);
+
+        $existing = $pickupRequest->certificate;
+        if ($existing && $existing->file_path) {
+            Storage::disk('public')->delete($existing->file_path);
+        }
+
+        $path = MediaCompressionService::store($request->file('certificate_file'), 'pickup-certificates');
+
+        PickupRequestCertificate::updateOrCreate(
+            ['pickup_request_id' => $pickupRequest->id],
+            [
+                'certificate_number' => $data['certificate_number'] ?? null,
+                'file_path' => $path,
+                'issued_at' => $data['issued_at'] ?? now(),
+                'notes' => $data['notes'] ?? null,
+                'uploaded_by' => $request->user()->id,
+            ]
+        );
+
+        return back()->with('success', 'Certificate uploaded.');
+    }
+
+    public function destroyCertificate(PickupRequest $pickupRequest)
+    {
+        $certificate = $pickupRequest->certificate;
+        if ($certificate) {
+            if ($certificate->file_path) {
+                Storage::disk('public')->delete($certificate->file_path);
+            }
+            $certificate->delete();
+        }
+
+        return back()->with('success', 'Certificate removed.');
     }
 }

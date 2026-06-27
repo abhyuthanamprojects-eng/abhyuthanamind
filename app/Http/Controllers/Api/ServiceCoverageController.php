@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\City;
+use App\Services\ServiceabilityService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
@@ -16,37 +17,25 @@ class ServiceCoverageController extends Controller
         path: "/api/v1/service-coverage",
         operationId: "getServiceCoverage",
         tags: ["Location"],
-        summary: "List cities and areas covered by active warehouses",
+        summary: "List active cities and configured serviceable pincodes",
         responses: [
             new OA\Response(response: 200, description: "Success")
         ]
     )]
     public function index()
     {
-        $cities = City::whereHas('warehouses', function ($query) {
-            $query->where('status', true);
-        })
-        ->with(['state', 'warehouses' => function ($query) {
-            $query->where('status', true);
-        }])
-        ->get()
-        ->map(function ($city) {
-            $areas = $city->warehouses->groupBy('area')->map(function ($warehouses, $area) {
-                return [
-                    'area_name' => $area ?? 'General',
-                    'warehouse_ids' => $warehouses->pluck('id'),
-                ];
-            })->values();
-
-            return [
+        $cities = City::where('status', true)
+            ->with('state')
+            ->get()
+            ->map(fn (City $city) => [
                 'city_id' => $city->id,
                 'city_name' => $city->name,
                 'state_name' => $city->state->name ?? null,
-                'warehouse_count' => $city->warehouses->count(),
-                'areas' => $areas,
-            ];
-        });
+            ]);
 
-        return $this->successResponse('location.coverage_fetched', ['cities' => $cities]);
+        return $this->successResponse('location.coverage_fetched', [
+            'cities' => $cities,
+            'serviceable_pincodes' => ServiceabilityService::serviceablePincodes(),
+        ]);
     }
 }
