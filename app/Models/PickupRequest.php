@@ -16,16 +16,39 @@ class PickupRequest extends Model
      * `status` / `status_new` columns used by the authenticated app's
      * pickup logistics lifecycle (RequestStatusTransitionService). These
      * drive manual admin updates and the public /track-pickup/{token} page.
+     *
+     * Full lifecycle: query acceptance -> pickup -> warehouse -> plant ->
+     * segregation -> dismantling/recycling/refurbish -> certificates -> done.
      */
     public const TRACKING_STATUSES = [
         'pending' => 'Pending',
-        'confirmed' => 'Booking Confirmed',
         'in_progress' => 'In Progress',
         'driver_on_the_way' => 'Driver On The Way',
-        'picked_up' => 'Picked Up',
-        'processing' => 'Processing',
+        'pickup_done' => 'Pickup Done',
+        'on_the_way_to_local_warehouse' => 'On The Way To Local Warehouse',
+        'local_warehouse_received' => 'Local Warehouse Received',
+        'on_the_way_to_plant' => 'On The Way To Plant',
+        'plant_received' => 'Plant Received',
+        'segregation_in_progress' => 'Segregation In Progress',
+        'segregation_completed' => 'Segregation Completed',
+        'dismantling_recycling' => 'Dismantling / Recycling',
+        'dismantling_refurbish' => 'Dismantling / Refurbish',
+        'certificate_ready' => 'Certificates Ready',
         'completed' => 'Completed',
         'cancelled' => 'Cancelled',
+    ];
+
+    /**
+     * Visual order for the customer-facing progress timeline. Excludes
+     * `cancelled`, which is an exception state rather than a lifecycle step.
+     */
+    public const TRACKING_STEP_ORDER = [
+        'pending', 'in_progress', 'driver_on_the_way', 'pickup_done',
+        'on_the_way_to_local_warehouse', 'local_warehouse_received',
+        'on_the_way_to_plant', 'plant_received',
+        'segregation_in_progress', 'segregation_completed',
+        'dismantling_recycling', 'dismantling_refurbish',
+        'certificate_ready', 'completed',
     ];
 
     protected $hidden = ['tracking_token'];
@@ -62,6 +85,16 @@ class PickupRequest extends Model
         return $this->hasOne(PickupRequestCertificate::class);
     }
 
+    public function documents()
+    {
+        return $this->hasMany(PickupRequestDocument::class);
+    }
+
+    public function pickupQuery()
+    {
+        return $this->belongsTo(PickupQuery::class, 'pickup_query_id');
+    }
+
     public function scopePending($query)
     {
         return $query->where('tracking_status', 'pending');
@@ -80,7 +113,7 @@ class PickupRequest extends Model
     /**
      * Apply a manual admin status update and record it in the history table.
      */
-    public function updateTrackingStatus(string $status, ?string $note = null, ?int $changedBy = null, ?string $publicNote = null): void
+    public function updateTrackingStatus(string $status, ?string $note = null, ?int $changedBy = null, ?string $publicNote = null, ?string $title = null): void
     {
         $this->update([
             'tracking_status' => $status,
@@ -91,7 +124,9 @@ class PickupRequest extends Model
 
         $this->statusHistories()->create([
             'status' => $status,
+            'title' => $title ?? (self::TRACKING_STATUSES[$status] ?? null),
             'note' => $note,
+            'public_note' => $publicNote,
             'changed_by' => $changedBy,
         ]);
     }
@@ -168,6 +203,14 @@ class PickupRequest extends Model
         'tracking_status_updated_at',
         'admin_notes',
         'public_notes',
+        'pickup_query_id',
+        'total_quantity',
+        'recycled_percentage',
+        'refurbished_percentage',
+        'disposed_percentage',
+        'recycled_quantity',
+        'refurbished_quantity',
+        'processing_notes',
     ];
 
     protected $casts = [
@@ -175,6 +218,12 @@ class PickupRequest extends Model
         'price_locked_at' => 'datetime',
         'metadata' => 'array',
         'tracking_status_updated_at' => 'datetime',
+        'total_quantity' => 'decimal:2',
+        'recycled_percentage' => 'decimal:2',
+        'refurbished_percentage' => 'decimal:2',
+        'disposed_percentage' => 'decimal:2',
+        'recycled_quantity' => 'decimal:2',
+        'refurbished_quantity' => 'decimal:2',
     ];
 
     public function setScheduledAtAttribute($value)

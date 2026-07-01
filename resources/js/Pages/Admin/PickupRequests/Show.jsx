@@ -3,25 +3,217 @@ import { Link, useForm, router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import {
     ArrowLeft, MapPin, Phone, Mail, Calendar, IndianRupee, Link as LinkIcon,
-    Download, Award, Upload, Trash2, Clock,
+    Download, Award, Upload, Trash2, Clock, FileText, Eye, Recycle, ClipboardList,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { PageHeader, StatusBadge, Panel } from '@/Components/Admin/AdminUI';
 
-export default function Show({ pickup, statusOptions }) {
-    const [showCertForm, setShowCertForm] = useState(false);
+const DOCUMENT_FIELDS = {
+    form_6: {
+        label: 'Form 6 — E-Waste Manifest',
+        icon: FileText,
+        availableFrom: 'pickup_done',
+        fields: [
+            ['sender_name', 'Sender Name'], ['sender_address', 'Sender Address'], ['sender_phone', 'Sender Phone'],
+            ['sender_authorization_no', 'Sender Authorization No.'],
+            ['transporter_name', 'Transporter Name'], ['transporter_address', 'Transporter Address'], ['transporter_phone', 'Transporter Phone'],
+            ['vehicle_type', 'Vehicle Type'], ['transporter_registration_no', 'Transporter Registration No.'], ['vehicle_registration_no', 'Vehicle Registration No.'],
+            ['receiver_authorization_no', 'Receiver Authorization No.'],
+            ['ewaste_description', 'E-Waste Description (Item / Weight / Numbers)', 'textarea'],
+            ['pickup_date', 'Pickup Date', 'date'],
+        ],
+    },
+    form_2: {
+        label: 'Form 2 — Recycling Certificate',
+        icon: ClipboardList,
+        availableFrom: 'segregation_completed',
+        fields: [
+            ['client_company_name', 'Client Company Name'], ['client_address', 'Client Address'],
+            ['tax_invoice_number', 'Tax Invoice Number'], ['weight_kg', 'Weight (KG)', 'number'],
+            ['vehicle_number', 'Vehicle Number'], ['manifest_number', 'Manifest Number'],
+            ['date', 'Date', 'date'], ['registration_no', 'Registration No. (UPPCB)'], ['valid_till', 'Valid Till'],
+            ['director_name', 'Director Name'], ['notes', 'Notes', 'textarea'],
+        ],
+    },
+    green_certificate: {
+        label: 'Green Certificate',
+        icon: Award,
+        availableFrom: 'segregation_completed',
+        fields: [
+            ['client_company_name', 'Client Company Name'], ['manifest_number', 'Manifest Number'],
+            ['tax_invoice_number', 'Tax Invoice Number'], ['date', 'Date', 'date'],
+            ['recycled_percentage', 'Recycled %', 'number'], ['refurbished_percentage', 'Refurbished %', 'number'],
+            ['quantity', 'Quantity'], ['registration_no', 'Registration No. (UPPCB)'], ['director_name', 'Director Name'],
+        ],
+    },
+};
 
+function autoFillData(pickup) {
+    const lead = pickup.metadata?.public_lead || {};
+    const today = new Date().toISOString().slice(0, 10);
+    const pickupDate = pickup.scheduled_at ? new Date(pickup.scheduled_at).toISOString().slice(0, 10) : '';
+    const wasteDescription = [
+        [lead.scrap_category, lead.selected_scrap_item].filter(Boolean).join(' — '),
+        lead.approximate_quantity ? `Approx. ${lead.approximate_quantity}` : null,
+        lead.description || null,
+    ].filter(Boolean).join(' | ');
+
+    // Chain values already entered on Form 6 (manifest/vehicle), so Form 2 / Green Certificate don't repeat data entry.
+    const form6 = pickup.documents?.find((d) => d.document_type === 'form_6');
+    const form6Data = form6?.generated_data || {};
+
+    return {
+        sender_name: pickup.customer_name || '',
+        sender_address: pickup.address || '',
+        sender_phone: pickup.customer_phone || '',
+        client_company_name: pickup.customer_name || '',
+        client_address: pickup.address || '',
+        ewaste_description: wasteDescription,
+        pickup_date: pickupDate,
+        date: today,
+        weight_kg: pickup.total_quantity || '',
+        quantity: lead.approximate_quantity || '',
+        recycled_percentage: pickup.recycled_percentage || '',
+        refurbished_percentage: pickup.refurbished_percentage || '',
+        manifest_number: form6?.document_number || '',
+        vehicle_number: form6Data.vehicle_registration_no || '',
+    };
+}
+
+function DocumentCard({ pickup, documentType, existing }) {
+    const def = DOCUMENT_FIELDS[documentType];
+    const Icon = def.icon;
+    const [open, setOpen] = useState(false);
+    const auto = autoFillData(pickup);
+
+    const form = useForm({
+        document_type: documentType,
+        mode: 'generate',
+        document_number: existing?.document_number || '',
+        file: null,
+        ...Object.fromEntries(def.fields.map(([key]) => [key, existing?.generated_data?.[key] || auto[key] || ''])),
+    });
+
+    const submit = (e) => {
+        e.preventDefault();
+        form.post(route('admin.pickups.documents.store', pickup.id), {
+            forceFormData: true,
+            preserveScroll: true,
+            onSuccess: () => setOpen(false),
+        });
+    };
+
+    const destroy = () => {
+        if (!existing) return;
+        if (!confirm(`Remove ${def.label}?`)) return;
+        router.delete(route('admin.pickups.documents.destroy', [pickup.id, existing.id]), { preserveScroll: true });
+    };
+
+    return (
+        <div className="rounded-2xl border border-border p-4">
+            <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                    <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-accent text-accent-foreground"><Icon className="size-4" /></span>
+                    <div>
+                        <p className="text-sm font-bold text-navy">{def.label}</p>
+                        {existing ? <StatusBadge status={existing.status} /> : <span className="text-xs text-muted-foreground">Not generated yet</span>}
+                    </div>
+                </div>
+            </div>
+
+            {existing && !open ? (
+                <div className="mt-3 flex gap-2">
+                    <a
+                        href={route('admin.pickups.documents.preview', [pickup.id, existing.id])}
+                        target="_blank" rel="noreferrer"
+                        className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-border px-3 py-2 text-xs font-semibold text-navy transition hover:bg-eco"
+                    >
+                        <Eye className="size-3.5" /> Preview
+                    </a>
+                    <button onClick={() => setOpen(true)} className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-border px-3 py-2 text-xs font-semibold text-navy transition hover:bg-eco">
+                        <Upload className="size-3.5" /> Replace
+                    </button>
+                    <button onClick={destroy} className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-rose-200 px-2.5 py-2 text-xs font-semibold text-rose-600 transition hover:bg-rose-50">
+                        <Trash2 className="size-3.5" />
+                    </button>
+                </div>
+            ) : !open ? (
+                <button onClick={() => setOpen(true)} className="mt-3 w-full rounded-xl border border-dashed border-border px-3 py-2 text-xs font-semibold text-brand transition hover:bg-eco">
+                    Generate / Upload
+                </button>
+            ) : (
+                <form onSubmit={submit} className="mt-3 space-y-2.5">
+                    <div className="flex gap-2 text-xs font-semibold">
+                        <button type="button" onClick={() => form.setData('mode', 'generate')} className={`flex-1 rounded-xl px-3 py-1.5 ${form.data.mode === 'generate' ? 'bg-brand text-brand-foreground' : 'border border-border text-navy'}`}>Generate</button>
+                        <button type="button" onClick={() => form.setData('mode', 'upload')} className={`flex-1 rounded-xl px-3 py-1.5 ${form.data.mode === 'upload' ? 'bg-brand text-brand-foreground' : 'border border-border text-navy'}`}>Upload File</button>
+                    </div>
+
+                    <input
+                        value={form.data.document_number}
+                        onChange={(e) => form.setData('document_number', e.target.value)}
+                        placeholder="Document / Reference Number"
+                        className="h-9 w-full rounded-xl border border-border bg-card px-3 text-xs outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+                    />
+
+                    {form.data.mode === 'upload' && (
+                        <input
+                            type="file" accept=".pdf,.jpg,.jpeg,.png,.docx"
+                            onChange={(e) => form.setData('file', e.target.files[0])}
+                            className="w-full rounded-xl border border-dashed border-border bg-card px-3 py-2 text-xs"
+                        />
+                    )}
+
+                    {form.data.mode === 'generate' && def.fields.map(([key, label, type]) => (
+                        type === 'textarea' ? (
+                            <textarea
+                                key={key}
+                                value={form.data[key]}
+                                onChange={(e) => form.setData(key, e.target.value)}
+                                placeholder={label}
+                                rows={2}
+                                className="w-full rounded-xl border border-border bg-card px-3 py-2 text-xs outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+                            />
+                        ) : (
+                            <input
+                                key={key}
+                                type={type || 'text'}
+                                value={form.data[key]}
+                                onChange={(e) => form.setData(key, e.target.value)}
+                                placeholder={label}
+                                className="h-9 w-full rounded-xl border border-border bg-card px-3 text-xs outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+                            />
+                        )
+                    ))}
+
+                    <div className="flex gap-2">
+                        <button type="submit" disabled={form.processing} className="flex-1 rounded-xl bg-brand px-3 py-2 text-xs font-semibold text-brand-foreground shadow-soft transition hover:bg-brand-dark disabled:opacity-60">
+                            {form.processing ? 'Saving…' : 'Save Document'}
+                        </button>
+                        <button type="button" onClick={() => setOpen(false)} className="rounded-xl border border-border px-3 py-2 text-xs font-semibold text-navy transition hover:bg-muted">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            )}
+        </div>
+    );
+}
+
+export default function Show({ pickup, statusOptions }) {
     const statusForm = useForm({
         tracking_status: pickup.tracking_status || 'pending',
         note: '',
         public_note: pickup.public_notes || '',
     });
 
-    const certForm = useForm({
-        certificate_file: null,
-        certificate_number: pickup.certificate?.certificate_number || '',
-        issued_at: pickup.certificate?.issued_at || '',
-        notes: pickup.certificate?.notes || '',
+    const processingForm = useForm({
+        total_quantity: pickup.total_quantity || '',
+        recycled_percentage: pickup.recycled_percentage || '',
+        refurbished_percentage: pickup.refurbished_percentage || '',
+        disposed_percentage: pickup.disposed_percentage || '',
+        recycled_quantity: pickup.recycled_quantity || '',
+        refurbished_quantity: pickup.refurbished_quantity || '',
+        processing_notes: pickup.processing_notes || '',
     });
 
     const submitStatus = (e) => {
@@ -32,18 +224,11 @@ export default function Show({ pickup, statusOptions }) {
         });
     };
 
-    const submitCertificate = (e) => {
+    const submitProcessing = (e) => {
         e.preventDefault();
-        certForm.post(route('admin.pickups.certificate.upload', pickup.id), {
+        processingForm.patch(route('admin.pickups.material-processing', pickup.id), {
             preserveScroll: true,
-            forceFormData: true,
-            onSuccess: () => setShowCertForm(false),
         });
-    };
-
-    const removeCertificate = () => {
-        if (!confirm('Remove this certificate?')) return;
-        router.delete(route('admin.pickups.certificate.destroy', pickup.id), { preserveScroll: true });
     };
 
     const copyTrackingLink = () => {
@@ -232,6 +417,58 @@ export default function Show({ pickup, statusOptions }) {
                             </div>
                         )}
                     </Panel>
+
+                    <Panel>
+                        <h3 className="mb-4 flex items-center gap-2 text-base font-bold text-navy">
+                            <Recycle className="size-4 text-brand" /> Material Processing
+                        </h3>
+                        <form onSubmit={submitProcessing} className="space-y-4">
+                            <div className="grid gap-4 sm:grid-cols-3">
+                                <div>
+                                    <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">Total Quantity (kg)</label>
+                                    <input type="number" step="0.01" min="0" value={processingForm.data.total_quantity} onChange={(e) => processingForm.setData('total_quantity', e.target.value)}
+                                        className="h-10 w-full rounded-2xl border border-border bg-card px-3 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20" />
+                                </div>
+                                <div>
+                                    <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">Recycled %</label>
+                                    <input type="number" step="0.01" min="0" max="100" value={processingForm.data.recycled_percentage} onChange={(e) => processingForm.setData('recycled_percentage', e.target.value)}
+                                        className="h-10 w-full rounded-2xl border border-border bg-card px-3 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20" />
+                                </div>
+                                <div>
+                                    <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">Refurbished %</label>
+                                    <input type="number" step="0.01" min="0" max="100" value={processingForm.data.refurbished_percentage} onChange={(e) => processingForm.setData('refurbished_percentage', e.target.value)}
+                                        className="h-10 w-full rounded-2xl border border-border bg-card px-3 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20" />
+                                </div>
+                                <div>
+                                    <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">Disposed / Other %</label>
+                                    <input type="number" step="0.01" min="0" max="100" value={processingForm.data.disposed_percentage} onChange={(e) => processingForm.setData('disposed_percentage', e.target.value)}
+                                        className="h-10 w-full rounded-2xl border border-border bg-card px-3 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20" />
+                                </div>
+                                <div>
+                                    <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">Recycled Qty (kg)</label>
+                                    <input type="number" step="0.01" min="0" value={processingForm.data.recycled_quantity} onChange={(e) => processingForm.setData('recycled_quantity', e.target.value)}
+                                        className="h-10 w-full rounded-2xl border border-border bg-card px-3 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20" />
+                                </div>
+                                <div>
+                                    <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">Refurbished Qty (kg)</label>
+                                    <input type="number" step="0.01" min="0" value={processingForm.data.refurbished_quantity} onChange={(e) => processingForm.setData('refurbished_quantity', e.target.value)}
+                                        className="h-10 w-full rounded-2xl border border-border bg-card px-3 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20" />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">Processing Notes</label>
+                                <textarea rows={2} value={processingForm.data.processing_notes} onChange={(e) => processingForm.setData('processing_notes', e.target.value)}
+                                    className="w-full rounded-2xl border border-border bg-card px-4 py-2.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20" />
+                            </div>
+                            {processingForm.errors.recycled_percentage && (
+                                <p className="text-xs font-medium text-rose-600">{processingForm.errors.recycled_percentage}</p>
+                            )}
+                            <button type="submit" disabled={processingForm.processing}
+                                className="inline-flex items-center gap-2 rounded-2xl bg-brand px-5 py-2.5 text-sm font-semibold text-brand-foreground shadow-soft transition hover:bg-brand-dark disabled:opacity-60">
+                                {processingForm.processing ? 'Saving…' : 'Save Material Processing'}
+                            </button>
+                        </form>
+                    </Panel>
                 </div>
 
                 <div className="space-y-6">
@@ -269,94 +506,18 @@ export default function Show({ pickup, statusOptions }) {
 
                     <Panel>
                         <h3 className="mb-4 flex items-center gap-2 text-base font-bold text-navy">
-                            <Award className="size-4 text-brand" /> Certificate
+                            <Award className="size-4 text-brand" /> Documents / Certificates
                         </h3>
-
-                        {pickup.certificate && !showCertForm ? (
-                            <div className="space-y-3">
-                                <dl className="space-y-2 text-sm">
-                                    <div className="flex items-center justify-between">
-                                        <dt className="text-muted-foreground">Number</dt>
-                                        <dd className="font-medium text-navy">{pickup.certificate.certificate_number || '—'}</dd>
-                                    </div>
-                                    <div className="flex items-center justify-between">
-                                        <dt className="text-muted-foreground">Issued</dt>
-                                        <dd className="font-medium text-navy">{pickup.certificate.issued_at ? new Date(pickup.certificate.issued_at).toLocaleDateString() : '—'}</dd>
-                                    </div>
-                                </dl>
-                                <div className="flex gap-2">
-                                    <a
-                                        href={pickup.certificate.file_url}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className="flex-1 inline-flex items-center justify-center gap-2 rounded-2xl border border-border px-4 py-2.5 text-sm font-semibold text-navy transition hover:bg-eco"
-                                    >
-                                        <Download className="size-4" /> View
-                                    </a>
-                                    <button
-                                        onClick={() => setShowCertForm(true)}
-                                        className="flex-1 inline-flex items-center justify-center gap-2 rounded-2xl border border-border px-4 py-2.5 text-sm font-semibold text-navy transition hover:bg-eco"
-                                    >
-                                        <Upload className="size-4" /> Replace
-                                    </button>
-                                    <button
-                                        onClick={removeCertificate}
-                                        className="inline-flex items-center justify-center gap-2 rounded-2xl border border-rose-200 px-3 py-2.5 text-sm font-semibold text-rose-600 transition hover:bg-rose-50"
-                                    >
-                                        <Trash2 className="size-4" />
-                                    </button>
-                                </div>
-                            </div>
-                        ) : (
-                            <form onSubmit={submitCertificate} className="space-y-3">
-                                <input
-                                    type="file"
-                                    accept=".pdf,.jpg,.jpeg,.png"
-                                    onChange={(e) => certForm.setData('certificate_file', e.target.files[0])}
-                                    className="w-full rounded-2xl border border-dashed border-border bg-card px-3 py-2.5 text-sm"
+                        <div className="space-y-3">
+                            {Object.keys(DOCUMENT_FIELDS).map((type) => (
+                                <DocumentCard
+                                    key={type}
+                                    pickup={pickup}
+                                    documentType={type}
+                                    existing={pickup.documents?.find((d) => d.document_type === type)}
                                 />
-                                <input
-                                    value={certForm.data.certificate_number}
-                                    onChange={(e) => certForm.setData('certificate_number', e.target.value)}
-                                    placeholder="Certificate number (optional)"
-                                    className="h-11 w-full rounded-2xl border border-border bg-card px-4 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
-                                />
-                                <input
-                                    type="date"
-                                    value={certForm.data.issued_at}
-                                    onChange={(e) => certForm.setData('issued_at', e.target.value)}
-                                    className="h-11 w-full rounded-2xl border border-border bg-card px-4 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
-                                />
-                                <textarea
-                                    value={certForm.data.notes}
-                                    onChange={(e) => certForm.setData('notes', e.target.value)}
-                                    placeholder="Notes (optional)"
-                                    rows={2}
-                                    className="w-full rounded-2xl border border-border bg-card px-4 py-2.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
-                                />
-                                <div className="flex gap-2">
-                                    <button
-                                        type="submit"
-                                        disabled={certForm.processing || !certForm.data.certificate_file}
-                                        className="flex-1 inline-flex items-center justify-center gap-2 rounded-2xl bg-brand px-4 py-2.5 text-sm font-semibold text-brand-foreground shadow-soft transition hover:bg-brand-dark disabled:opacity-60"
-                                    >
-                                        {certForm.processing ? 'Uploading…' : 'Upload Certificate'}
-                                    </button>
-                                    {pickup.certificate && (
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowCertForm(false)}
-                                            className="rounded-2xl border border-border px-4 py-2.5 text-sm font-semibold text-navy transition hover:bg-eco"
-                                        >
-                                            Cancel
-                                        </button>
-                                    )}
-                                </div>
-                                {pickup.tracking_status !== 'completed' && (
-                                    <p className="text-xs text-muted-foreground">Certificate is usually uploaded after marking the request as Completed.</p>
-                                )}
-                            </form>
-                        )}
+                            ))}
+                        </div>
                     </Panel>
 
                     <Panel>
@@ -370,12 +531,6 @@ export default function Show({ pickup, statusOptions }) {
                                 <span className="text-muted-foreground">Final</span>
                                 <span className="flex items-center font-semibold text-navy"><IndianRupee className="size-3.5" />{pickup.final_amount ?? '—'}</span>
                             </div>
-                            {pickup.warehouse && (
-                                <div className="flex items-center justify-between border-t border-border pt-3 text-sm">
-                                    <span className="text-muted-foreground">Warehouse</span>
-                                    <span className="font-semibold text-navy">{pickup.warehouse.name}</span>
-                                </div>
-                            )}
                         </div>
                     </Panel>
                 </div>

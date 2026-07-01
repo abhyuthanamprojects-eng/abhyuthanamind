@@ -27,8 +27,10 @@ Route::get('pages/{slug}', [\App\Http\Controllers\Api\PageController::class, 'sh
 Route::post('contact', [\App\Http\Controllers\Api\PageController::class, 'submitContact'])
     ->middleware('throttle:10,1');
 
-// Public Pickup Lead Submission (Schedule Pickup page — no auth)
-Route::post('pickup-requests/public', [\App\Http\Controllers\Api\PickupRequestSubmissionController::class, 'store'])
+// Public Pickup Enquiry Submission (Schedule Pickup page — no auth).
+// Creates a PickupQuery for admin review/negotiation; it does NOT create a
+// PickupRequest directly. Admin converts it into a real PickupRequest later.
+Route::post('pickup-queries', [\App\Http\Controllers\Api\PickupQuerySubmissionController::class, 'store'])
     ->middleware('throttle:6,1');
 
 // Public Pickup Tracking (token-gated, no auth)

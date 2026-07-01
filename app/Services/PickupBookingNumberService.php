@@ -9,6 +9,7 @@ class PickupBookingNumberService
 {
     private const PREFIX = 'AIPL';
     private const TYPE = 'pickup_request';
+    private const QUERY_TYPE = 'pickup_query';
 
     /**
      * Generate the next sequential booking ID for the current month, e.g.
@@ -17,11 +18,26 @@ class PickupBookingNumberService
      */
     public static function next(): string
     {
+        return self::nextForType(self::TYPE, sprintf('%s-%%s-%%03d', self::PREFIX));
+    }
+
+    /**
+     * Generate the next sequential pickup query ID for the current month,
+     * e.g. AIPL-Q-2606-001. Shares the same booking_sequences table under a
+     * distinct `type` key so the two sequences never collide.
+     */
+    public static function nextQueryId(): string
+    {
+        return self::nextForType(self::QUERY_TYPE, sprintf('%s-Q-%%s-%%03d', self::PREFIX));
+    }
+
+    private static function nextForType(string $type, string $format): string
+    {
         $period = now()->format('ym');
 
-        return DB::transaction(function () use ($period) {
+        return DB::transaction(function () use ($type, $format, $period) {
             $sequence = DB::table('booking_sequences')
-                ->where('type', self::TYPE)
+                ->where('type', $type)
                 ->where('period', $period)
                 ->lockForUpdate()
                 ->first();
@@ -34,7 +50,7 @@ class PickupBookingNumberService
             } else {
                 $nextNumber = 1;
                 DB::table('booking_sequences')->insert([
-                    'type' => self::TYPE,
+                    'type' => $type,
                     'period' => $period,
                     'last_number' => $nextNumber,
                     'created_at' => now(),
@@ -42,7 +58,7 @@ class PickupBookingNumberService
                 ]);
             }
 
-            return sprintf('%s-%s-%03d', self::PREFIX, $period, $nextNumber);
+            return sprintf($format, $period, $nextNumber);
         });
     }
 

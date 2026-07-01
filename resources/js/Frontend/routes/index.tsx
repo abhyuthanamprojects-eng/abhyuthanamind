@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
-  ArrowRight, ShieldCheck, Truck, CheckCircle2, Award, Recycle,
+  ArrowRight, ArrowUpRight, ShieldCheck, Truck, CheckCircle2, Award, Recycle,
   Laptop, GraduationCap, HeartHandshake, Leaf, Star, Quote, Sparkles, Phone,
-  Linkedin, MapPin, Gem, Smartphone,
+  Linkedin, MapPin, Gem, Smartphone, Code2, Layers,
 } from "lucide-react";
 import { SiteLayout } from "@/Frontend/components/SiteLayout";
 import { Testimonials } from "@/Frontend/components/Testimonials";
@@ -24,7 +24,6 @@ import svcLogistics from "@/Frontend/assets/svc-logistics.jpg";
 import svcTraining from "@/Frontend/assets/svc-training.jpg";
 import svcEpr from "@/Frontend/assets/svc-epr.jpg";
 import svcCsr from "@/Frontend/assets/svc-csr.jpg";
-import dumpTruck from "@/Frontend/assets/dump-truck.png";
 import aboutMain from "@/Frontend/assets/about-main.jpg";
 import aboutTruck from "@/Frontend/assets/about-truck.jpg";
 import aboutWorker from "@/Frontend/assets/about-worker.jpg";
@@ -51,6 +50,36 @@ const serviceImages: Record<string, string> = {
 };
 
 const marqueeItems = ["REDUCE REUSE RECYCLE", "GREEN FUTURE TOGETHER", "CLEAN EARTH INITIATIVE", "ZERO LANDFILL", "SUSTAINABLE TOMORROW"];
+
+const ecosystem = [
+  {
+    icon: Recycle,
+    title: "Abhyuthanam Recyclers",
+    subtitle: "Certified E-Waste & Recycling Solutions",
+    description: "We help businesses, institutions, and households manage e-waste and scrap through safe, compliant, and responsible recycling processes.",
+    cta: "Explore Recycling",
+    href: "/about",
+    external: false,
+  },
+  {
+    icon: Code2,
+    title: "Devzign Technologies",
+    subtitle: "IT & Software Development",
+    description: "Our technology vertical supports businesses with websites, mobile apps, custom software, backend systems, and digital product development.",
+    cta: "Visit Devzign",
+    href: "https://devzign.com",
+    external: true,
+  },
+  {
+    icon: Smartphone,
+    title: "Scrapify / Scrapi5",
+    subtitle: "Day-to-Day Scrap Pickup",
+    description: "Our scrap pickup platform helps households, shops, offices, and small businesses schedule daily scrap pickup with simple rates and transparent service.",
+    cta: "Visit Scrapi5",
+    href: "https://scrapi5.com",
+    external: true,
+  },
+];
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -141,7 +170,7 @@ function Index() {
       </div>
 
       {/* About — Wastex-style collage */}
-      <section className="section relative overflow-hidden bg-eco pb-32 lg:pb-44">
+      <section className="section relative overflow-hidden bg-eco">
         <div className="container-px relative grid items-center gap-12 lg:grid-cols-2">
           {/* Image collage */}
           <Reveal className="relative">
@@ -177,18 +206,18 @@ function Index() {
             <div className="absolute left-1/2 top-1/2 size-36 -translate-x-1/2 -translate-y-1/2 sm:size-44">
               <svg viewBox="0 0 200 200" className="absolute inset-0 size-full animate-spin-slow drop-shadow">
                 <defs>
-                  <path id="badgeCircle" d="M 100,100 m -82,0 a 82,82 0 1,1 164,0 a 82,82 0 1,1 -164,0" />
+                  <path id="badgeCircle" d="M 100,100 m -76,0 a 76,76 0 1,1 152,0 a 76,76 0 1,1 -152,0" />
                 </defs>
                 <circle cx="100" cy="100" r="96" className="fill-brand" />
-                <text className="fill-navy text-[13px] font-bold uppercase tracking-[0.18em]">
+                <text dominantBaseline="middle" className="fill-navy text-[15px] font-extrabold uppercase tracking-[0.08em]">
                   <textPath href="#badgeCircle" startOffset="0%">
-                    10+ YEARS OF EXPERIENCE · ABHYUTHANAM ·
+                    3+ YEARS OF EXPERIENCE · ABHYUTHANAM ·
                   </textPath>
                 </text>
               </svg>
               <div className="absolute inset-0 grid place-items-center">
-                <div className="grid size-20 place-items-center rounded-full bg-navy text-3xl font-extrabold leading-none text-lime shadow-card sm:size-24 sm:text-4xl">
-                  10+
+                <div className="grid size-20 place-items-center rounded-full bg-navy text-center leading-none text-lime shadow-card sm:size-24">
+                  <span className="text-3xl font-extrabold sm:text-4xl">3+</span>
                 </div>
               </div>
             </div>
@@ -224,19 +253,6 @@ function Index() {
             </div>
           </Reveal>
         </div>
-        {/* Big static waste dump truck, slides in slightly from the right */}
-        <motion.img
-          src={dumpTruck}
-          alt="ABHYUTHANAM waste dump truck"
-          loading="lazy"
-          width={680}
-          height={510}
-          initial={{ opacity: 0, x: 70 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-          className="pointer-events-none absolute bottom-0 right-0 z-10 hidden h-40 w-auto drop-shadow-2xl lg:block xl:h-48"
-        />
       </section>
 
       {/* Leadership / Owners */}
@@ -456,6 +472,50 @@ function Index() {
                     <p className="mt-1 line-clamp-2 text-sm text-navy-foreground/80">{ind.short}</p>
                   </div>
                 </Link>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Our Ecosystem */}
+      <section className="section bg-eco">
+        <div className="container-px">
+          <Reveal className="mx-auto max-w-2xl text-center">
+            <span className="eyebrow"><Layers className="size-4" /> Our Ecosystem</span>
+            <h2 className="mt-4 text-3xl font-extrabold text-navy sm:text-4xl">Built for Recycling, Technology &amp; Daily Scrap Solutions</h2>
+            <p className="mt-4 text-muted-foreground">
+              ABHYUTHANAM is part of a small group of ventures working across recycling, technology, and everyday scrap solutions.
+            </p>
+          </Reveal>
+          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {ecosystem.map((item, i) => (
+              <Reveal key={item.title} delay={i * 0.12}>
+                <div className="group flex h-full flex-col rounded-3xl border border-border bg-card p-7 shadow-soft transition-all hover:-translate-y-1.5 hover:shadow-card">
+                  <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-brand/10 text-brand">
+                    <item.icon className="size-6" />
+                  </span>
+                  <h3 className="mt-5 text-lg font-bold text-navy">{item.title}</h3>
+                  <p className="mt-1 text-sm font-semibold text-brand">{item.subtitle}</p>
+                  <p className="mt-3 flex-1 text-sm text-muted-foreground">{item.description}</p>
+                  {item.external ? (
+                    <a
+                      href={item.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-brand transition-colors hover:text-brand-dark"
+                    >
+                      {item.cta} <ArrowUpRight className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                    </a>
+                  ) : (
+                    <Link
+                      to={item.href}
+                      className="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-brand transition-colors hover:text-brand-dark"
+                    >
+                      {item.cta} <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+                    </Link>
+                  )}
+                </div>
               </Reveal>
             ))}
           </div>

@@ -43,14 +43,15 @@ class PickupRequestAdminController extends Controller
 
         $pickups = $query->latest()->paginate(10)->withQueryString();
 
+        $terminalStatuses = ['pending', 'completed', 'cancelled'];
+
         return Inertia::render('Admin/PickupRequests/Index', [
             'pickups' => $pickups,
             'filters' => $request->only(['search', 'status', 'date', 'scrap_category']),
             'stats' => [
                 'total' => PickupRequest::count(),
                 'pending' => PickupRequest::where('tracking_status', 'pending')->count(),
-                'confirmed' => PickupRequest::where('tracking_status', 'confirmed')->count(),
-                'in_progress' => PickupRequest::where('tracking_status', 'in_progress')->count(),
+                'active' => PickupRequest::whereNotIn('tracking_status', $terminalStatuses)->count(),
                 'completed' => PickupRequest::where('tracking_status', 'completed')->count(),
                 'cancelled' => PickupRequest::where('tracking_status', 'cancelled')->count(),
             ],
@@ -64,15 +65,42 @@ class PickupRequestAdminController extends Controller
             'city:id,name',
             'customer:id,name,email,phone',
             'items',
-            'warehouse:id,name',
             'statusHistories.changedBy:id,name',
             'certificate',
+            'documents',
+            'pickupQuery:id,query_id',
         ]);
 
         return Inertia::render('Admin/PickupRequests/Show', [
             'pickup' => $pickupRequest,
             'statusOptions' => PickupRequest::TRACKING_STATUSES,
+            'stepOrder' => PickupRequest::TRACKING_STEP_ORDER,
         ]);
+    }
+
+    public function updateMaterialProcessing(Request $request, PickupRequest $pickupRequest)
+    {
+        $data = $request->validate([
+            'total_quantity' => 'nullable|numeric|min:0',
+            'recycled_percentage' => 'nullable|numeric|min:0|max:100',
+            'refurbished_percentage' => 'nullable|numeric|min:0|max:100',
+            'disposed_percentage' => 'nullable|numeric|min:0|max:100',
+            'recycled_quantity' => 'nullable|numeric|min:0',
+            'refurbished_quantity' => 'nullable|numeric|min:0',
+            'processing_notes' => 'nullable|string|max:2000',
+        ]);
+
+        $totalPercentage = ($data['recycled_percentage'] ?? 0)
+            + ($data['refurbished_percentage'] ?? 0)
+            + ($data['disposed_percentage'] ?? 0);
+
+        if ($totalPercentage > 100) {
+            return back()->withErrors(['recycled_percentage' => 'Recycled + refurbished + disposed percentages cannot exceed 100%.']);
+        }
+
+        $pickupRequest->update($data);
+
+        return back()->with('success', 'Material processing details saved.');
     }
 
     public function updateStatus(Request $request, PickupRequest $pickupRequest)

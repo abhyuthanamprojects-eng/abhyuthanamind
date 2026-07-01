@@ -127,6 +127,31 @@ const badgeTones = {
     Replied: 'bg-accent text-accent-foreground',
     Active: 'bg-accent text-accent-foreground',
     Inactive: 'bg-muted text-muted-foreground',
+
+    // Pickup query lifecycle (pre pickup-request stage)
+    new: 'bg-sky-100 text-sky-700',
+    under_review: 'bg-amber-100 text-amber-700',
+    negotiation: 'bg-violet-100 text-violet-700',
+    accepted: 'bg-accent text-accent-foreground',
+    converted: 'bg-accent text-accent-foreground',
+
+    // Pickup request lifecycle (post conversion, 15-stage)
+    pickup_done: 'bg-indigo-100 text-indigo-700',
+    on_the_way_to_local_warehouse: 'bg-violet-100 text-violet-700',
+    local_warehouse_received: 'bg-indigo-100 text-indigo-700',
+    on_the_way_to_plant: 'bg-violet-100 text-violet-700',
+    plant_received: 'bg-indigo-100 text-indigo-700',
+    segregation_in_progress: 'bg-amber-100 text-amber-700',
+    segregation_completed: 'bg-sky-100 text-sky-700',
+    dismantling_recycling: 'bg-sky-100 text-sky-700',
+    dismantling_refurbish: 'bg-sky-100 text-sky-700',
+    certificate_ready: 'bg-accent text-accent-foreground',
+
+    // Pickup document statuses
+    draft: 'bg-muted text-muted-foreground',
+    generated: 'bg-sky-100 text-sky-700',
+    uploaded: 'bg-accent text-accent-foreground',
+    sent: 'bg-accent text-accent-foreground',
 };
 export function StatusBadge({ status }) {
     const label = typeof status === 'string' ? status.replace(/_/g, ' ') : status;

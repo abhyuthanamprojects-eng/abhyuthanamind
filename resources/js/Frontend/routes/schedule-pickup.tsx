@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import {
   ShieldCheck, BadgeCheck, Clock, Lock, ArrowRight, Phone, Mail,
-  MapPin, CheckCircle2, Send, Truck, Copy, Link as LinkIcon,
+  MapPin, CheckCircle2, Send, Truck, Copy,
 } from "lucide-react";
 import { toast } from "sonner";
 import { SiteLayout, PageHero } from "@/Frontend/components/SiteLayout";
@@ -41,7 +41,7 @@ const steps = [
 
 function SchedulePickup() {
   const [sent, setSent] = useState(false);
-  const [booking, setBooking] = useState<{ booking_id: string; tracking_url: string } | null>(null);
+  const [query, setQuery] = useState<{ query_id: string } | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const formRef = useRef<HTMLFormElement>(null);
@@ -72,7 +72,7 @@ function SchedulePickup() {
 
     setSubmitting(true);
     try {
-      const res = await fetch("/api/pickup-requests/public", {
+      const res = await fetch("/api/pickup-queries", {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify(payload),
@@ -109,7 +109,7 @@ function SchedulePickup() {
         return;
       }
 
-      setBooking(result.data ?? null);
+      setQuery(result.data ?? null);
       setSent(true);
       formRef.current?.reset();
     } catch {
@@ -134,45 +134,32 @@ function SchedulePickup() {
               <span className="mx-auto grid size-16 place-items-center rounded-full bg-accent text-brand">
                 <CheckCircle2 className="size-9" />
               </span>
-              <h2 className="mt-6 text-2xl font-extrabold text-navy">Request received!</h2>
+              <h2 className="mt-6 text-2xl font-extrabold text-navy">Enquiry received!</h2>
               <p className="mt-3 text-muted-foreground">
-                Your pickup request has been submitted. Please save your booking ID and tracking link to check status.
+                Your pickup enquiry has been submitted. Our team will review the details and contact you shortly.
               </p>
 
-              {booking && (
+              {query && (
                 <div className="mt-6 rounded-2xl border border-border bg-eco p-5 text-left">
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Booking ID</p>
-                      <p className="text-lg font-extrabold text-navy">{booking.booking_id}</p>
+                      <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Enquiry Reference</p>
+                      <p className="text-lg font-extrabold text-navy">{query.query_id}</p>
                     </div>
                     <button
                       type="button"
                       onClick={() => {
-                        navigator.clipboard.writeText(booking.booking_id);
-                        toast.success("Booking ID copied.");
+                        navigator.clipboard.writeText(query.query_id);
+                        toast.success("Reference copied.");
                       }}
                       className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold text-navy hover:bg-background"
                     >
                       <Copy className="size-3.5" /> Copy
                     </button>
                   </div>
-                  <div className="mt-4 flex items-center justify-between gap-3 border-t border-border/60 pt-4">
-                    <div className="min-w-0">
-                      <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Track Status</p>
-                      <p className="truncate text-sm font-medium text-brand">{booking.tracking_url}</p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        navigator.clipboard.writeText(booking.tracking_url);
-                        toast.success("Tracking link copied.");
-                      }}
-                      className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold text-navy hover:bg-background"
-                    >
-                      <LinkIcon className="size-3.5" /> Copy Link
-                    </button>
-                  </div>
+                  <p className="mt-4 border-t border-border/60 pt-4 text-xs text-muted-foreground">
+                    Once our team confirms your pickup, you'll receive a booking ID and a private tracking link to follow its progress.
+                  </p>
                 </div>
               )}
 

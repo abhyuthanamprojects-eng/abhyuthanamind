@@ -42,6 +42,28 @@ class TrackPickupController extends Controller
         return response()->download($fullPath, 'certificate-' . $pickup->booking_id . '.' . pathinfo($fullPath, PATHINFO_EXTENSION));
     }
 
+    /**
+     * Customer download for a generated/uploaded document (Form 6, Form 2,
+     * Green Certificate). Only documents that are ready (not `draft`) are
+     * reachable here, and only via this pickup's own tracking token.
+     */
+    public function document(string $token, \App\Models\PickupRequestDocument $document)
+    {
+        $pickup = $this->findOrFail($token);
+
+        abort_if($document->pickup_request_id !== $pickup->id, 404);
+        abort_if($document->status === \App\Models\PickupRequestDocument::STATUS_DRAFT, 404);
+
+        if ($document->file_path) {
+            $fullPath = public_path($document->file_path);
+            abort_if(!file_exists($fullPath), 404);
+
+            return response()->download($fullPath, $document->document_type . '-' . $pickup->booking_id . '.' . pathinfo($fullPath, PATHINFO_EXTENSION));
+        }
+
+        return \App\Http\Controllers\Admin\PickupRequestDocumentController::renderPrintable($pickup, $document);
+    }
+
     private function findOrFail(string $token): PickupRequest
     {
         $pickup = PickupRequest::where('tracking_token', $token)->with('city:id,name', 'certificate')->first();

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class PickupRequestStatusHistory extends Model
 {
-    protected $fillable = ['pickup_request_id', 'status', 'note', 'changed_by'];
+    protected $fillable = ['pickup_request_id', 'status', 'title', 'note', 'public_note', 'changed_by'];
 
     public function pickupRequest()
     {

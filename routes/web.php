@@ -65,6 +65,9 @@ Route::get('/track-pickup/{token}/download', [\App\Http\Controllers\TrackPickupC
 Route::get('/track-pickup/{token}/certificate', [\App\Http\Controllers\TrackPickupController::class, 'certificate'])
     ->middleware('throttle:20,1')
     ->name('track-pickup.certificate');
+Route::get('/track-pickup/{token}/documents/{document}', [\App\Http\Controllers\TrackPickupController::class, 'document'])
+    ->middleware('throttle:20,1')
+    ->name('track-pickup.document');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class , 'edit'])->name('profile.edit');
@@ -98,12 +101,24 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::post('help-support/{id}/status', [\App\Http\Controllers\Admin\HelpSupportController::class, 'updateStatus'])->name('admin.help-support.update-status');
     Route::delete('help-support/{id}', [\App\Http\Controllers\Admin\HelpSupportController::class, 'destroy'])->name('admin.help-support.destroy');
 
+    // Pickup Queries — pre-pickup negotiation stage, converts into Pickup Requests
+    Route::get('pickup-queries', [\App\Http\Controllers\Admin\PickupQueryAdminController::class, 'index'])->name('admin.pickup-queries.index');
+    Route::get('pickup-queries/{pickupQuery}', [\App\Http\Controllers\Admin\PickupQueryAdminController::class, 'show'])->name('admin.pickup-queries.show');
+    Route::patch('pickup-queries/{pickupQuery}', [\App\Http\Controllers\Admin\PickupQueryAdminController::class, 'update'])->name('admin.pickup-queries.update');
+    Route::post('pickup-queries/{pickupQuery}/accept', [\App\Http\Controllers\Admin\PickupQueryAdminController::class, 'accept'])->name('admin.pickup-queries.accept');
+    Route::post('pickup-queries/{pickupQuery}/reject', [\App\Http\Controllers\Admin\PickupQueryAdminController::class, 'reject'])->name('admin.pickup-queries.reject');
+    Route::delete('pickup-queries/{pickupQuery}', [\App\Http\Controllers\Admin\PickupQueryAdminController::class, 'destroy'])->name('admin.pickup-queries.destroy');
+
     // Pickup Requests — real backend, manual status workflow + certificates
     Route::get('pickup-requests', [\App\Http\Controllers\Admin\PickupRequestAdminController::class, 'index'])->name('admin.pickups.index');
     Route::get('pickup-requests/{pickupRequest}', [\App\Http\Controllers\Admin\PickupRequestAdminController::class, 'show'])->name('admin.pickups.show');
     Route::post('pickup-requests/{pickupRequest}/status', [\App\Http\Controllers\Admin\PickupRequestAdminController::class, 'updateStatus'])->name('admin.pickups.update-status');
+    Route::patch('pickup-requests/{pickupRequest}/material-processing', [\App\Http\Controllers\Admin\PickupRequestAdminController::class, 'updateMaterialProcessing'])->name('admin.pickups.material-processing');
     Route::post('pickup-requests/{pickupRequest}/certificate', [\App\Http\Controllers\Admin\PickupRequestAdminController::class, 'uploadCertificate'])->name('admin.pickups.certificate.upload');
     Route::delete('pickup-requests/{pickupRequest}/certificate', [\App\Http\Controllers\Admin\PickupRequestAdminController::class, 'destroyCertificate'])->name('admin.pickups.certificate.destroy');
+    Route::post('pickup-requests/{pickupRequest}/documents', [\App\Http\Controllers\Admin\PickupRequestDocumentController::class, 'store'])->name('admin.pickups.documents.store');
+    Route::get('pickup-requests/{pickupRequest}/documents/{document}/preview', [\App\Http\Controllers\Admin\PickupRequestDocumentController::class, 'preview'])->name('admin.pickups.documents.preview');
+    Route::delete('pickup-requests/{pickupRequest}/documents/{document}', [\App\Http\Controllers\Admin\PickupRequestDocumentController::class, 'destroy'])->name('admin.pickups.documents.destroy');
 
     // Scrap Rate Management (categories + items) — real backend
     Route::get('scrap-rate-management', [\App\Http\Controllers\Admin\ScrapItemController::class, 'index'])->name('admin.scrap-rate.index');

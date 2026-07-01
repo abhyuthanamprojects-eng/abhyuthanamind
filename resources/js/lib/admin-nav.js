@@ -1,6 +1,6 @@
 import {
     LayoutDashboard, Truck, MessageSquare, HelpCircle, FileText, Star, Award, Images,
-    IndianRupee, Users, BarChart3, User, Wrench, Factory, LayoutTemplate,
+    IndianRupee, Users, BarChart3, User, Wrench, Factory, LayoutTemplate, ClipboardList,
 } from 'lucide-react';
 
 export const adminNav = [
@@ -8,6 +8,7 @@ export const adminNav = [
         group: 'Main',
         items: [
             { label: 'Dashboard', route: 'dashboard', icon: LayoutDashboard },
+            { label: 'Pickup Queries', route: 'admin.pickup-queries.index', icon: ClipboardList },
             { label: 'Pickup Requests', route: 'admin.pickups.index', icon: Truck },
             { label: 'Contact Queries', route: 'admin.contacts.index', icon: MessageSquare },
             { label: 'Help & Support', route: 'admin.help-support.index', icon: HelpCircle },

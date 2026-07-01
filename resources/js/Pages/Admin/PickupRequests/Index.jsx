@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
-import { Truck, Clock, CheckCircle2, XCircle, BadgeCheck, Eye, Link as LinkIcon, Download } from 'lucide-react';
+import { Truck, Clock, CheckCircle2, XCircle, Activity, Eye, Link as LinkIcon, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import {
     PageHeader, StatCard, StatusBadge, FilterBar, FilterSelect, Panel, EmptyState, ActionBtn, Pagination,
@@ -32,13 +32,12 @@ export default function Index({ pickups, filters, stats, statusOptions }) {
         <AdminLayout title="Pickup Requests">
             <PageHeader title="Pickup Requests" subtitle="All scrap pickup requests booked by customers." />
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-5">
                 <StatCard icon={Truck} label="Total" value={stats.total} tone="brand" i={0} />
                 <StatCard icon={Clock} label="Pending" value={stats.pending} tone="amber" i={1} />
-                <StatCard icon={BadgeCheck} label="Confirmed" value={stats.confirmed} tone="blue" i={2} />
-                <StatCard icon={Truck} label="In Progress" value={stats.in_progress} tone="violet" i={3} />
-                <StatCard icon={CheckCircle2} label="Completed" value={stats.completed} tone="blue" i={4} />
-                <StatCard icon={XCircle} label="Cancelled" value={stats.cancelled} tone="rose" i={5} />
+                <StatCard icon={Activity} label="Active (in process)" value={stats.active} tone="violet" i={2} />
+                <StatCard icon={CheckCircle2} label="Completed" value={stats.completed} tone="blue" i={3} />
+                <StatCard icon={XCircle} label="Cancelled" value={stats.cancelled} tone="rose" i={4} />
             </div>
 
             <div className="mt-6">
