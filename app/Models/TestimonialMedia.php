@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Traits\ResolvesPublicFileUrl;
 use Illuminate\Database\Eloquent\Model;
 
 class TestimonialMedia extends Model
 {
+    use ResolvesPublicFileUrl;
     public const TYPE_IMAGE = 'image';
     public const TYPE_VIDEO = 'video';
     public const TYPE_VIDEO_URL = 'video_url';
@@ -28,11 +30,11 @@ class TestimonialMedia extends Model
             return $this->video_url;
         }
 
-        return $this->file_path ? asset($this->file_path) : null;
+        return $this->resolvePublicFileUrl($this->file_path);
     }
 
     public function getThumbnailUrlAttribute(): ?string
     {
-        return $this->thumbnail_path ? asset($this->thumbnail_path) : null;
+        return $this->resolvePublicFileUrl($this->thumbnail_path);
     }
 }

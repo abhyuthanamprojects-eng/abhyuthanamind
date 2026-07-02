@@ -41,6 +41,7 @@ Route::get('track-pickup/{token}', [\App\Http\Controllers\Api\TrackPickupControl
 Route::get('services', [\App\Http\Controllers\Api\SiteContentController::class, 'services']);
 Route::get('industries', [\App\Http\Controllers\Api\SiteContentController::class, 'industries']);
 Route::get('page-sections', [\App\Http\Controllers\Api\SiteContentController::class, 'pageSections']);
+Route::get('certificates', [\App\Http\Controllers\Api\SiteContentController::class, 'certificates']);
 Route::get('testimonials', [\App\Http\Controllers\Api\TestimonialController::class, 'index']);
 Route::get('scrap-rate', [\App\Http\Controllers\Api\ScrapRateController::class, 'index']);
 Route::get('media', [\App\Http\Controllers\Api\MediaController::class, 'index']);

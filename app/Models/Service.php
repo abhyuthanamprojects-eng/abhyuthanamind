@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\ResolvesPublicFileUrl;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -9,6 +10,7 @@ use Illuminate\Support\Str;
 
 class Service extends Model
 {
+    use ResolvesPublicFileUrl;
     use SoftDeletes;
 
     protected $fillable = [
@@ -35,7 +37,7 @@ class Service extends Model
 
     public function getImageUrlAttribute()
     {
-        return $this->image_path ? asset($this->image_path) : null;
+        return $this->resolvePublicFileUrl($this->image_path);
     }
 
     public function scopeActive($query)

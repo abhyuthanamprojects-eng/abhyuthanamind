@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\ResolvesPublicFileUrl;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 
 class Certificate extends Model
 {
+    use ResolvesPublicFileUrl;
     use SoftDeletes;
 
     protected $fillable = [
@@ -26,7 +28,7 @@ class Certificate extends Model
 
     public function getFileUrlAttribute()
     {
-        return $this->file_path ? asset($this->file_path) : null;
+        return $this->resolvePublicFileUrl($this->file_path);
     }
 
     public function scopeActive($query)

@@ -3,7 +3,7 @@ import { useState } from "react";
 import {
   Target, Eye, Gem, Award, CheckCircle2, Factory, ArrowRight, Leaf,
   Recycle, ShieldCheck, Truck, Sparkles, PlayCircle, Linkedin, Users,
-  Images, ChevronDown, ChevronUp,
+  Images, ChevronDown, ChevronUp, X, ExternalLink, FileText,
 } from "lucide-react";
 import { SiteLayout, PageHero } from "@/Frontend/components/SiteLayout";
 import { Reveal, Counter, motion } from "@/Frontend/components/anim";
@@ -59,10 +59,32 @@ async function fetchGallery(): Promise<MediaItem[]> {
   return [];
 }
 
+type CertificateItem = {
+  id: number;
+  name: string;
+  certificate_type: string | null;
+  file_url: string | null;
+  is_pdf: boolean;
+  issue_date: string | null;
+};
+
+async function fetchCertificates(): Promise<CertificateItem[]> {
+  try {
+    const res = await fetch("/api/certificates");
+    const json = await res.json();
+    if (json?.data?.length) return json.data;
+  } catch {}
+  return [];
+}
+
 export const Route = createFileRoute("/about")({
   loader: async () => {
-    const [founders, gallery] = await Promise.all([fetchFounders(), fetchGallery()]);
-    return { founders, gallery };
+    const [founders, gallery, liveCertificates] = await Promise.all([
+      fetchFounders(),
+      fetchGallery(),
+      fetchCertificates(),
+    ]);
+    return { founders, gallery, liveCertificates };
   },
   head: () => ({
     meta: [
@@ -99,9 +121,10 @@ const marqueeItems = ["REDUCE REUSE RECYCLE", "GREEN FUTURE TOGETHER", "CLEAN EA
 const GALLERY_PREVIEW_COUNT = 6;
 
 function About() {
-  const loaderData = Route.useLoaderData() as { founders: Founder[]; gallery: MediaItem[] } | undefined;
+  const loaderData = Route.useLoaderData() as { founders: Founder[]; gallery: MediaItem[]; liveCertificates: CertificateItem[] } | undefined;
   const dynamicFounders: Founder[] = loaderData?.founders ?? [];
   const gallery: MediaItem[] = loaderData?.gallery ?? [];
+  const liveCertificates: CertificateItem[] = loaderData?.liveCertificates ?? [];
 
   const founders: Founder[] = dynamicFounders.length > 0 ? dynamicFounders : staticFounders.map((f, i) => ({
     name: f.name,
@@ -384,36 +407,44 @@ function About() {
         </div>
       </section>
 
-      {/* Certifications — proof cards */}
+      {/* Certifications — proof cards (admin-uploaded PDFs when available) */}
       <section className="section bg-eco">
         <div className="container-px">
           <Reveal className="mx-auto max-w-2xl text-center">
             <span className="eyebrow"><Award className="size-4" /> Certifications & Compliance</span>
             <h2 className="mt-4 text-3xl font-extrabold text-navy sm:text-4xl">Proof you can rely on</h2>
-            <p className="mt-4 text-muted-foreground">We hold the approvals needed to handle e-waste legally and safely. Certificate copies are available on request.</p>
+            <p className="mt-4 text-muted-foreground">
+              {liveCertificates.length > 0
+                ? "We hold the approvals needed to handle e-waste legally and safely. Click any certificate to view the full document."
+                : "We hold the approvals needed to handle e-waste legally and safely. Certificate copies are available on request."}
+            </p>
           </Reveal>
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {certificates.map((c, i) => (
-              <Reveal key={c.code} delay={(i % 3) * 0.1}>
-                <div className="group h-full overflow-hidden rounded-3xl border border-border bg-card shadow-soft transition-all hover:-translate-y-1 hover:shadow-card">
-                  <div className="relative grid aspect-[4/3] place-items-center bg-gradient-to-br from-eco to-card">
-                    {c.available ? null : (
-                      <div className="text-center">
-                        <span className="grid size-16 mx-auto place-items-center rounded-2xl bg-brand/10 text-brand"><Award className="size-8" /></span>
-                        <p className="mt-3 text-2xl font-extrabold text-navy">{c.code}</p>
-                        <p className="mt-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Certificate preview</p>
-                      </div>
-                    )}
-                    <span className="absolute right-3 top-3 rounded-full bg-brand px-2.5 py-1 text-[10px] font-bold text-brand-foreground">VERIFIED</span>
+          {liveCertificates.length > 0 ? (
+            <CertificateGrid items={liveCertificates} />
+          ) : (
+            <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {certificates.map((c, i) => (
+                <Reveal key={c.code} delay={(i % 3) * 0.1}>
+                  <div className="group h-full overflow-hidden rounded-3xl border border-border bg-card shadow-soft transition-all hover:-translate-y-1 hover:shadow-card">
+                    <div className="relative grid aspect-[4/3] place-items-center bg-gradient-to-br from-eco to-card">
+                      {c.available ? null : (
+                        <div className="text-center">
+                          <span className="grid size-16 mx-auto place-items-center rounded-2xl bg-brand/10 text-brand"><Award className="size-8" /></span>
+                          <p className="mt-3 text-2xl font-extrabold text-navy">{c.code}</p>
+                          <p className="mt-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Certificate preview</p>
+                        </div>
+                      )}
+                      <span className="absolute right-3 top-3 rounded-full bg-brand px-2.5 py-1 text-[10px] font-bold text-brand-foreground">VERIFIED</span>
+                    </div>
+                    <div className="p-5">
+                      <h3 className="text-base font-bold text-navy">{c.title}</h3>
+                      <p className="mt-1.5 text-sm text-muted-foreground">{c.desc}</p>
+                    </div>
                   </div>
-                  <div className="p-5">
-                    <h3 className="text-base font-bold text-navy">{c.title}</h3>
-                    <p className="mt-1.5 text-sm text-muted-foreground">{c.desc}</p>
-                  </div>
-                </div>
-              </Reveal>
-            ))}
-          </div>
+                </Reveal>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -497,5 +528,112 @@ function About() {
         </Reveal>
       </section>
     </SiteLayout>
+  );
+}
+
+/**
+ * Admin-uploaded certificates: each card shows a branded preview face
+ * (image thumbnail for image files, styled document face for PDFs) and
+ * opens the full multi-page document in a viewer overlay on click.
+ */
+function CertificateGrid({ items }: { items: CertificateItem[] }) {
+  const [active, setActive] = useState<CertificateItem | null>(null);
+
+  return (
+    <>
+      <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {items.map((c, i) => (
+          <Reveal key={c.id} delay={(i % 3) * 0.1}>
+            <button
+              type="button"
+              onClick={() => c.file_url && setActive(c)}
+              className="group block h-full w-full overflow-hidden rounded-3xl border border-border bg-card text-left shadow-soft transition-all hover:-translate-y-1 hover:shadow-card"
+            >
+              <div className="relative grid aspect-[4/3] place-items-center overflow-hidden bg-gradient-to-br from-eco to-card">
+                {!c.is_pdf && c.file_url ? (
+                  <img
+                    src={c.file_url}
+                    alt={c.name}
+                    loading="lazy"
+                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="text-center">
+                    <span className="mx-auto grid size-16 place-items-center rounded-2xl bg-brand/10 text-brand">
+                      <FileText className="size-8" />
+                    </span>
+                    <p className="mt-3 px-4 text-lg font-extrabold leading-tight text-navy">{c.name}</p>
+                    {c.issue_date && (
+                      <p className="mt-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Issued {c.issue_date}</p>
+                    )}
+                  </div>
+                )}
+                <span className="absolute right-3 top-3 rounded-full bg-brand px-2.5 py-1 text-[10px] font-bold text-brand-foreground">VERIFIED</span>
+                <span className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-1.5 bg-navy/80 py-2.5 text-xs font-bold text-navy-foreground opacity-0 backdrop-blur transition-opacity duration-300 group-hover:opacity-100">
+                  <ExternalLink className="size-3.5" /> View Certificate
+                </span>
+              </div>
+              <div className="p-5">
+                <h3 className="text-base font-bold text-navy">{c.name}</h3>
+                {c.certificate_type && <p className="mt-1.5 text-sm text-muted-foreground">{c.certificate_type}</p>}
+              </div>
+            </button>
+          </Reveal>
+        ))}
+      </div>
+
+      {active && active.file_url && (
+        <div
+          className="fixed inset-0 z-[80] flex items-center justify-center bg-navy/80 p-4 backdrop-blur-sm"
+          onClick={() => setActive(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${active.name} certificate`}
+        >
+          <div
+            className="flex h-[88vh] w-[min(960px,96vw)] flex-col overflow-hidden rounded-3xl bg-card shadow-card"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-3.5">
+              <div className="min-w-0">
+                <h3 className="truncate text-sm font-bold text-navy sm:text-base">{active.name}</h3>
+                {active.certificate_type && <p className="truncate text-xs text-muted-foreground">{active.certificate_type}</p>}
+              </div>
+              <div className="flex shrink-0 items-center gap-2">
+                <a
+                  href={active.file_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-brand px-4 py-2 text-xs font-bold text-brand-foreground transition-transform hover:-translate-y-0.5"
+                >
+                  <ExternalLink className="size-3.5" /> Open Full
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setActive(null)}
+                  aria-label="Close certificate viewer"
+                  className="grid size-9 place-items-center rounded-full border border-border text-navy transition-colors hover:bg-accent"
+                >
+                  <X className="size-4.5" />
+                </button>
+              </div>
+            </div>
+            <div className="flex-1 bg-eco">
+              {active.is_pdf ? (
+                <iframe
+                  src={active.file_url}
+                  title={active.name}
+                  className="h-full w-full border-0"
+                />
+              ) : (
+                <div className="grid h-full place-items-center overflow-auto p-4">
+                  <img src={active.file_url} alt={active.name} className="max-h-full max-w-full rounded-xl object-contain shadow-soft" />
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

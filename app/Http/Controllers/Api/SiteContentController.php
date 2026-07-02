@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Certificate;
 use App\Models\Industry;
 use App\Models\PageSection;
 use App\Models\Service;
@@ -36,6 +37,24 @@ class SiteContentController extends Controller
             ->get(['id', 'title', 'slug', 'short_description', 'long_description', 'image_path', 'sort_order']);
 
         return $this->successResponse('industries.fetched', $industries);
+    }
+
+    public function certificates()
+    {
+        $certificates = Certificate::active()
+            ->visible()
+            ->ordered()
+            ->get(['id', 'name', 'certificate_type', 'file_path', 'issue_date', 'expiry_date', 'sort_order'])
+            ->map(fn ($c) => [
+                'id' => $c->id,
+                'name' => $c->name,
+                'certificate_type' => $c->certificate_type,
+                'file_url' => $c->file_url,
+                'is_pdf' => str_ends_with(strtolower((string) $c->file_path), '.pdf'),
+                'issue_date' => $c->issue_date?->format('M Y'),
+            ]);
+
+        return $this->successResponse('certificates.fetched', $certificates);
     }
 
     public function pageSections()

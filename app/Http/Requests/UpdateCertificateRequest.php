@@ -16,7 +16,7 @@ class UpdateCertificateRequest extends FormRequest
         return [
             'name' => 'required|string|max:150',
             'certificate_type' => 'nullable|string|max:100',
-            'file' => 'nullable|file|mimes:jpg,jpeg,png,webp,pdf|max:8192',
+            'file' => 'nullable|file|mimes:jpg,jpeg,png,webp,pdf|max:15360',
             'issue_date' => 'nullable|date',
             'expiry_date' => 'nullable|date|after_or_equal:issue_date',
             'show_on_website' => 'boolean',

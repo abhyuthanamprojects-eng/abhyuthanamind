@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\ResolvesPublicFileUrl;
 use Illuminate\Database\Eloquent\Model;
 
 
 class PageSection extends Model
 {
+    use ResolvesPublicFileUrl;
     protected $fillable = [
         'page_key', 'section_key', 'title', 'subtitle', 'content',
         'image_path', 'json_data', 'is_active', 'sort_order',
@@ -21,7 +23,7 @@ class PageSection extends Model
 
     public function getImageUrlAttribute()
     {
-        return $this->image_path ? asset($this->image_path) : null;
+        return $this->resolvePublicFileUrl($this->image_path);
     }
 
     public function scopeActive($query)

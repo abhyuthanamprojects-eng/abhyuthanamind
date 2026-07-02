@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\ResolvesPublicFileUrl;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 
 class Testimonial extends Model
 {
+    use ResolvesPublicFileUrl;
     use SoftDeletes;
 
     public const STATUS_PENDING = 'pending';
@@ -34,7 +36,7 @@ class Testimonial extends Model
 
     public function getImageUrlAttribute()
     {
-        return $this->image_path ? asset($this->image_path) : null;
+        return $this->resolvePublicFileUrl($this->image_path);
     }
 
     public function media()
