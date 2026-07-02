@@ -21,7 +21,7 @@ class PageSectionSeeder extends Seeder
                 'title' => 'ABHYUTHANAM RECYCLER',
                 'subtitle' => 'Certified e-waste and scrap recycling for businesses and households.',
                 'content' => 'Abhyuthanam Recyclers is a certified e-waste and scrap recycling company helping businesses and households dispose responsibly through secure, transparent and sustainable processes.',
-                'image' => 'home-hero.jpg',
+                'image' => 'home-hero.png',
                 'json_data' => null,
             ],
             [
