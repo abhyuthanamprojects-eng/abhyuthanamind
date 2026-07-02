@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import { Menu, X, ChevronDown, Mail, Clock, MapPin, Phone } from "lucide-react";
-import { company, services, industries } from "@/Frontend/lib/site-data";
+import { company } from "@/Frontend/lib/site-data";
+import { useServices, useIndustries } from "@/Frontend/lib/dynamic-content";
 const logo = "/images/logo.png";
 
 const resources = [
@@ -14,6 +15,8 @@ export function Header() {
   const [open, setOpen] = useState(false);
   const [mobileSub, setMobileSub] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
+  const services = useServices();
+  const industries = useIndustries();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);

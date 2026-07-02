@@ -1,7 +1,7 @@
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
 import { ArrowRight, CheckCircle2, Factory } from "lucide-react";
 import { SiteLayout, PageHero } from "@/Frontend/components/SiteLayout";
-import { industries, company } from "@/Frontend/lib/site-data";
+import { fetchIndustries } from "@/Frontend/lib/dynamic-content";
 import oem from "@/Frontend/assets/ind-oem.jpg";
 import ecommerce from "@/Frontend/assets/ind-ecommerce.jpg";
 import corporate from "@/Frontend/assets/ind-corporate.jpg";
@@ -10,10 +10,11 @@ import logistics from "@/Frontend/assets/ind-logistics.jpg";
 const indImages: Record<string, string> = { oem, ecommerce, corporate, logistics };
 
 export const Route = createFileRoute("/industries/$industryId")({
-  loader: ({ params }) => {
+  loader: async ({ params }) => {
+    const industries = await fetchIndustries();
     const industry = industries.find((i) => i.slug === params.industryId);
     if (!industry) throw notFound();
-    return { industry };
+    return { industry, industries };
   },
   head: ({ loaderData }) => ({
     meta: loaderData
@@ -39,14 +40,14 @@ export const Route = createFileRoute("/industries/$industryId")({
 });
 
 function IndustryPage() {
-  const { industry } = Route.useLoaderData();
+  const { industry, industries } = Route.useLoaderData();
   return (
     <SiteLayout>
       <PageHero breadcrumb="Home / Industries" title={industry.title} subtitle={industry.short} />
 
       <section className="section">
         <div className="container-px grid items-center gap-12 lg:grid-cols-2">
-          <img src={indImages[industry.image]} alt={industry.title} loading="lazy" width={1280} height={960} className="aspect-[4/3] w-full rounded-[2rem] object-cover shadow-card" />
+          <img src={industry.imageUrl ?? indImages[industry.image] ?? oem} alt={industry.title} loading="lazy" width={1280} height={960} className="aspect-[4/3] w-full rounded-[2rem] object-cover shadow-card" />
           <div>
             <span className="eyebrow"><Factory className="size-4" /> Industry Overview</span>
             <h2 className="mt-4 text-3xl font-extrabold text-navy sm:text-4xl">{industry.title}</h2>
@@ -59,10 +60,12 @@ function IndustryPage() {
 
       <section className="section bg-secondary">
         <div className="container-px">
-          <div className="mx-auto max-w-2xl text-center">
-            <span className="eyebrow">Industry-specific Services</span>
-            <h2 className="mt-4 text-3xl font-extrabold text-navy sm:text-4xl">How we help</h2>
-          </div>
+          {industry.servicesOffered.length > 0 && (
+            <div className="mx-auto max-w-2xl text-center">
+              <span className="eyebrow">Industry-specific Services</span>
+              <h2 className="mt-4 text-3xl font-extrabold text-navy sm:text-4xl">How we help</h2>
+            </div>
+          )}
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {industry.servicesOffered.map((s: { title: string; desc: string }) => (
               <div key={s.title} className="card-soft">
@@ -73,7 +76,7 @@ function IndustryPage() {
             ))}
           </div>
           <div className="mt-12 flex flex-wrap justify-center gap-3">
-            {industries.filter((i) => i.slug !== industry.slug).map((i) => (
+            {industries.filter((i: { slug: string }) => i.slug !== industry.slug).map((i: { slug: string; title: string }) => (
               <Link key={i.slug} to={`/industries/${i.slug}`} className="btn-outline">{i.title}</Link>
             ))}
           </div>

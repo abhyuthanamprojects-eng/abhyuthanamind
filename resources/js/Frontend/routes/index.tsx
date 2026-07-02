@@ -8,8 +8,9 @@ import { SiteLayout } from "@/Frontend/components/SiteLayout";
 import { Testimonials } from "@/Frontend/components/Testimonials";
 import { Reveal, Counter, motion } from "@/Frontend/components/anim";
 import {
-  company, services, industries, whyChoose, counters, advanced, founders, scrapify,
+  company, whyChoose, counters, advanced, founders, scrapify,
 } from "@/Frontend/lib/site-data";
+import { useServices, useIndustries } from "@/Frontend/lib/dynamic-content";
 import heroImg from "@/Frontend/assets/hero-westix.jpg";
 import rec1 from "@/Frontend/assets/recycle-1.jpg";
 import rec2 from "@/Frontend/assets/recycle-2.jpg";
@@ -94,6 +95,8 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
+  const services = useServices();
+  const industries = useIndustries();
   return (
     <SiteLayout>
       {/* Hero */}
@@ -356,7 +359,7 @@ function Index() {
                     className="group relative block h-72 overflow-hidden rounded-[1.75rem] shadow-soft transition-all duration-300 hover:-translate-y-1.5 hover:shadow-card"
                   >
                     <img
-                      src={serviceImages[s.slug]}
+                      src={s.imageUrl ?? serviceImages[s.slug] ?? svcRecovery}
                       alt={s.title}
                       loading="lazy"
                       width={800}
@@ -465,7 +468,7 @@ function Index() {
             {industries.map((ind, i) => (
               <Reveal key={ind.slug} delay={(i % 4) * 0.1}>
                 <Link to={`/industries/${ind.slug}`} className="group relative block overflow-hidden rounded-3xl shadow-soft transition-all hover:-translate-y-1.5 hover:shadow-card">
-                  <img src={indImages[ind.image]} alt={ind.title} loading="lazy" width={800} height={600} className="h-64 w-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                  <img src={ind.imageUrl ?? indImages[ind.image] ?? oem} alt={ind.title} loading="lazy" width={800} height={600} className="h-64 w-full object-cover transition-transform duration-500 group-hover:scale-110" />
                   <div className="absolute inset-0 bg-gradient-to-t from-navy via-navy/40 to-transparent" />
                   <div className="absolute inset-x-0 bottom-0 p-5 text-navy-foreground">
                     <h3 className="text-lg font-bold">{ind.title}</h3>

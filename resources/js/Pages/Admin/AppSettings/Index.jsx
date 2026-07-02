@@ -11,9 +11,10 @@ const tabs = [
     ['intervals', 'Performance & Intervals'],
     ['msg91', 'SMS Gateway'],
     ['banners', 'Home Banners'],
+    ['founders', 'Founders'],
 ];
 
-export default function Index({ settings, homeBanners = [] }) {
+export default function Index({ settings, homeBanners = [], foundersData = [], ownerMedia = [] }) {
     const normalizeCsvValue = (value) => Array.isArray(value) ? value.join(', ') : (value ?? '');
 
     const { data, setData, post, processing, errors } = useForm({
@@ -94,6 +95,10 @@ export default function Index({ settings, homeBanners = [] }) {
             {activeTab === 'banners' ? (
                 <Panel>
                     <HomeBanners banners={homeBanners} />
+                </Panel>
+            ) : activeTab === 'founders' ? (
+                <Panel>
+                    <FoundersEditor foundersData={foundersData} ownerMedia={ownerMedia} />
                 </Panel>
             ) : (
                 <Panel>
@@ -191,6 +196,120 @@ export default function Index({ settings, homeBanners = [] }) {
                 </Panel>
             )}
         </AdminLayout>
+    );
+}
+
+function FoundersEditor({ foundersData = [], ownerMedia = [] }) {
+    const [founders, setFounders] = useState(
+        foundersData.length > 0 ? foundersData : [
+            { name: '', role: '', bio: '', leads: '', linkedin_url: '', tagline: '', message: '', media_id: null },
+            { name: '', role: '', bio: '', leads: '', linkedin_url: '', tagline: '', message: '', media_id: null },
+        ]
+    );
+    const [saving, setSaving] = useState(false);
+
+    const update = (index, field, value) => {
+        setFounders((prev) => prev.map((f, i) => i === index ? { ...f, [field]: value } : f));
+    };
+
+    const handleSave = () => {
+        setSaving(true);
+        router.post(route('admin.app-settings.update'), { founders_data: founders }, {
+            preserveScroll: true,
+            onFinish: () => setSaving(false),
+        });
+    };
+
+    const inputCls = 'h-10 w-full rounded-xl border border-border bg-card px-3 text-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20';
+
+    return (
+        <div>
+            <div className="mb-5">
+                <h3 className="text-sm font-bold text-navy">Founder Profiles</h3>
+                <p className="mt-1 text-xs text-muted-foreground">Edit founder info shown on the About page. Upload owner photos in Media &rarr; Owner category first.</p>
+            </div>
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                {founders.map((f, i) => (
+                    <div key={i} className="rounded-2xl border border-border p-5 space-y-4">
+                        <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Founder {i + 1}</p>
+                        {/* Photo select */}
+                        <div>
+                            <label className="mb-1.5 block text-xs font-semibold text-navy">Photo (Owner Media)</label>
+                            <div className="flex items-center gap-3">
+                                {f.media_id && ownerMedia.find((m) => m.id === f.media_id) && (
+                                    <img
+                                        src={ownerMedia.find((m) => m.id === f.media_id)?.file_url}
+                                        alt="owner"
+                                        className="size-16 rounded-xl object-cover border border-border"
+                                    />
+                                )}
+                                <select
+                                    value={f.media_id ?? ''}
+                                    onChange={(e) => update(i, 'media_id', e.target.value ? Number(e.target.value) : null)}
+                                    className={inputCls + ' flex-1'}
+                                >
+                                    <option value="">— select photo —</option>
+                                    {ownerMedia.map((m) => (
+                                        <option key={m.id} value={m.id}>{m.title || `Owner #${m.id}`}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label className="mb-1.5 block text-xs font-semibold text-navy">Full Name</label>
+                            <input className={inputCls} value={f.name} onChange={(e) => update(i, 'name', e.target.value)} />
+                        </div>
+                        <div>
+                            <label className="mb-1.5 block text-xs font-semibold text-navy">Role / Designation</label>
+                            <input className={inputCls} value={f.role} onChange={(e) => update(i, 'role', e.target.value)} />
+                        </div>
+                        <div>
+                            <label className="mb-1.5 block text-xs font-semibold text-navy">Bio</label>
+                            <textarea
+                                rows={3}
+                                value={f.bio}
+                                onChange={(e) => update(i, 'bio', e.target.value)}
+                                className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20 resize-none"
+                            />
+                        </div>
+                        <div>
+                            <label className="mb-1.5 block text-xs font-semibold text-navy">Leads / Focus Area</label>
+                            <input className={inputCls} value={f.leads} placeholder="e.g. Leads: Strategy & Operations" onChange={(e) => update(i, 'leads', e.target.value)} />
+                        </div>
+                        <div>
+                            <label className="mb-1.5 block text-xs font-semibold text-navy">LinkedIn URL</label>
+                            <input className={inputCls} type="url" value={f.linkedin_url} placeholder="https://linkedin.com/in/..." onChange={(e) => update(i, 'linkedin_url', e.target.value)} />
+                        </div>
+                        <div>
+                            <label className="mb-1.5 block text-xs font-semibold text-navy">Tagline</label>
+                            <input className={inputCls} value={f.tagline ?? ''} placeholder="e.g. Building a greener India, one pickup at a time." onChange={(e) => update(i, 'tagline', e.target.value)} />
+                            <p className="mt-1 text-xs text-muted-foreground">Short one-liner shown below the founder's name on the About page.</p>
+                        </div>
+                        <div>
+                            <label className="mb-1.5 block text-xs font-semibold text-navy">Personal Message / Quote</label>
+                            <textarea
+                                rows={3}
+                                value={f.message ?? ''}
+                                onChange={(e) => update(i, 'message', e.target.value)}
+                                placeholder='e.g. "We believe every device deserves a responsible end-of-life."'
+                                className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20 resize-none"
+                            />
+                            <p className="mt-1 text-xs text-muted-foreground">Optional quote shown as a highlighted callout on the About page.</p>
+                        </div>
+                    </div>
+                ))}
+            </div>
+            <div className="mt-6 flex justify-end">
+                <button
+                    type="button"
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="rounded-2xl bg-brand px-6 py-2.5 text-sm font-semibold text-brand-foreground shadow-soft transition hover:bg-brand-dark disabled:opacity-60"
+                >
+                    {saving ? 'Saving…' : 'Save Founders'}
+                </button>
+            </div>
+        </div>
     );
 }
 

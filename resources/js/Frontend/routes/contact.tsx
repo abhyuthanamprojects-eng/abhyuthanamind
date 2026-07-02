@@ -4,6 +4,7 @@ import { MapPin, Phone, Mail, Clock, Send, Building2, Factory, ArrowRight, Exter
 import { toast } from "sonner";
 import { SiteLayout, PageHero } from "@/Frontend/components/SiteLayout";
 import { company, companyMeta } from "@/Frontend/lib/site-data";
+import { usePageSection } from "@/Frontend/lib/dynamic-content";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -68,12 +69,15 @@ function Contact() {
     }
   };
 
+  const infoSection = usePageSection("contact", "info");
+  const info = infoSection?.json ?? {};
+  const plantAddress = info.plant_address ?? companyMeta.plantAddress;
   const cards = [
-    { icon: Factory, title: "Plant Address", lines: [companyMeta.plantAddress] },
-    { icon: Building2, title: "Corporate Office", lines: [companyMeta.corporateAddress] },
-    { icon: Phone, title: "Phone", lines: companyMeta.phonesAll },
-    { icon: Mail, title: "Email", lines: companyMeta.emails },
-    { icon: Clock, title: "Working Hours", lines: [company.hours] },
+    { icon: Factory, title: "Plant Address", lines: [plantAddress] },
+    { icon: Building2, title: "Corporate Office", lines: [info.corporate_address ?? companyMeta.corporateAddress] },
+    { icon: Phone, title: "Phone", lines: Array.isArray(info.phones) && info.phones.length > 0 ? info.phones : companyMeta.phonesAll },
+    { icon: Mail, title: "Email", lines: Array.isArray(info.emails) && info.emails.length > 0 ? info.emails : companyMeta.emails },
+    { icon: Clock, title: "Working Hours", lines: [info.hours ?? company.hours] },
   ];
   return (
     <SiteLayout>
@@ -120,7 +124,7 @@ function Contact() {
         <div className="container-px mt-12">
           <div className="overflow-hidden rounded-3xl border border-border shadow-card">
             <div className="flex flex-wrap items-center justify-between gap-3 bg-navy px-6 py-4 text-navy-foreground">
-              <p className="flex items-center gap-2 text-sm font-semibold"><MapPin className="size-4 text-lime" /> {companyMeta.plantAddress}</p>
+              <p className="flex items-center gap-2 text-sm font-semibold"><MapPin className="size-4 text-lime" /> {plantAddress}</p>
               <a href={companyMeta.mapLink} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full bg-brand px-4 py-2 text-xs font-semibold text-brand-foreground transition-colors hover:bg-lime">Open in Google Maps <ExternalLink className="size-3.5" /></a>
             </div>
             <iframe

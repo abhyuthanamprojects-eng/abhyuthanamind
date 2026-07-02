@@ -1,14 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import {
   Target, Eye, Gem, Award, CheckCircle2, Factory, ArrowRight, Leaf,
   Recycle, ShieldCheck, Truck, Sparkles, PlayCircle, Linkedin, Users,
+  Images, ChevronDown, ChevronUp,
 } from "lucide-react";
 import { SiteLayout, PageHero } from "@/Frontend/components/SiteLayout";
 import { Reveal, Counter, motion } from "@/Frontend/components/anim";
 import { GrowthTimeline } from "@/Frontend/components/GrowthTimeline";
 import {
-  counters, founders, missionVisionValues, companyMeta,
-  companyStory, companyScale, revenueFY26, certificates, ecoImpact,
+  founders as staticFounders, missionVisionValues, companyMeta,
+  companyStory, companyScale, revenueFY26, certificates, ecoImpact, counters,
 } from "@/Frontend/lib/site-data";
 import aboutImg from "@/Frontend/assets/about.jpg";
 import rec1 from "@/Frontend/assets/recycle-1.jpg";
@@ -17,9 +19,51 @@ import owner1 from "@/Frontend/assets/owner-1.jpg";
 import owner2 from "@/Frontend/assets/owner-2.jpg";
 import plantExterior from "@/Frontend/assets/plant-exterior.jpg";
 
-const ownerImages: Record<string, string> = { owner1, owner2 };
+const staticOwnerFallbacks = [owner1, owner2];
+
+type Founder = {
+  name: string;
+  role: string;
+  bio: string;
+  leads: string;
+  linkedin_url: string;
+  tagline: string;
+  message: string;
+  image_url: string | null;
+};
+
+type MediaItem = {
+  id: number;
+  title: string;
+  category: string;
+  alt_text: string | null;
+  file_path: string;
+  file_url: string;
+};
+
+async function fetchFounders(): Promise<Founder[]> {
+  try {
+    const res = await fetch("/api/founders");
+    const json = await res.json();
+    if (json?.data?.length) return json.data;
+  } catch {}
+  return [];
+}
+
+async function fetchGallery(): Promise<MediaItem[]> {
+  try {
+    const res = await fetch("/api/media");
+    const json = await res.json();
+    if (json?.data?.length) return json.data;
+  } catch {}
+  return [];
+}
 
 export const Route = createFileRoute("/about")({
+  loader: async () => {
+    const [founders, gallery] = await Promise.all([fetchFounders(), fetchGallery()]);
+    return { founders, gallery };
+  },
   head: () => ({
     meta: [
       { title: "About Us | ABHYUTHANAM RECYCLER" },
@@ -52,7 +96,29 @@ const process = [
 
 const marqueeItems = ["REDUCE REUSE RECYCLE", "GREEN FUTURE TOGETHER", "CLEAN EARTH INITIATIVE", "ZERO LANDFILL"];
 
+const GALLERY_PREVIEW_COUNT = 6;
+
 function About() {
+  const loaderData = Route.useLoaderData() as { founders: Founder[]; gallery: MediaItem[] } | undefined;
+  const dynamicFounders: Founder[] = loaderData?.founders ?? [];
+  const gallery: MediaItem[] = loaderData?.gallery ?? [];
+
+  const founders: Founder[] = dynamicFounders.length > 0 ? dynamicFounders : staticFounders.map((f, i) => ({
+    name: f.name,
+    role: f.role,
+    bio: f.bio,
+    leads: f.leads,
+    linkedin_url: '',
+    tagline: '',
+    message: '',
+    image_url: (staticOwnerFallbacks[i] ?? staticOwnerFallbacks[0]) as string,
+  }));
+
+  const galleryCategories = ['about', 'plant', 'recycle', 'process', 'journey'];
+  const galleryItems: MediaItem[] = gallery.filter((m: MediaItem) => galleryCategories.includes(m.category));
+  const [showAllGallery, setShowAllGallery] = useState(false);
+  const visibleGallery = showAllGallery ? galleryItems : galleryItems.slice(0, GALLERY_PREVIEW_COUNT);
+
   return (
     <SiteLayout>
       <PageHero breadcrumb="Home / About Us" title="About Us" subtitle="A certified Indian e-waste recycling company built on responsibility, safety and trust." />
@@ -150,22 +216,42 @@ function About() {
             <p className="mt-4 text-muted-foreground">Committed to responsible recycling, sustainability, compliance and the circular economy.</p>
           </Reveal>
           <div className="mx-auto mt-12 grid max-w-3xl gap-8 sm:grid-cols-2">
-            {founders.map((f, i) => (
-              <Reveal key={f.name} delay={i * 0.1}>
-                <div className="group overflow-hidden rounded-[2rem] border border-border bg-card shadow-soft transition-all hover:-translate-y-1.5 hover:shadow-card">
-                  <div className="relative overflow-hidden">
-                    <img src={ownerImages[f.img] ?? owner1} alt={f.name} loading="lazy" width={1024} height={1024} className="h-72 w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                    <span className="absolute right-4 top-4 grid size-10 place-items-center rounded-full bg-brand text-brand-foreground shadow-card"><Linkedin className="size-5" /></span>
+            {founders.map((f: Founder, i: number) => {
+              const imgSrc: string = f.image_url || (staticOwnerFallbacks[i] ?? staticOwnerFallbacks[0]);
+              const linkedinHref: string | null = f.linkedin_url || null;
+              return (
+                <Reveal key={f.name} delay={i * 0.1}>
+                  <div className="group overflow-hidden rounded-[2rem] border border-border bg-card shadow-soft transition-all hover:-translate-y-1.5 hover:shadow-card">
+                    <div className="relative overflow-hidden">
+                      <img src={imgSrc} alt={f.name} loading="lazy" width={1024} height={1024} className="h-72 w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                      {linkedinHref ? (
+                        <a href={linkedinHref} target="_blank" rel="noopener noreferrer" className="absolute right-4 top-4 grid size-10 place-items-center rounded-full bg-brand text-brand-foreground shadow-card transition hover:bg-navy">
+                          <Linkedin className="size-5" />
+                        </a>
+                      ) : (
+                        <span className="absolute right-4 top-4 grid size-10 place-items-center rounded-full bg-brand/60 text-brand-foreground shadow-card">
+                          <Linkedin className="size-5" />
+                        </span>
+                      )}
+                    </div>
+                    <div className="p-6">
+                      <h3 className="text-xl font-bold text-navy">{f.name}</h3>
+                      <p className="text-sm font-semibold text-brand">{f.role}</p>
+                      {f.tagline && (
+                        <p className="mt-1 text-xs font-medium italic text-muted-foreground">{f.tagline}</p>
+                      )}
+                      <p className="mt-3 text-sm text-muted-foreground">{f.bio}</p>
+                      {f.message && (
+                        <blockquote className="mt-4 rounded-xl border-l-4 border-brand bg-eco px-4 py-3 text-sm italic text-navy/80">
+                          "{f.message}"
+                        </blockquote>
+                      )}
+                      <p className="mt-4 inline-flex items-center gap-2 rounded-full bg-eco px-3 py-1.5 text-xs font-semibold text-navy"><CheckCircle2 className="size-3.5 text-brand" /> {f.leads}</p>
+                    </div>
                   </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-navy">{f.name}</h3>
-                    <p className="text-sm font-semibold text-brand">{f.role}</p>
-                    <p className="mt-3 text-sm text-muted-foreground">{f.bio}</p>
-                    <p className="mt-4 inline-flex items-center gap-2 rounded-full bg-eco px-3 py-1.5 text-xs font-semibold text-navy"><CheckCircle2 className="size-3.5 text-brand" /> {f.leads}</p>
-                  </div>
-                </div>
-              </Reveal>
-            ))}
+                </Reveal>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -352,6 +438,48 @@ function About() {
           </div>
         </div>
       </section>
+
+      {/* Gallery */}
+      {galleryItems.length > 0 && (
+        <section className="section bg-eco">
+          <div className="container-px">
+            <Reveal className="mx-auto max-w-2xl text-center">
+              <span className="eyebrow"><Images className="size-4" /> Our Gallery</span>
+              <h2 className="mt-4 text-3xl font-extrabold text-navy sm:text-4xl">Life at Abhyuthanam</h2>
+              <p className="mt-4 text-muted-foreground">A glimpse inside our plant, recycling processes and daily operations.</p>
+            </Reveal>
+            <div className="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-3">
+              {visibleGallery.map((item: MediaItem, i: number) => (
+                <Reveal key={item.id} delay={(i % 3) * 0.07}>
+                  <div className="group aspect-square overflow-hidden rounded-2xl border border-border shadow-soft">
+                    <img
+                      src={item.file_url}
+                      alt={item.alt_text ?? item.title ?? 'Gallery'}
+                      loading="lazy"
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+            {galleryItems.length > GALLERY_PREVIEW_COUNT && (
+              <div className="mt-8 text-center">
+                <button
+                  type="button"
+                  onClick={() => setShowAllGallery((v) => !v)}
+                  className="inline-flex items-center gap-2 rounded-full border border-brand px-6 py-2.5 text-sm font-semibold text-brand transition hover:bg-brand hover:text-brand-foreground"
+                >
+                  {showAllGallery ? (
+                    <><ChevronUp className="size-4" /> Show Less</>
+                  ) : (
+                    <><ChevronDown className="size-4" /> View All ({galleryItems.length} Photos)</>
+                  )}
+                </button>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* CTA */}
       <section className="container-px py-16">

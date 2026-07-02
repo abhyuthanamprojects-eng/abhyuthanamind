@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { useState, useRef } from "react";
-import { Handshake, Upload, CheckCircle2, IndianRupee, TrendingUp, Users, ArrowLeft, FileText } from "lucide-react";
+import { Handshake, CheckCircle2, IndianRupee, TrendingUp, Users, ArrowLeft } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { Header } from "@/Frontend/components/Header";
@@ -17,7 +17,7 @@ export const Route = createFileRoute("/partner")({
       {
         name: "description",
         content:
-          "Join Scrapify's collection partner network. Submit your Aadhaar, PAN and GST details to start earning by collecting scrap in your area.",
+          "Join Scrapify's collection partner network. Share your business details and our team will contact you to complete onboarding.",
       },
       { property: "og:title", content: "Become a Scrapify Partner" },
       {
@@ -39,18 +39,6 @@ const partnerSchema = z.object({
   state: z.string().trim().min(2, "State is required").max(80),
   pincode: z.string().trim().regex(/^\d{6}$/, "Pincode must be 6 digits"),
   address: z.string().trim().min(10, "Address must be at least 10 characters").max(300),
-  aadhaar: z.string().trim().regex(/^\d{12}$/, "Aadhaar must be 12 digits"),
-  pan: z.string().trim().regex(/^[A-Z]{5}[0-9]{4}[A-Z]$/, "Enter a valid PAN (e.g. ABCDE1234F)"),
-  gst: z
-    .string()
-    .trim()
-    .max(15)
-    .optional()
-    .or(z.literal(""))
-    .refine(
-      (v) => !v || /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/.test(v),
-      "Enter a valid GSTIN or leave blank",
-    ),
   experience: z.string().trim().max(500).optional().or(z.literal("")),
 });
 
@@ -61,7 +49,6 @@ const benefits = [
 ];
 
 function PartnerPage() {
-  const [aadhaarFile, setAadhaarFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
@@ -78,9 +65,6 @@ function PartnerPage() {
       state: String(fd.get("state") || ""),
       pincode: String(fd.get("pincode") || ""),
       address: String(fd.get("address") || ""),
-      aadhaar: String(fd.get("aadhaar") || "").replace(/\s+/g, ""),
-      pan: String(fd.get("pan") || "").toUpperCase(),
-      gst: String(fd.get("gst") || "").toUpperCase(),
       experience: String(fd.get("experience") || ""),
     };
 
@@ -89,33 +73,24 @@ function PartnerPage() {
       toast.error(parsed.error.issues[0]?.message ?? "Please check the form");
       return;
     }
-    if (!aadhaarFile) {
-      toast.error("Please upload your Aadhaar card photo");
-      return;
-    }
-    if (aadhaarFile.size > 5 * 1024 * 1024) {
-      toast.error("Aadhaar photo must be under 5 MB");
-      return;
-    }
 
     setSubmitting(true);
     try {
+      // Applications land in the admin Contact Queries inbox; KYC documents
+      // (Aadhaar/PAN/GST) are collected later, during phone onboarding.
       const apiPayload = {
-        full_name: data.fullName,
-        business_name: data.businessName,
-        phone: data.mobile,
+        name: data.fullName,
         email: data.email,
-        city: data.city,
-        state: data.state,
-        pincode: data.pincode,
-        address: data.address,
-        aadhaar_number: data.aadhaar,
-        pan_number: data.pan,
-        gst_number: data.gst || null,
-        opening_location_name: data.city,
+        phone: data.mobile,
+        subject: "Channel Partner Application",
+        message:
+          `Business/Firm: ${data.businessName}\n` +
+          `City: ${data.city}, ${data.state} - ${data.pincode}\n` +
+          `Address: ${data.address}\n` +
+          (data.experience ? `Experience: ${data.experience}` : "Experience: Not shared"),
       };
 
-      const res = await fetch("/api/channel-partner/registration/request", {
+      const res = await fetch("/api/contact", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -140,7 +115,6 @@ function PartnerPage() {
       toast.success("Application received! Our team will contact you within 48 hours.");
       setSubmitted(true);
       formRef.current?.reset();
-      setAadhaarFile(null);
     } catch (err) {
       toast.error("Network error. Please check your connection and try again.");
     } finally {
@@ -165,14 +139,14 @@ function PartnerPage() {
               </div>
               <h1 className="text-3xl font-extrabold text-foreground mb-4">Application Submitted!</h1>
               <p className="text-base text-muted-foreground mb-8 max-w-md mx-auto">
-                Thank you for applying. Our team will review your business details and identity documents within 24-48 hours.
+                Thank you for applying. Our team will review your business details within 24-48 hours.
               </p>
               <div className="bg-primary/5 p-5 rounded-2xl border border-primary/10 text-sm text-foreground mb-8">
                 <p className="font-bold mb-2">Next Steps:</p>
                 <ul className="list-disc list-inside text-left space-y-1 text-muted-foreground">
-                  <li>Manual verification of Aadhaar and PAN.</li>
                   <li>Phone screening by our regional manager.</li>
-                  <li>Approval & Fee confirmation detail email.</li>
+                  <li>KYC document collection (Aadhaar / PAN / GST) during onboarding.</li>
+                  <li>Approval & fee confirmation detail email.</li>
                 </ul>
               </div>
               <Link
@@ -292,64 +266,6 @@ function PartnerPage() {
                   placeholder="House no., street, area, landmark"
                   className="mt-2"
                 />
-              </div>
-            </div>
-
-            <div className="mt-8 rounded-2xl bg-secondary/60 p-5 md:p-6">
-              <div className="flex items-center gap-2">
-                <FileText className="h-4 w-4 text-primary-deep" />
-                <h3 className="text-sm font-bold uppercase tracking-widest text-navy">
-                  KYC Documents
-                </h3>
-              </div>
-
-              <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-5">
-                <Field
-                  label="Aadhaar Number"
-                  name="aadhaar"
-                  placeholder="1234 5678 9012"
-                  maxLength={14}
-                  required
-                />
-                <Field
-                  label="PAN Number"
-                  name="pan"
-                  placeholder="ABCDE1234F"
-                  maxLength={10}
-                  className="uppercase"
-                  required
-                />
-                <Field
-                  label="GSTIN (Optional)"
-                  name="gst"
-                  placeholder="22ABCDE1234F1Z5"
-                  maxLength={15}
-                  className="uppercase"
-                />
-                <div>
-                  <Label className="text-sm font-semibold">
-                    Aadhaar Card Photo <span className="text-destructive">*</span>
-                  </Label>
-                  <label
-                    htmlFor="aadhaarFile"
-                    className="mt-2 flex cursor-pointer items-center justify-between gap-3 rounded-md border border-dashed border-input bg-background px-3 py-2.5 text-sm hover:border-primary transition-colors"
-                  >
-                    <span className="flex items-center gap-2 truncate">
-                      <Upload className="h-4 w-4 text-primary-deep shrink-0" />
-                      <span className="truncate text-muted-foreground">
-                        {aadhaarFile ? aadhaarFile.name : "Upload JPG/PNG/PDF (max 5 MB)"}
-                      </span>
-                    </span>
-                    {aadhaarFile && <CheckCircle2 className="h-4 w-4 text-primary-deep shrink-0" />}
-                  </label>
-                  <input
-                    id="aadhaarFile"
-                    type="file"
-                    accept="image/png,image/jpeg,application/pdf"
-                    className="sr-only"
-                    onChange={(e) => setAadhaarFile(e.target.files?.[0] ?? null)}
-                  />
-                </div>
               </div>
             </div>
 

@@ -1,6 +1,7 @@
 import {
     LayoutDashboard, Truck, MessageSquare, HelpCircle, FileText, Star, Award, Images,
     IndianRupee, Users, BarChart3, User, Wrench, Factory, LayoutTemplate, ClipboardList,
+    Settings,
 } from 'lucide-react';
 
 export const adminNav = [
@@ -37,6 +38,7 @@ export const adminNav = [
     {
         group: 'Settings',
         items: [
+            { label: 'App Settings', route: 'admin.app-settings.index', icon: Settings },
             { label: 'Profile', route: 'profile.edit', icon: User },
         ],
     },

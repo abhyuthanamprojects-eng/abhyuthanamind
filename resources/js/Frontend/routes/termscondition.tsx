@@ -2,6 +2,12 @@ import { createFileRoute } from '@tanstack/react-router';
 import React from 'react';
 
 export const Route = createFileRoute('/termscondition')({
+  head: () => ({
+    meta: [
+      { title: 'Terms and Conditions — Scrapify' },
+      { name: 'description', content: 'Terms and Conditions for using the Scrapify scrap pickup website and mobile application.' },
+    ],
+  }),
   component: TermsConditionComponent,
 });
 

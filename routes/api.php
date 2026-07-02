@@ -38,9 +38,13 @@ Route::get('track-pickup/{token}', [\App\Http\Controllers\Api\TrackPickupControl
     ->middleware('throttle:30,1');
 
 // Public Website Content
+Route::get('services', [\App\Http\Controllers\Api\SiteContentController::class, 'services']);
+Route::get('industries', [\App\Http\Controllers\Api\SiteContentController::class, 'industries']);
+Route::get('page-sections', [\App\Http\Controllers\Api\SiteContentController::class, 'pageSections']);
 Route::get('testimonials', [\App\Http\Controllers\Api\TestimonialController::class, 'index']);
 Route::get('scrap-rate', [\App\Http\Controllers\Api\ScrapRateController::class, 'index']);
 Route::get('media', [\App\Http\Controllers\Api\MediaController::class, 'index']);
+Route::get('founders', [\App\Http\Controllers\Api\FoundersController::class, 'index']);
 Route::post('testimonials', [\App\Http\Controllers\Api\TestimonialSubmissionController::class, 'store'])
     ->middleware('throttle:6,1');
 

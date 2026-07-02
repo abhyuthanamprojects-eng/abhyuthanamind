@@ -1,9 +1,17 @@
 import { Link } from "@tanstack/react-router";
 import { MapPin, Mail, Phone, Building2 } from "lucide-react";
-import { company, companyMeta, services } from "@/Frontend/lib/site-data";
+import { company, companyMeta } from "@/Frontend/lib/site-data";
+import { useServices, usePageSection } from "@/Frontend/lib/dynamic-content";
 const logo = "/images/logo.png";
 
 export function Footer() {
+  const services = useServices();
+  const contactSection = usePageSection("footer", "contact");
+  const contactJson = contactSection?.json ?? {};
+  const footerEmail = contactJson.email ?? companyMeta.emails[0];
+  const footerPhones: string[] = Array.isArray(contactJson.phones) && contactJson.phones.length > 0
+    ? contactJson.phones
+    : companyMeta.phonesAll.slice(0, 2);
   return (
     <footer className="bg-navy text-navy-foreground">
       <div className="container-px py-16">
@@ -43,8 +51,8 @@ export function Footer() {
             <ul className="mt-5 space-y-4 text-sm text-navy-foreground/70">
               <li className="flex gap-3"><Building2 className="mt-0.5 size-4 shrink-0 text-lime" /><span>Plant: {companyMeta.plantAddress}</span></li>
               <li className="flex gap-3"><MapPin className="mt-0.5 size-4 shrink-0 text-lime" /><span>Corporate: {companyMeta.corporateAddress}</span></li>
-              <li className="flex gap-3"><Mail className="mt-0.5 size-4 shrink-0 text-lime" /><a href={`mailto:${companyMeta.emails[0]}`} className="hover:text-lime">{companyMeta.emails.join(" · ")}</a></li>
-              <li className="flex gap-3"><Phone className="mt-0.5 size-4 shrink-0 text-lime" /><span>{companyMeta.phonesAll.slice(0, 2).join(", ")}</span></li>
+              <li className="flex gap-3"><Mail className="mt-0.5 size-4 shrink-0 text-lime" /><a href={`mailto:${footerEmail}`} className="hover:text-lime">{companyMeta.emails.join(" · ")}</a></li>
+              <li className="flex gap-3"><Phone className="mt-0.5 size-4 shrink-0 text-lime" /><span>{footerPhones.join(", ")}</span></li>
             </ul>
           </div>
         </div>

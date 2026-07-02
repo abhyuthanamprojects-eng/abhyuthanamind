@@ -2,7 +2,7 @@ import { createFileRoute, notFound, Link } from "@tanstack/react-router";
 import { CheckCircle2, ArrowRight, Recycle } from "lucide-react";
 import { SiteLayout, PageHero } from "@/Frontend/components/SiteLayout";
 import { Reveal, motion } from "@/Frontend/components/anim";
-import { services } from "@/Frontend/lib/site-data";
+import { fetchServices } from "@/Frontend/lib/dynamic-content";
 import imgEwaste from "@/Frontend/assets/svc-ewaste.jpg";
 import imgItad from "@/Frontend/assets/svc-itad.jpg";
 import imgData from "@/Frontend/assets/svc-data.jpg";
@@ -17,10 +17,11 @@ const svcImages: Record<string, string> = {
 };
 
 export const Route = createFileRoute("/services/$serviceId")({
-  loader: ({ params }) => {
+  loader: async ({ params }) => {
+    const services = await fetchServices();
     const service = services.find((s) => s.slug === params.serviceId);
     if (!service) throw notFound();
-    return { service };
+    return { service, services };
   },
   head: ({ loaderData }) => ({
     meta: loaderData
@@ -46,7 +47,7 @@ export const Route = createFileRoute("/services/$serviceId")({
 });
 
 function ServicePage() {
-  const { service } = Route.useLoaderData();
+  const { service, services } = Route.useLoaderData();
   return (
     <SiteLayout>
       <PageHero breadcrumb="Home / Services" title={service.title} subtitle={service.short} />
@@ -59,7 +60,7 @@ function ServicePage() {
               whileInView={{ scale: 1, opacity: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-              src={svcImages[service.image]}
+              src={service.imageUrl ?? svcImages[service.image] ?? imgEwaste}
               alt={service.title}
               loading="lazy"
               width={1280}
@@ -76,19 +77,23 @@ function ServicePage() {
         </div>
       </section>
 
-      <section className="section bg-secondary">
-        <div className="container-px max-w-4xl">
-          <h2 className="text-2xl font-extrabold text-navy sm:text-3xl">Why do we require these services?</h2>
-          <p className="mt-5 text-lg leading-relaxed text-muted-foreground">{service.why}</p>
-        </div>
-      </section>
+      {service.why && (
+        <section className="section bg-secondary">
+          <div className="container-px max-w-4xl">
+            <h2 className="text-2xl font-extrabold text-navy sm:text-3xl">Why do we require these services?</h2>
+            <p className="mt-5 text-lg leading-relaxed text-muted-foreground">{service.why}</p>
+          </div>
+        </section>
+      )}
 
       <section className="section">
         <div className="container-px">
-          <div className="mx-auto max-w-2xl text-center">
-            <span className="eyebrow">Benefits</span>
-            <h2 className="mt-4 text-3xl font-extrabold text-navy sm:text-4xl">What you get with us</h2>
-          </div>
+          {service.benefits.length > 0 && (
+            <div className="mx-auto max-w-2xl text-center">
+              <span className="eyebrow">Benefits</span>
+              <h2 className="mt-4 text-3xl font-extrabold text-navy sm:text-4xl">What you get with us</h2>
+            </div>
+          )}
           <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {service.benefits.map((b: { title: string; desc: string }) => (
               <div key={b.title} className="card-soft">
@@ -99,7 +104,7 @@ function ServicePage() {
             ))}
           </div>
           <div className="mt-12 flex flex-wrap justify-center gap-3">
-            {services.filter((s) => s.slug !== service.slug).slice(0, 3).map((s) => (
+            {services.filter((s: { slug: string }) => s.slug !== service.slug).slice(0, 3).map((s: { slug: string; title: string }) => (
               <Link key={s.slug} to={`/services/${s.slug}`} className="btn-outline">{s.title}</Link>
             ))}
           </div>
