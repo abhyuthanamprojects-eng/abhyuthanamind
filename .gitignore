@@ -42,8 +42,6 @@ yarn-error.log*
 
 # Dependencies
 composer.lock
-package-lock.json
-yarn.lock
 
 # Testing
 .phpunit.xml
