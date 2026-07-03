@@ -40,9 +40,6 @@ yarn-error.log*
 .env.local
 .env.*.local
 
-# Dependencies
-composer.lock
-
 # Testing
 .phpunit.xml
 coverage/
