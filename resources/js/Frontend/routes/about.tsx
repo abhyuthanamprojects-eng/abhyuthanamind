@@ -720,9 +720,6 @@ function CertificateGrid({ items }: { items: CertificateItem[] }) {
                       title={active.name}
                       className="w-full border-0 rounded"
                       style={{ height: '600px', minHeight: '400px' }}
-                      sandbox={{
-                        allowSameOrigin: true,
-                      }}
                     />
                   </div>
                 </div>
