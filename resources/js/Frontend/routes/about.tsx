@@ -3,10 +3,11 @@ import { useState } from "react";
 import {
   Target, Eye, Gem, Award, CheckCircle2, Factory, ArrowRight, Leaf,
   Recycle, ShieldCheck, Truck, Sparkles, PlayCircle, Linkedin, Users,
-  Images, ChevronDown, ChevronUp, X, ExternalLink, FileText,
+  Images, ChevronDown, ChevronUp, X, ExternalLink, FileText, ChevronLeft, ChevronRight, Lock,
 } from "lucide-react";
 import { SiteLayout, PageHero } from "@/Frontend/components/SiteLayout";
 import { Reveal, Counter, motion } from "@/Frontend/components/anim";
+import ViewOnlyDocumentViewer from "@/Frontend/components/ViewOnlyDocumentViewer";
 import { GrowthTimeline } from "@/Frontend/components/GrowthTimeline";
 import {
   founders as staticFounders, missionVisionValues, companyMeta,
@@ -631,7 +632,7 @@ function CertificateGrid({ items }: { items: CertificateItem[] }) {
         ))}
       </div>
 
-      {active && active.file_url && (
+      {active && active.file_url && active.is_pdf && (
         <div
           className="fixed inset-0 z-[80] flex items-center justify-center bg-navy/80 p-4 backdrop-blur-sm"
           onClick={() => setActive(null)}
@@ -640,7 +641,113 @@ function CertificateGrid({ items }: { items: CertificateItem[] }) {
           aria-label={`${active.name} certificate`}
         >
           <div
-            className="flex h-[88vh] w-[min(960px,96vw)] flex-col overflow-hidden rounded-3xl bg-card shadow-card"
+            className="flex h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between gap-3 border-b border-slate-200 bg-white px-6 py-4">
+              <div className="min-w-0">
+                <h3 className="truncate text-lg font-bold text-slate-900">{active.name}</h3>
+                {active.certificate_type && <p className="truncate text-sm text-slate-500">{active.certificate_type}</p>}
+              </div>
+              <button
+                type="button"
+                onClick={() => setActive(null)}
+                aria-label="Close certificate viewer"
+                className="flex-shrink-0 rounded-full p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors"
+              >
+                <X className="size-6" />
+              </button>
+            </div>
+
+            {/* Viewer Content */}
+            <div className="flex-1 overflow-auto bg-slate-50 p-6">
+              <div className="mx-auto max-w-2xl">
+                {/* Security Badge */}
+                <div className="mb-6 rounded-lg bg-blue-50 border border-blue-200 p-4 flex items-start gap-3">
+                  <Lock size={20} className="text-blue-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="font-semibold text-blue-900">View-Only Certificate</p>
+                    <p className="text-sm text-blue-800 mt-1">This certificate is protected. Download and printing are disabled.</p>
+                  </div>
+                </div>
+
+                {/* PDF Viewer with Zoom Controls */}
+                <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+                  {/* Zoom Toolbar */}
+                  <div className="flex items-center gap-2 border-b border-slate-200 p-4 bg-white">
+                    <span className="text-sm font-medium text-slate-700">Zoom:</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const pdfFrame = document.querySelector('iframe[title="' + active.name + '"]') as HTMLIFrameElement;
+                        if (pdfFrame) {
+                          const viewScale = (pdfFrame.style.height ? parseFloat(pdfFrame.style.height) / 800 : 1) - 0.2;
+                          if (viewScale >= 0.5) {
+                            pdfFrame.style.height = (800 * viewScale) + 'px';
+                          }
+                        }
+                      }}
+                      className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                      title="Zoom Out"
+                    >
+                      <ChevronLeft size={18} className="text-slate-600" />
+                    </button>
+                    <span className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg text-sm font-medium min-w-12 text-center">100%</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const pdfFrame = document.querySelector('iframe[title="' + active.name + '"]') as HTMLIFrameElement;
+                        if (pdfFrame) {
+                          const viewScale = (pdfFrame.style.height ? parseFloat(pdfFrame.style.height) / 800 : 1) + 0.2;
+                          if (viewScale <= 2) {
+                            pdfFrame.style.height = (800 * viewScale) + 'px';
+                          }
+                        }
+                      }}
+                      className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                      title="Zoom In"
+                    >
+                      <ChevronRight size={18} className="text-slate-600" />
+                    </button>
+                    <span className="ml-auto text-xs text-slate-500">Scroll to view • Use zoom to adjust size</span>
+                  </div>
+
+                  {/* PDF iframe */}
+                  <div className="flex-1 overflow-auto bg-slate-100 p-4">
+                    <iframe
+                      src={active.file_url + "#toolbar=0&navpanes=0&scrollbar=1"}
+                      title={active.name}
+                      className="w-full border-0 rounded"
+                      style={{ height: '600px', minHeight: '400px' }}
+                      sandbox={{
+                        allowSameOrigin: true,
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="mt-6 text-center text-xs text-slate-500">
+                  <p>This is a secure, view-only certificate. Unauthorized copying or sharing is prohibited.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Image certificate modal */}
+      {active && active.file_url && !active.is_pdf && (
+        <div
+          className="fixed inset-0 z-[80] flex items-center justify-center bg-navy/80 p-4 backdrop-blur-sm"
+          onClick={() => setActive(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${active.name} certificate`}
+        >
+          <div
+            className="flex flex-col overflow-hidden rounded-3xl bg-card shadow-card max-w-2xl max-h-[90vh]"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-3.5">
@@ -648,37 +755,17 @@ function CertificateGrid({ items }: { items: CertificateItem[] }) {
                 <h3 className="truncate text-sm font-bold text-navy sm:text-base">{active.name}</h3>
                 {active.certificate_type && <p className="truncate text-xs text-muted-foreground">{active.certificate_type}</p>}
               </div>
-              <div className="flex shrink-0 items-center gap-2">
-                <a
-                  href={active.file_url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 rounded-full bg-brand px-4 py-2 text-xs font-bold text-brand-foreground transition-transform hover:-translate-y-0.5"
-                >
-                  <ExternalLink className="size-3.5" /> Open Full
-                </a>
-                <button
-                  type="button"
-                  onClick={() => setActive(null)}
-                  aria-label="Close certificate viewer"
-                  className="grid size-9 place-items-center rounded-full border border-border text-navy transition-colors hover:bg-accent"
-                >
-                  <X className="size-4.5" />
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => setActive(null)}
+                aria-label="Close certificate viewer"
+                className="grid size-9 place-items-center rounded-full border border-border text-navy transition-colors hover:bg-accent"
+              >
+                <X className="size-4.5" />
+              </button>
             </div>
-            <div className="flex-1 bg-eco">
-              {active.is_pdf ? (
-                <iframe
-                  src={active.file_url}
-                  title={active.name}
-                  className="h-full w-full border-0"
-                />
-              ) : (
-                <div className="grid h-full place-items-center overflow-auto p-4">
-                  <img src={active.file_url} alt={active.name} className="max-h-full max-w-full rounded-xl object-contain shadow-soft" />
-                </div>
-              )}
+            <div className="flex-1 overflow-auto bg-eco p-4 grid place-items-center">
+              <img src={active.file_url} alt={active.name} className="max-h-full max-w-full rounded-xl object-contain shadow-soft" />
             </div>
           </div>
         </div>
