@@ -49,6 +49,12 @@ Route::get('/scrap-rate', function () {
 Route::get('/schedule-pickup', function () {
     return view('frontend');
 });
+Route::get('/documents', function () {
+    return view('frontend');
+});
+Route::get('/documents/{document}', function () {
+    return view('frontend');
+});
 
 // Public Testimonial Submission (SPA shell — actual form lives in resources/js/Frontend)
 Route::get('/submit-testimonial', function () {

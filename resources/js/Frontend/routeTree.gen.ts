@@ -17,6 +17,7 @@ import { Route as SchedulePickupRouteImport } from './routes/schedule-pickup'
 import { Route as ProcessRouteImport } from './routes/process'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PartnerRouteImport } from './routes/partner'
+import { Route as DocumentsRouteImport } from './routes/documents'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CancellationRouteImport } from './routes/cancellation'
 import { Route as AboutRouteImport } from './routes/about'
@@ -24,6 +25,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as TrackPickupTokenRouteImport } from './routes/track-pickup.$token'
 import { Route as ServicesServiceIdRouteImport } from './routes/services.$serviceId'
 import { Route as IndustriesIndustryIdRouteImport } from './routes/industries.$industryId'
+import { Route as DocumentsUppcbRouteImport } from './routes/documents.uppcb'
 
 const TermsconditionRoute = TermsconditionRouteImport.update({
   id: '/termscondition',
@@ -65,6 +67,11 @@ const PartnerRoute = PartnerRouteImport.update({
   path: '/partner',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DocumentsRoute = DocumentsRouteImport.update({
+  id: '/documents',
+  path: '/documents',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
@@ -100,12 +107,18 @@ const IndustriesIndustryIdRoute = IndustriesIndustryIdRouteImport.update({
   path: '/industries/$industryId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DocumentsUppcbRoute = DocumentsUppcbRouteImport.update({
+  id: '/uppcb',
+  path: '/uppcb',
+  getParentRoute: () => DocumentsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/cancellation': typeof CancellationRoute
   '/contact': typeof ContactRoute
+  '/documents': typeof DocumentsRouteWithChildren
   '/partner': typeof PartnerRoute
   '/privacy': typeof PrivacyRoute
   '/process': typeof ProcessRoute
@@ -114,6 +127,7 @@ export interface FileRoutesByFullPath {
   '/submit-testimonial': typeof SubmitTestimonialRoute
   '/terms': typeof TermsRoute
   '/termscondition': typeof TermsconditionRoute
+  '/documents/uppcb': typeof DocumentsUppcbRoute
   '/industries/$industryId': typeof IndustriesIndustryIdRoute
   '/services/$serviceId': typeof ServicesServiceIdRoute
   '/track-pickup/$token': typeof TrackPickupTokenRoute
@@ -123,6 +137,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/cancellation': typeof CancellationRoute
   '/contact': typeof ContactRoute
+  '/documents': typeof DocumentsRouteWithChildren
   '/partner': typeof PartnerRoute
   '/privacy': typeof PrivacyRoute
   '/process': typeof ProcessRoute
@@ -131,6 +146,7 @@ export interface FileRoutesByTo {
   '/submit-testimonial': typeof SubmitTestimonialRoute
   '/terms': typeof TermsRoute
   '/termscondition': typeof TermsconditionRoute
+  '/documents/uppcb': typeof DocumentsUppcbRoute
   '/industries/$industryId': typeof IndustriesIndustryIdRoute
   '/services/$serviceId': typeof ServicesServiceIdRoute
   '/track-pickup/$token': typeof TrackPickupTokenRoute
@@ -141,6 +157,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/cancellation': typeof CancellationRoute
   '/contact': typeof ContactRoute
+  '/documents': typeof DocumentsRouteWithChildren
   '/partner': typeof PartnerRoute
   '/privacy': typeof PrivacyRoute
   '/process': typeof ProcessRoute
@@ -149,6 +166,7 @@ export interface FileRoutesById {
   '/submit-testimonial': typeof SubmitTestimonialRoute
   '/terms': typeof TermsRoute
   '/termscondition': typeof TermsconditionRoute
+  '/documents/uppcb': typeof DocumentsUppcbRoute
   '/industries/$industryId': typeof IndustriesIndustryIdRoute
   '/services/$serviceId': typeof ServicesServiceIdRoute
   '/track-pickup/$token': typeof TrackPickupTokenRoute
@@ -160,6 +178,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/cancellation'
     | '/contact'
+    | '/documents'
     | '/partner'
     | '/privacy'
     | '/process'
@@ -168,6 +187,7 @@ export interface FileRouteTypes {
     | '/submit-testimonial'
     | '/terms'
     | '/termscondition'
+    | '/documents/uppcb'
     | '/industries/$industryId'
     | '/services/$serviceId'
     | '/track-pickup/$token'
@@ -177,6 +197,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/cancellation'
     | '/contact'
+    | '/documents'
     | '/partner'
     | '/privacy'
     | '/process'
@@ -185,6 +206,7 @@ export interface FileRouteTypes {
     | '/submit-testimonial'
     | '/terms'
     | '/termscondition'
+    | '/documents/uppcb'
     | '/industries/$industryId'
     | '/services/$serviceId'
     | '/track-pickup/$token'
@@ -194,6 +216,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/cancellation'
     | '/contact'
+    | '/documents'
     | '/partner'
     | '/privacy'
     | '/process'
@@ -202,6 +225,7 @@ export interface FileRouteTypes {
     | '/submit-testimonial'
     | '/terms'
     | '/termscondition'
+    | '/documents/uppcb'
     | '/industries/$industryId'
     | '/services/$serviceId'
     | '/track-pickup/$token'
@@ -212,6 +236,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   CancellationRoute: typeof CancellationRoute
   ContactRoute: typeof ContactRoute
+  DocumentsRoute: typeof DocumentsRouteWithChildren
   PartnerRoute: typeof PartnerRoute
   PrivacyRoute: typeof PrivacyRoute
   ProcessRoute: typeof ProcessRoute
@@ -283,6 +308,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PartnerRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/documents': {
+      id: '/documents'
+      path: '/documents'
+      fullPath: '/documents'
+      preLoaderRoute: typeof DocumentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/contact': {
       id: '/contact'
       path: '/contact'
@@ -332,14 +364,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndustriesIndustryIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/documents/uppcb': {
+      id: '/documents/uppcb'
+      path: '/uppcb'
+      fullPath: '/documents/uppcb'
+      preLoaderRoute: typeof DocumentsUppcbRouteImport
+      parentRoute: typeof DocumentsRoute
+    }
   }
 }
+
+interface DocumentsRouteChildren {
+  DocumentsUppcbRoute: typeof DocumentsUppcbRoute
+}
+
+const DocumentsRouteChildren: DocumentsRouteChildren = {
+  DocumentsUppcbRoute: DocumentsUppcbRoute,
+}
+
+const DocumentsRouteWithChildren = DocumentsRoute._addFileChildren(
+  DocumentsRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   CancellationRoute: CancellationRoute,
   ContactRoute: ContactRoute,
+  DocumentsRoute: DocumentsRouteWithChildren,
   PartnerRoute: PartnerRoute,
   PrivacyRoute: PrivacyRoute,
   ProcessRoute: ProcessRoute,
