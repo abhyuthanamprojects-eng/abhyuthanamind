@@ -714,11 +714,11 @@ function CertificateGrid({ items }: { items: CertificateItem[] }) {
                   </div>
 
                   {/* PDF iframe */}
-                  <div className="flex-1 overflow-auto bg-slate-100 p-4">
+                  <div className="flex-1 overflow-auto bg-slate-100 py-4">
                     <iframe
                       src={active.file_url + "#toolbar=0&navpanes=0&scrollbar=1"}
                       title={active.name}
-                      className="w-full border-0 rounded"
+                      className="w-full border-0"
                       style={{ height: '600px', minHeight: '400px' }}
                     />
                   </div>
