@@ -37,15 +37,6 @@ class PickupRequestObserver
                     $pickupRequest->customer->notify(new PickupStatusNotification($pickupRequest, 'feedback_request'));
                 }
             }
-
-            // Notify Pickup Boy if status is 'assigned' or 'reassigned'
-            if (in_array($newStatus, ['assigned', 'reassigned'])) {
-                // Ensure we have the latest assignment
-                $assignment = $pickupRequest->assignment()->latest()->first();
-                if ($assignment && $assignment->pickupBoy) {
-                    $assignment->pickupBoy->notify(new PickupStatusNotification($pickupRequest, 'assigned'));
-                }
-            }
         }
 
         // 2. Handle Rescheduling (when status doesn't change but date does)

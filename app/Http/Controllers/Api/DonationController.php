@@ -33,11 +33,6 @@ class DonationController extends Controller
         ]);
 
         try {
-            // Auto-assign warehouse by city
-            $warehouse = \App\Models\Warehouse::where('city_id', $validated['city_id'])
-                ->where('status', true)
-                ->first();
-
             // Create donation request (no payment required)
             $donation = PickupRequest::create([
                 'customer_id' => Auth::id(),
@@ -46,8 +41,6 @@ class DonationController extends Controller
                 'status_new' => RequestStatus::PENDING_WAREHOUSE->value, // New string column
                 'address' => $validated['address'],
                 'city_id' => $validated['city_id'],
-                'warehouse_id' => $warehouse?->id,
-                'warehouse_assigned_at' => $warehouse ? now() : null,
                 'scheduled_at' => $validated['scheduled_at'],
                 'latitude' => $validated['latitude'] ?? null,
                 'longitude' => $validated['longitude'] ?? null,
@@ -92,15 +85,12 @@ class DonationController extends Controller
     {
         $user = Auth::user();
         $query = PickupRequest::where('request_type', RequestType::DONATION->value)
-            ->with([
-                'customer',
-                'currentAssignment.pickupBoy',
-            ]);
+            ->with(['customer']);
 
         // Filter by role
         if ($user->hasRole('customer')) {
             $query->where('customer_id', $user->id);
-        } elseif (!$user->hasRole(['admin', 'warehouse'])) {
+        } elseif (!$user->hasRole(['admin'])) {
             return $this->errorResponse('auth.unauthorized', 403);
         }
 
@@ -131,14 +121,13 @@ class DonationController extends Controller
         $donation = PickupRequest::where('request_type', RequestType::DONATION->value)
             ->with([
                 'customer',
-                'currentAssignment.pickupBoy',
                 'statusLogs.changedBy',
             ])
             ->findOrFail($id);
 
         // Authorization
         $user = Auth::user();
-        if ($donation->customer_id !== $user->id && !$user->hasRole(['admin', 'warehouse'])) {
+        if ($donation->customer_id !== $user->id && !$user->hasRole(['admin'])) {
             return $this->errorResponse('auth.unauthorized', 403);
         }
 
@@ -193,16 +182,11 @@ class DonationController extends Controller
     {
         $user = Auth::user();
 
-        if (!$user->hasRole(['admin', 'warehouse'])) {
+        if (!$user->hasRole(['admin'])) {
             return $this->errorResponse('auth.unauthorized', 403);
         }
 
         $query = PickupRequest::where('request_type', RequestType::DONATION->value);
-
-        // Filter by warehouse if user is warehouse
-        if ($user->hasRole('warehouse') && $user->warehouse) {
-            $query->where('warehouse_id', $user->warehouse->id);
-        }
 
         return $this->successResponse('donation.statistics_fetched', [
             'total' => (clone $query)->count(),
@@ -233,10 +217,6 @@ class DonationController extends Controller
             'address' => $donation->address,
             'scheduled_at' => $donation->scheduled_at?->format('Y-m-d H:i:s'),
             'donation_category' => $donation->donation_category,
-            'pickup_boy' => $donation->currentAssignment?->pickupBoy ? [
-                'id' => $donation->currentAssignment->pickupBoy->id,
-                'name' => $donation->currentAssignment->pickupBoy->name,
-            ] : null,
         ];
     }
 
@@ -264,11 +244,6 @@ class DonationController extends Controller
             'longitude' => $donation->longitude,
             'scheduled_at' => $donation->scheduled_at?->format('Y-m-d H:i:s'),
             'donation_category' => $donation->donation_category,
-            'pickup_boy' => $donation->currentAssignment?->pickupBoy ? [
-                'id' => $donation->currentAssignment->pickupBoy->id,
-                'name' => $donation->currentAssignment->pickupBoy->name,
-                'phone' => $donation->currentAssignment->pickupBoy->phone,
-            ] : null,
             'timeline' => [
                 'created_at' => $donation->created_at?->format('Y-m-d H:i:s'),
                 'warehouse_assigned_at' => $donation->warehouse_assigned_at?->format('Y-m-d H:i:s'),

@@ -1,0 +1,1 @@
+import{j as o}from"./index-DXibOfsm.js";function a({value:t,className:e="",children:s,...n}){return o.jsx("label",{...n,className:"block text-sm font-semibold text-navy "+e,children:t||s})}export{a as I};

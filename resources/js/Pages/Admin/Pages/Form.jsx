@@ -1,7 +1,10 @@
-import { Head, useForm, Link } from '@inertiajs/react';
+import { useForm } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
-import AdminHeader from '@/Components/Admin/AdminHeader';
 import { ArrowLeft } from 'lucide-react';
+import { PageHeader, Panel } from '@/Components/Admin/AdminUI';
+
+const inputClass = 'h-11 w-full rounded-2xl border border-border bg-card px-4 text-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20';
+const labelClass = 'mb-1.5 block text-sm font-semibold text-navy';
 
 export default function Form({ page = null }) {
     const isEditing = !!page;
@@ -23,87 +26,86 @@ export default function Form({ page = null }) {
     };
 
     return (
-        <AdminLayout>
-            <Head title={isEditing ? 'Edit Page' : 'Create Page'} />
+        <AdminLayout title={isEditing ? 'Edit Page' : 'Create Page'}>
+            <a href={route('admin.pages.index')} className="mb-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand hover:underline">
+                <ArrowLeft className="size-4" /> Back to Static Pages
+            </a>
 
-            <AdminHeader
-                title={isEditing ? `Edit: ${page.title}` : 'Create New Page'}
-                action={{ label: 'Back to List', icon: <ArrowLeft size={16} />, href: route('admin.pages.index') }}
-            />
+            <PageHeader title={isEditing ? `Edit: ${page.title}` : 'Create New Page'} />
 
-            <div className="card" style={{ maxWidth: '56rem' }}>
-                <div className="card-body p-4">
-                    <form onSubmit={handleSubmit}>
-                        <div className="mb-3">
-                            <label htmlFor="title" className="form-label">Page Title</label>
+            <Panel className="max-w-3xl">
+                <form onSubmit={handleSubmit} className="space-y-5">
+                    <div>
+                        <label htmlFor="title" className={labelClass}>Page Title</label>
+                        <input
+                            id="title"
+                            type="text"
+                            className={inputClass}
+                            value={data.title}
+                            onChange={(e) => {
+                                setData('title', e.target.value);
+                                if (!isEditing) {
+                                    setData('slug', e.target.value.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, ''));
+                                }
+                            }}
+                            required
+                        />
+                        {errors.title && <p className="mt-1.5 text-xs font-medium text-rose-600">{errors.title}</p>}
+                    </div>
+
+                    <div>
+                        <label htmlFor="slug" className={labelClass}>Slug (URL Path)</label>
+                        <div className="flex items-center overflow-hidden rounded-2xl border border-border bg-card focus-within:border-brand focus-within:ring-2 focus-within:ring-brand/20">
+                            <span className="pl-4 text-sm text-muted-foreground">abhyuthanamind.com/</span>
                             <input
-                                id="title"
+                                id="slug"
                                 type="text"
-                                name="title"
-                                className="form-control"
-                                value={data.title}
-                                onChange={(e) => {
-                                    setData('title', e.target.value);
-                                    if (!isEditing) {
-                                        setData('slug', e.target.value.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, ''));
-                                    }
-                                }}
+                                className="h-11 w-full bg-transparent px-2 text-sm outline-none"
+                                value={data.slug}
+                                onChange={(e) => setData('slug', e.target.value)}
                                 required
                             />
-                            {errors.title && <div className="text-danger fs-3 mt-1">{errors.title}</div>}
                         </div>
+                        {errors.slug && <p className="mt-1.5 text-xs font-medium text-rose-600">{errors.slug}</p>}
+                    </div>
 
-                        <div className="mb-3">
-                            <label htmlFor="slug" className="form-label">Slug (URL Path)</label>
-                            <div className="input-group">
-                                <span className="input-group-text">scrapify.in/</span>
-                                <input
-                                    id="slug"
-                                    type="text"
-                                    name="slug"
-                                    className="form-control"
-                                    value={data.slug}
-                                    onChange={(e) => setData('slug', e.target.value)}
-                                    required
-                                />
-                            </div>
-                            {errors.slug && <div className="text-danger fs-3 mt-1">{errors.slug}</div>}
-                        </div>
+                    <div>
+                        <label htmlFor="content" className={labelClass}>Page Content (HTML/Markdown)</label>
+                        <textarea
+                            id="content"
+                            className="w-full rounded-2xl border border-border bg-card p-4 text-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
+                            value={data.content}
+                            rows={15}
+                            onChange={(e) => setData('content', e.target.value)}
+                            required
+                        />
+                        {errors.content && <p className="mt-1.5 text-xs font-medium text-rose-600">{errors.content}</p>}
+                    </div>
 
-                        <div className="mb-3">
-                            <label htmlFor="content" className="form-label">Page Content (HTML/Markdown)</label>
-                            <textarea
-                                id="content"
-                                name="content"
-                                className="form-control"
-                                value={data.content}
-                                rows="15"
-                                onChange={(e) => setData('content', e.target.value)}
-                                required
-                            />
-                            {errors.content && <div className="text-danger fs-3 mt-1">{errors.content}</div>}
-                        </div>
+                    <label className="flex items-center gap-2.5 text-sm font-medium text-navy">
+                        <input
+                            type="checkbox"
+                            className="size-4 rounded border-border text-brand focus:ring-brand/30"
+                            checked={data.is_active}
+                            onChange={(e) => setData('is_active', e.target.checked)}
+                        />
+                        Published (Visible on site)
+                    </label>
 
-                        <div className="form-check mb-4">
-                            <input
-                                id="is_active"
-                                type="checkbox"
-                                className="form-check-input"
-                                checked={data.is_active}
-                                onChange={(e) => setData('is_active', e.target.checked)}
-                            />
-                            <label htmlFor="is_active" className="form-check-label">
-                                Published (Visible on site)
-                            </label>
-                            {errors.is_active && <div className="text-danger fs-3 mt-1">{errors.is_active}</div>}
-                        </div>
-
-                        <button type="submit" className="btn btn-primary" disabled={processing}>
+                    <div className="flex justify-end gap-3 pt-2">
+                        <a href={route('admin.pages.index')} className="rounded-2xl border border-border px-4 py-2.5 text-sm font-semibold text-navy transition hover:bg-muted">
+                            Cancel
+                        </a>
+                        <button
+                            type="submit"
+                            disabled={processing}
+                            className="rounded-2xl bg-brand px-5 py-2.5 text-sm font-semibold text-brand-foreground shadow-soft transition hover:bg-brand-dark disabled:opacity-60"
+                        >
                             {isEditing ? 'Update Page' : 'Create Page'}
                         </button>
-                    </form>
-                </div>
-            </div>
+                    </div>
+                </form>
+            </Panel>
         </AdminLayout>
     );
 }

@@ -18,7 +18,6 @@ class TestUserSeeder extends Seeder
             'customer' => '9000000001',
             'pickup_boy' => '9000000002',
             'channel_partner' => '9000000003',
-            'warehouse' => '9000000004',
             'payment_admin' => '9000000005'
         ];
 
@@ -40,14 +39,6 @@ class TestUserSeeder extends Seeder
             
             if (!$user->hasRole($roleName)) {
                 $user->assignRole($roleName);
-            }
-
-            // If this is a warehouse user, link it to the first available warehouse
-            if ($roleName === 'warehouse') {
-                $firstWarehouse = \App\Models\Warehouse::first();
-                if ($firstWarehouse) {
-                    $user->update(['warehouse_id' => $firstWarehouse->id]);
-                }
             }
         }
     }

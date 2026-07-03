@@ -9,20 +9,24 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as WarehousesRouteImport } from './routes/warehouses'
 import { Route as TermsconditionRouteImport } from './routes/termscondition'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as SubmitTestimonialRouteImport } from './routes/submit-testimonial'
+import { Route as ScrapRateRouteImport } from './routes/scrap-rate'
+import { Route as SchedulePickupRouteImport } from './routes/schedule-pickup'
+import { Route as ProcessRouteImport } from './routes/process'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PartnerRouteImport } from './routes/partner'
+import { Route as DocumentsRouteImport } from './routes/documents'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CancellationRouteImport } from './routes/cancellation'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TrackPickupTokenRouteImport } from './routes/track-pickup.$token'
+import { Route as ServicesServiceIdRouteImport } from './routes/services.$serviceId'
+import { Route as IndustriesIndustryIdRouteImport } from './routes/industries.$industryId'
+import { Route as DocumentsUppcbRouteImport } from './routes/documents.uppcb'
 
-const WarehousesRoute = WarehousesRouteImport.update({
-  id: '/warehouses',
-  path: '/warehouses',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const TermsconditionRoute = TermsconditionRouteImport.update({
   id: '/termscondition',
   path: '/termscondition',
@@ -31,6 +35,26 @@ const TermsconditionRoute = TermsconditionRouteImport.update({
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SubmitTestimonialRoute = SubmitTestimonialRouteImport.update({
+  id: '/submit-testimonial',
+  path: '/submit-testimonial',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ScrapRateRoute = ScrapRateRouteImport.update({
+  id: '/scrap-rate',
+  path: '/scrap-rate',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SchedulePickupRoute = SchedulePickupRouteImport.update({
+  id: '/schedule-pickup',
+  path: '/schedule-pickup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProcessRoute = ProcessRouteImport.update({
+  id: '/process',
+  path: '/process',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -43,6 +67,11 @@ const PartnerRoute = PartnerRouteImport.update({
   path: '/partner',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DocumentsRoute = DocumentsRouteImport.update({
+  id: '/documents',
+  path: '/documents',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
@@ -53,96 +82,176 @@ const CancellationRoute = CancellationRouteImport.update({
   path: '/cancellation',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TrackPickupTokenRoute = TrackPickupTokenRouteImport.update({
+  id: '/track-pickup/$token',
+  path: '/track-pickup/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServicesServiceIdRoute = ServicesServiceIdRouteImport.update({
+  id: '/services/$serviceId',
+  path: '/services/$serviceId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IndustriesIndustryIdRoute = IndustriesIndustryIdRouteImport.update({
+  id: '/industries/$industryId',
+  path: '/industries/$industryId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocumentsUppcbRoute = DocumentsUppcbRouteImport.update({
+  id: '/uppcb',
+  path: '/uppcb',
+  getParentRoute: () => DocumentsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/cancellation': typeof CancellationRoute
   '/contact': typeof ContactRoute
+  '/documents': typeof DocumentsRouteWithChildren
   '/partner': typeof PartnerRoute
   '/privacy': typeof PrivacyRoute
+  '/process': typeof ProcessRoute
+  '/schedule-pickup': typeof SchedulePickupRoute
+  '/scrap-rate': typeof ScrapRateRoute
+  '/submit-testimonial': typeof SubmitTestimonialRoute
   '/terms': typeof TermsRoute
   '/termscondition': typeof TermsconditionRoute
-  '/warehouses': typeof WarehousesRoute
+  '/documents/uppcb': typeof DocumentsUppcbRoute
+  '/industries/$industryId': typeof IndustriesIndustryIdRoute
+  '/services/$serviceId': typeof ServicesServiceIdRoute
+  '/track-pickup/$token': typeof TrackPickupTokenRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/cancellation': typeof CancellationRoute
   '/contact': typeof ContactRoute
+  '/documents': typeof DocumentsRouteWithChildren
   '/partner': typeof PartnerRoute
   '/privacy': typeof PrivacyRoute
+  '/process': typeof ProcessRoute
+  '/schedule-pickup': typeof SchedulePickupRoute
+  '/scrap-rate': typeof ScrapRateRoute
+  '/submit-testimonial': typeof SubmitTestimonialRoute
   '/terms': typeof TermsRoute
   '/termscondition': typeof TermsconditionRoute
-  '/warehouses': typeof WarehousesRoute
+  '/documents/uppcb': typeof DocumentsUppcbRoute
+  '/industries/$industryId': typeof IndustriesIndustryIdRoute
+  '/services/$serviceId': typeof ServicesServiceIdRoute
+  '/track-pickup/$token': typeof TrackPickupTokenRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/cancellation': typeof CancellationRoute
   '/contact': typeof ContactRoute
+  '/documents': typeof DocumentsRouteWithChildren
   '/partner': typeof PartnerRoute
   '/privacy': typeof PrivacyRoute
+  '/process': typeof ProcessRoute
+  '/schedule-pickup': typeof SchedulePickupRoute
+  '/scrap-rate': typeof ScrapRateRoute
+  '/submit-testimonial': typeof SubmitTestimonialRoute
   '/terms': typeof TermsRoute
   '/termscondition': typeof TermsconditionRoute
-  '/warehouses': typeof WarehousesRoute
+  '/documents/uppcb': typeof DocumentsUppcbRoute
+  '/industries/$industryId': typeof IndustriesIndustryIdRoute
+  '/services/$serviceId': typeof ServicesServiceIdRoute
+  '/track-pickup/$token': typeof TrackPickupTokenRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/about'
     | '/cancellation'
     | '/contact'
+    | '/documents'
     | '/partner'
     | '/privacy'
+    | '/process'
+    | '/schedule-pickup'
+    | '/scrap-rate'
+    | '/submit-testimonial'
     | '/terms'
     | '/termscondition'
-    | '/warehouses'
+    | '/documents/uppcb'
+    | '/industries/$industryId'
+    | '/services/$serviceId'
+    | '/track-pickup/$token'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/about'
     | '/cancellation'
     | '/contact'
+    | '/documents'
     | '/partner'
     | '/privacy'
+    | '/process'
+    | '/schedule-pickup'
+    | '/scrap-rate'
+    | '/submit-testimonial'
     | '/terms'
     | '/termscondition'
-    | '/warehouses'
+    | '/documents/uppcb'
+    | '/industries/$industryId'
+    | '/services/$serviceId'
+    | '/track-pickup/$token'
   id:
     | '__root__'
     | '/'
+    | '/about'
     | '/cancellation'
     | '/contact'
+    | '/documents'
     | '/partner'
     | '/privacy'
+    | '/process'
+    | '/schedule-pickup'
+    | '/scrap-rate'
+    | '/submit-testimonial'
     | '/terms'
     | '/termscondition'
-    | '/warehouses'
+    | '/documents/uppcb'
+    | '/industries/$industryId'
+    | '/services/$serviceId'
+    | '/track-pickup/$token'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
   CancellationRoute: typeof CancellationRoute
   ContactRoute: typeof ContactRoute
+  DocumentsRoute: typeof DocumentsRouteWithChildren
   PartnerRoute: typeof PartnerRoute
   PrivacyRoute: typeof PrivacyRoute
+  ProcessRoute: typeof ProcessRoute
+  SchedulePickupRoute: typeof SchedulePickupRoute
+  ScrapRateRoute: typeof ScrapRateRoute
+  SubmitTestimonialRoute: typeof SubmitTestimonialRoute
   TermsRoute: typeof TermsRoute
   TermsconditionRoute: typeof TermsconditionRoute
-  WarehousesRoute: typeof WarehousesRoute
+  IndustriesIndustryIdRoute: typeof IndustriesIndustryIdRoute
+  ServicesServiceIdRoute: typeof ServicesServiceIdRoute
+  TrackPickupTokenRoute: typeof TrackPickupTokenRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/warehouses': {
-      id: '/warehouses'
-      path: '/warehouses'
-      fullPath: '/warehouses'
-      preLoaderRoute: typeof WarehousesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/termscondition': {
       id: '/termscondition'
       path: '/termscondition'
@@ -155,6 +264,34 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/submit-testimonial': {
+      id: '/submit-testimonial'
+      path: '/submit-testimonial'
+      fullPath: '/submit-testimonial'
+      preLoaderRoute: typeof SubmitTestimonialRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/scrap-rate': {
+      id: '/scrap-rate'
+      path: '/scrap-rate'
+      fullPath: '/scrap-rate'
+      preLoaderRoute: typeof ScrapRateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/schedule-pickup': {
+      id: '/schedule-pickup'
+      path: '/schedule-pickup'
+      fullPath: '/schedule-pickup'
+      preLoaderRoute: typeof SchedulePickupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/process': {
+      id: '/process'
+      path: '/process'
+      fullPath: '/process'
+      preLoaderRoute: typeof ProcessRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -171,6 +308,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PartnerRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/documents': {
+      id: '/documents'
+      path: '/documents'
+      fullPath: '/documents'
+      preLoaderRoute: typeof DocumentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/contact': {
       id: '/contact'
       path: '/contact'
@@ -185,6 +329,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CancellationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -192,18 +343,66 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/track-pickup/$token': {
+      id: '/track-pickup/$token'
+      path: '/track-pickup/$token'
+      fullPath: '/track-pickup/$token'
+      preLoaderRoute: typeof TrackPickupTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/services/$serviceId': {
+      id: '/services/$serviceId'
+      path: '/services/$serviceId'
+      fullPath: '/services/$serviceId'
+      preLoaderRoute: typeof ServicesServiceIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/industries/$industryId': {
+      id: '/industries/$industryId'
+      path: '/industries/$industryId'
+      fullPath: '/industries/$industryId'
+      preLoaderRoute: typeof IndustriesIndustryIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/documents/uppcb': {
+      id: '/documents/uppcb'
+      path: '/uppcb'
+      fullPath: '/documents/uppcb'
+      preLoaderRoute: typeof DocumentsUppcbRouteImport
+      parentRoute: typeof DocumentsRoute
+    }
   }
 }
 
+interface DocumentsRouteChildren {
+  DocumentsUppcbRoute: typeof DocumentsUppcbRoute
+}
+
+const DocumentsRouteChildren: DocumentsRouteChildren = {
+  DocumentsUppcbRoute: DocumentsUppcbRoute,
+}
+
+const DocumentsRouteWithChildren = DocumentsRoute._addFileChildren(
+  DocumentsRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
   CancellationRoute: CancellationRoute,
   ContactRoute: ContactRoute,
+  DocumentsRoute: DocumentsRouteWithChildren,
   PartnerRoute: PartnerRoute,
   PrivacyRoute: PrivacyRoute,
+  ProcessRoute: ProcessRoute,
+  SchedulePickupRoute: SchedulePickupRoute,
+  ScrapRateRoute: ScrapRateRoute,
+  SubmitTestimonialRoute: SubmitTestimonialRoute,
   TermsRoute: TermsRoute,
   TermsconditionRoute: TermsconditionRoute,
-  WarehousesRoute: WarehousesRoute,
+  IndustriesIndustryIdRoute: IndustriesIndustryIdRoute,
+  ServicesServiceIdRoute: ServicesServiceIdRoute,
+  TrackPickupTokenRoute: TrackPickupTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

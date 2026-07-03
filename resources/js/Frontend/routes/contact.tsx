@@ -1,166 +1,152 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { motion } from "framer-motion";
-import { Mail, Phone, MapPin, MessageCircle, ArrowLeft, Send } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
 import { useRef, useState } from "react";
-import { z } from "zod";
+import { MapPin, Phone, Mail, Clock, Send, Building2, Factory, ArrowRight, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
-import { Navbar } from "@/components/site/Navbar";
-import { Footer } from "@/components/site/Footer";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { SiteLayout, PageHero } from "@/Frontend/components/SiteLayout";
+import { company, companyMeta } from "@/Frontend/lib/site-data";
+import { usePageSection } from "@/Frontend/lib/dynamic-content";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
-      { title: "Contact Us — Scrapify | Get in Touch" },
-      { name: "description", content: "Reach the Scrapify team for support, partnerships or feedback. Call, email or send us a message." },
-      { property: "og:title", content: "Contact Scrapify" },
-      { property: "og:description", content: "Get in touch with India's smartest doorstep scrap pickup service." },
+      { title: "Contact Us | ABHYUTHANAM RECYCLER" },
+      { name: "description", content: "Get in touch with ABHYUTHANAM RECYCLER for secure e-waste recycling, ITAD and bulk pickup enquiries across India." },
+      { property: "og:title", content: "Contact ABHYUTHANAM RECYCLER" },
+      { property: "og:description", content: "Reach our team for e-waste pickup and enquiries." },
     ],
   }),
-  component: ContactPage,
+  component: Contact,
 });
 
-const contactSchema = z.object({
-  name: z.string().trim().min(2, "Name is too short").max(100),
-  email: z.string().trim().email("Enter a valid email").max(255),
-  subject: z.string().trim().min(3, "Subject is too short").max(150),
-  message: z.string().trim().min(10, "Message must be at least 10 characters").max(1000),
-});
-
-const channels = [
-  { icon: Phone, title: "Call Us", value: "+91 11 3574 8627", href: "tel:+911135748627", note: "Mon–Sat, 9 AM – 7 PM" },
-  { icon: Mail, title: "Email Us", value: "support@scrapify.in", href: "mailto:support@scrapify.in", note: "Reply within 24 hours" },
-  { icon: MessageCircle, title: "WhatsApp / Mobile", value: "+91 98702 91813", href: "https://wa.me/919870291813", note: "Chat anytime" },
-  { icon: MapPin, title: "Office", value: "E-44/3 Okhla Industrial Area Phase - 2, New Delhi - 110020", href: "#", note: "Visit by appointment" },
-];
-
-function ContactPage() {
+function Contact() {
+  const [sent, setSent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const formRef = useRef<HTMLFormElement>(null);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setErrors({});
+
     const fd = new FormData(e.currentTarget);
-    const data = {
-      name: String(fd.get("name") || ""),
-      email: String(fd.get("email") || ""),
-      subject: String(fd.get("subject") || ""),
-      message: String(fd.get("message") || ""),
+    const payload = {
+      name: String(fd.get("name") || "").trim(),
+      phone: String(fd.get("phone") || "").trim() || null,
+      email: String(fd.get("email") || "").trim(),
+      subject: String(fd.get("subject") || "").trim() || null,
+      message: String(fd.get("message") || "").trim(),
     };
-    const parsed = contactSchema.safeParse(data);
-    if (!parsed.success) {
-      toast.error(parsed.error.issues[0]?.message ?? "Please check the form");
-      return;
-    }
+
     setSubmitting(true);
-    await new Promise((r) => setTimeout(r, 700));
-    setSubmitting(false);
-    toast.success("Message sent! We'll get back to you within 24 hours.");
-    formRef.current?.reset();
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const result = await res.json();
+
+      if (!res.ok) {
+        if (result.errors) {
+          const fieldErrors: Record<string, string> = {};
+          Object.entries(result.errors).forEach(([key, msgs]) => {
+            fieldErrors[key] = Array.isArray(msgs) ? String(msgs[0]) : String(msgs);
+          });
+          setErrors(fieldErrors);
+          toast.error(Object.values(fieldErrors)[0] ?? "Please check the form and try again.");
+        } else {
+          toast.error(result.message || "Something went wrong. Please try again.");
+        }
+        return;
+      }
+
+      setSent(true);
+      formRef.current?.reset();
+    } catch {
+      toast.error("Network error. Please check your connection and try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
+  const infoSection = usePageSection("contact", "info");
+  const info = infoSection?.json ?? {};
+  const plantAddress = info.plant_address ?? companyMeta.plantAddress;
+  const cards = [
+    { icon: Factory, title: "Plant Address", lines: [plantAddress] },
+    { icon: Building2, title: "Corporate Office", lines: [info.corporate_address ?? companyMeta.corporateAddress] },
+    { icon: Phone, title: "Phone", lines: Array.isArray(info.phones) && info.phones.length > 0 ? info.phones : companyMeta.phonesAll },
+    { icon: Mail, title: "Email", lines: Array.isArray(info.emails) && info.emails.length > 0 ? info.emails : companyMeta.emails },
+    { icon: Clock, title: "Working Hours", lines: [info.hours ?? company.hours] },
+  ];
   return (
-    <main className="min-h-screen bg-background">
-      <Navbar />
-      <section className="relative overflow-hidden pt-32 pb-12">
-        <div className="absolute inset-0 -z-10 gradient-primary opacity-10" />
-        <div className="absolute -top-20 right-0 -z-10 h-72 w-72 rounded-full bg-primary/20 blur-3xl" />
-        <div className="absolute -bottom-20 left-0 -z-10 h-72 w-72 rounded-full bg-accent/20 blur-3xl" />
-
-        <div className="mx-auto w-[min(1100px,94%)] text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/70 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-primary-deep backdrop-blur"
-          >
-            <MessageCircle className="h-3.5 w-3.5" />
-            Contact Us
-          </motion.div>
-          <h1 className="mt-5 text-4xl md:text-6xl font-extrabold tracking-tight text-foreground">
-            We'd love to <span className="text-primary-deep">hear from you.</span>
-          </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-base md:text-lg text-muted-foreground">
-            Questions, feedback, partnership ideas — our team is here to help.
-          </p>
-        </div>
-      </section>
-
-      <section className="pb-20">
-        <div className="mx-auto w-[min(1100px,94%)] grid gap-6 lg:grid-cols-5">
-          {/* Channels */}
-          <div className="lg:col-span-2 grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
-            {channels.map((c, i) => {
-              const Icon = c.icon;
-              return (
-                <motion.a
-                  key={c.title} href={c.href} target={c.href.startsWith("http") ? "_blank" : undefined} rel="noopener noreferrer"
-                  initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.05 }}
-                  className="group block rounded-2xl border border-border/60 bg-card p-5 shadow-soft hover:shadow-glow transition-spring hover:-translate-y-0.5"
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl gradient-primary text-primary-foreground shadow-soft">
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold uppercase tracking-widest text-navy">{c.title}</p>
-                      <p className="mt-1 font-semibold text-foreground">{c.value}</p>
-                      <p className="text-xs text-muted-foreground">{c.note}</p>
-                    </div>
-                  </div>
-                </motion.a>
-              );
-            })}
+    <SiteLayout>
+      <PageHero breadcrumb="Home / Contact" title="Contact Us" subtitle="We'd love to hear from you. Reach out for pickups, quotes and enquiries." />
+      <section className="section">
+        <div className="container-px grid gap-10 lg:grid-cols-2">
+          <div className="space-y-4">
+            {cards.map(({ icon: Icon, title, lines }) => (
+              <div key={title} className="flex gap-4 rounded-3xl border border-border bg-card p-6 shadow-soft transition-all hover:-translate-y-0.5 hover:shadow-card">
+                <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-accent text-brand"><Icon className="size-6" /></span>
+                <div>
+                  <h3 className="font-bold text-navy">{title}</h3>
+                  {lines.map((l) => <p key={l} className="text-sm text-muted-foreground">{l}</p>)}
+                </div>
+              </div>
+            ))}
+            <div className="flex flex-wrap gap-3 pt-2">
+              <a href="/schedule-pickup" className="btn-primary">Schedule Pickup <ArrowRight className="size-4" /></a>
+              <a href={`mailto:${companyMeta.emails[0]}`} className="btn-outline">Request a Quote</a>
+            </div>
           </div>
-
-          {/* Form */}
-          <motion.form
-            ref={formRef} onSubmit={handleSubmit}
-            initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }} transition={{ duration: 0.5 }}
-            className="lg:col-span-3 rounded-3xl border border-border/60 bg-card p-6 md:p-10 shadow-soft"
-          >
-            <h2 className="text-2xl md:text-3xl font-extrabold text-foreground">Send us a message</h2>
-            <p className="mt-1 text-sm text-muted-foreground">We respond within 24 hours.</p>
-
-            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="rounded-3xl border border-border bg-card p-8 shadow-card">
+            <h2 className="text-2xl font-bold text-navy">Send an Enquiry</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Fill the form and our team will get back to you.</p>
+            <form ref={formRef} className="mt-6 space-y-4" onSubmit={handleSubmit}>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Full Name" name="name" error={errors.name} />
+                <Field label="Phone" name="phone" type="tel" error={errors.phone} />
+              </div>
+              <Field label="Email" name="email" type="email" error={errors.email} />
+              <Field label="Subject" name="subject" error={errors.subject} />
               <div>
-                <Label htmlFor="name" className="text-sm font-semibold">Name *</Label>
-                <Input id="name" name="name" required maxLength={100} placeholder="Your name" className="mt-2" />
+                <label className="mb-1.5 block text-sm font-semibold text-navy">Message</label>
+                <textarea name="message" required rows={4} className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/20" />
+                {errors.message && <p className="mt-1 text-xs font-medium text-destructive">{errors.message}</p>}
               </div>
-              <div>
-                <Label htmlFor="email" className="text-sm font-semibold">Email *</Label>
-                <Input id="email" name="email" type="email" required maxLength={255} placeholder="you@example.com" className="mt-2" />
-              </div>
-              <div className="md:col-span-2">
-                <Label htmlFor="subject" className="text-sm font-semibold">Subject *</Label>
-                <Input id="subject" name="subject" required maxLength={150} placeholder="How can we help?" className="mt-2" />
-              </div>
-              <div className="md:col-span-2">
-                <Label htmlFor="message" className="text-sm font-semibold">Message *</Label>
-                <Textarea id="message" name="message" required rows={5} maxLength={1000} placeholder="Tell us a bit more…" className="mt-2" />
-              </div>
+              <button type="submit" disabled={submitting} className="btn-primary w-full justify-center disabled:opacity-60">
+                {submitting ? "Submitting…" : "Submit Enquiry"} <Send className="size-4" />
+              </button>
+              {sent && <p className="text-center text-sm font-semibold text-brand">Thank you! Your enquiry has been received.</p>}
+            </form>
+          </div>
+        </div>
+        <div className="container-px mt-12">
+          <div className="overflow-hidden rounded-3xl border border-border shadow-card">
+            <div className="flex flex-wrap items-center justify-between gap-3 bg-navy px-6 py-4 text-navy-foreground">
+              <p className="flex items-center gap-2 text-sm font-semibold"><MapPin className="size-4 text-lime" /> {plantAddress}</p>
+              <a href={companyMeta.mapLink} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full bg-brand px-4 py-2 text-xs font-semibold text-brand-foreground transition-colors hover:bg-lime">Open in Google Maps <ExternalLink className="size-3.5" /></a>
             </div>
-
-            <button
-              type="submit" disabled={submitting}
-              className="mt-6 inline-flex items-center justify-center gap-2 rounded-full gradient-primary px-8 py-3 text-sm font-bold text-primary-foreground shadow-soft hover:shadow-glow transition-spring hover:-translate-y-0.5 disabled:opacity-60"
-            >
-              <Send className="h-4 w-4" />
-              {submitting ? "Sending…" : "Send Message"}
-            </button>
-
-            <div className="mt-6">
-              <Link to="/" className="inline-flex items-center gap-2 text-sm font-semibold text-primary-deep hover:underline">
-                <ArrowLeft className="h-4 w-4" /> Back to Home
-              </Link>
-            </div>
-          </motion.form>
+            <iframe
+              title="ABHYUTHANAM plant location"
+              src={companyMeta.mapEmbed}
+              className="h-80 w-full border-0"
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          </div>
         </div>
       </section>
+    </SiteLayout>
+  );
+}
 
-      <Footer />
-    </main>
+function Field({ label, name, type = "text", error }: { label: string; name: string; type?: string; error?: string }) {
+  return (
+    <div>
+      <label className="mb-1.5 block text-sm font-semibold text-navy">{label}</label>
+      <input required name={name} type={type} className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/20" />
+      {error && <p className="mt-1 text-xs font-medium text-destructive">{error}</p>}
+    </div>
   );
 }

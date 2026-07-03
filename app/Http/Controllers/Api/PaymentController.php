@@ -16,14 +16,14 @@ class PaymentController extends Controller
     use ApiResponseTrait;
 
     /**
-     * Move request to payment pending (warehouse action)
+     * Move request to payment pending (admin action)
      */
     public function moveToPaymentPending($id)
     {
         $request = PickupRequest::findOrFail($id);
 
-        // Only warehouse/admin can move to payment pending
-        if (!Auth::user()->hasRole(['admin', 'warehouse'])) {
+        // Only admin can move to payment pending
+        if (!Auth::user()->hasRole(['admin'])) {
             return $this->errorResponse('auth.unauthorized', 403);
         }
 
@@ -42,7 +42,7 @@ class PaymentController extends Controller
             $request->transitionTo(
                 RequestStatus::PAYMENT_PENDING,
                 Auth::id(),
-                'warehouse',
+                'admin',
                 'Moved to payment pending'
             );
 
@@ -189,9 +189,9 @@ class PaymentController extends Controller
     {
         $request = PickupRequest::findOrFail($id);
 
-        // Authorization: customer, admin, warehouse, payment_admin
+        // Authorization: customer, admin, payment_admin
         $user = Auth::user();
-        if ($request->customer_id !== $user->id && !$user->hasAnyRole(['admin', 'warehouse', 'payment_admin'])) {
+        if ($request->customer_id !== $user->id && !$user->hasAnyRole(['admin', 'payment_admin'])) {
             return $this->errorResponse('auth.unauthorized', 403);
         }
 

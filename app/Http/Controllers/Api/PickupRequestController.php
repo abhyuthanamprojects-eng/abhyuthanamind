@@ -9,10 +9,9 @@ use App\Models\Category;
 use App\Models\Attribute;
 use App\Models\PickupRequestAttribute;
 use App\Models\AppSetting;
-use App\Models\Warehouse;
 use App\Services\LocationService;
+use App\Services\ServiceabilityService;
 
-use App\Services\ReferralService;
 use App\Services\HomeAppliancePricingService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
@@ -50,13 +49,6 @@ class PickupRequestController extends Controller
 
         if ($user->hasRole('customer')) {
             $query->where('customer_id', $user->id);
-        } elseif ($user->hasRole('channel_partner')) {
-            $query->where('channel_partner_id', $user->channel_partner_id);
-        } elseif ($user->hasRole('pickup_boy')) {
-            // Pickup boy sees assigned requests
-            $query->whereHas('assignments', function ($q) use ($user) {
-                $q->where('pickup_boy_id', $user->id);
-            });
         }
         // Admin sees all
 
@@ -95,12 +87,6 @@ class PickupRequestController extends Controller
 
         if ($user->hasRole('customer')) {
             $query->where('customer_id', $user->id);
-        } elseif ($user->hasRole('channel_partner')) {
-            $query->where('channel_partner_id', $user->channel_partner_id);
-        } elseif ($user->hasRole('pickup_boy')) {
-            $query->whereHas('assignments', function ($q) use ($user) {
-                $q->where('pickup_boy_id', $user->id);
-            });
         }
 
         $stats = [
@@ -165,7 +151,6 @@ class PickupRequestController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
-        $isPartner = $user->hasRole('channel_partner');
 
         $validator = Validator::make($request->all(), [
             'address_id' => 'nullable|exists:addresses,id',
@@ -198,10 +183,8 @@ class PickupRequestController extends Controller
             'items.*.attributes.*.attribute_id' => 'required|exists:attributes,id',
             'items.*.attributes.*.attribute_option_id' => 'nullable|exists:attribute_options,id',
             'items.*.attributes.*.value' => 'required',
-            // Partner specific
-            'customer_name' => $isPartner ? 'required|string' : 'nullable',
-            'customer_phone' => $isPartner ? 'required|string|regex:/^[6-9]\d{9}$/' : 'nullable',
-            // Referral coupon (customer only)
+            'customer_name' => 'nullable|string',
+            'customer_phone' => 'nullable|string',
             'coupon_code' => 'nullable|string',
         ]);
 
@@ -285,18 +268,14 @@ class PickupRequestController extends Controller
         DB::beginTransaction();
 
         try {
-            $warehouse = $this->resolveWarehouseByPincode($pincode, $lat, $lng);
+            $resolvedPincode = $this->resolveServiceabilityPincode($pincode, $lat, $lng);
+            $isServiceable = $user->phone === '9999999999' || ServiceabilityService::isServiceable($resolvedPincode);
 
-            if (!$warehouse && $user->phone === '9999999999') {
-                $warehouse = Warehouse::where('status', true)->orderBy('id')->first();
-            }
-
-            if (!$warehouse) {
+            if (!$isServiceable) {
                 DB::rollBack();
 
                 return $this->validationErrorResponse([
-                    'warehouse' => ['No active warehouse is mapped for this booking pincode. Please add the pincode in warehouse service pincodes before accepting bookings.'],
-                    'pincode' => [$pincode ?: 'Pincode could not be resolved from the selected address/location.'],
+                    'pincode' => ['We are not currently serving this pincode.'],
                 ]);
             }
 
@@ -305,11 +284,9 @@ class PickupRequestController extends Controller
                 'customer_id' => $user->id,
                 'address_id' => $request->address_id,
                 'payment_detail_id' => $request->payment_detail_id,
-                'warehouse_id' => $warehouse->id,
                 'created_by' => $user->id,
-                'channel_partner_id' => $isPartner ? $user->channel_partner_id : null,
-                'customer_name' => $isPartner ? $request->customer_name : $user->name,
-                'customer_phone' => $isPartner ? $request->customer_phone : $user->phone,
+                'customer_name' => $request->customer_name ?: $user->name,
+                'customer_phone' => $request->customer_phone ?: $user->phone,
                 'city_id' => $cityId,
                 'address' => $addressStr,
                 'latitude' => $lat,
@@ -425,22 +402,9 @@ class PickupRequestController extends Controller
                 'created_by' => $user->id,
             ]);
 
-            // Apply referral coupon (customer only)
-            if ($request->filled('coupon_code') && $user->hasRole('customer')) {
-                $referralService = app(ReferralService::class);
-                $couponResult = $referralService->validateCoupon($request->coupon_code, $user, (float) $finalEstimatedAmount);
-                if (!$couponResult['ok']) {
-                    DB::rollBack();
-                    return $this->errorResponse($couponResult['message'], 422, [
-                        'coupon_code' => [trans($couponResult['message'])],
-                    ]);
-                }
-                $referralService->applyCouponToBooking($couponResult['coupon'], $pickup, $couponResult['discount']);
-            }
-
             DB::commit();
 
-            return $this->successResponse('pickup.created', $pickup->fresh()->load('items', 'images', 'referralCoupon', 'partnerCustomer'), 201);
+            return $this->successResponse('pickup.created', $pickup->fresh()->load('items', 'images'), 201);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -550,18 +514,18 @@ class PickupRequestController extends Controller
         return $this->successResponse('pickup.eligibility_checked', $eligibility);
     }
 
-    private function resolveWarehouseByPincode(?string $pincode, $lat = null, $lng = null): ?Warehouse
+    private function resolveServiceabilityPincode(?string $pincode, $lat = null, $lng = null): ?string
     {
-        $normalized = Warehouse::normalizePincode($pincode);
+        $normalized = ServiceabilityService::normalizePincode($pincode);
         $requestLat = is_numeric($lat) ? (float) $lat : null;
         $requestLng = is_numeric($lng) ? (float) $lng : null;
 
         if (!$normalized && $requestLat !== null && $requestLng !== null) {
             $geo = app(LocationService::class)->reverseGeocode($requestLat, $requestLng);
-            $normalized = Warehouse::normalizePincode($geo['pincode'] ?? null);
+            $normalized = ServiceabilityService::normalizePincode($geo['pincode'] ?? null);
         }
 
-        return Warehouse::findBestByPincode($normalized, $requestLat, $requestLng);
+        return $normalized;
     }
 
     /**
@@ -584,7 +548,7 @@ class PickupRequestController extends Controller
     public function show($id)
     {
         $user = Auth::user();
-        $pickup = PickupRequest::with(['items.category.pricingRules', 'images', 'assignments.pickupBoy'])
+        $pickup = PickupRequest::with(['items.category.pricingRules', 'images'])
             ->find($id);
 
         if (!$pickup) {
@@ -593,9 +557,6 @@ class PickupRequestController extends Controller
 
         // Access control
         if ($user->hasRole('customer') && $pickup->customer_id != $user->id) {
-            return $this->errorResponse('pickup.unauthorized', 403);
-        }
-        if ($user->hasRole('channel_partner') && $pickup->channel_partner_id != $user->channel_partner_id) {
             return $this->errorResponse('pickup.unauthorized', 403);
         }
 
@@ -665,13 +626,6 @@ class PickupRequestController extends Controller
             return $this->errorResponse('pickup.reschedule_invalid_status', 400, ['status' => $pickup->status]);
         }
         
-        if ($user->hasRole('pickup_boy')) {
-            $assignment = $pickup->assignments()->where('pickup_boy_id', $user->id)->first();
-            if (!$assignment) {
-                return $this->errorResponse('pickup.unauthorized', 403);
-            }
-        }
-
         try {
             $scheduledAt = $request->scheduled_at;
             

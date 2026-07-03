@@ -7,8 +7,8 @@ use App\Models\PickupRequest;
 use App\Models\PickupItem;
 use App\Models\PickupRequestAttribute;
 use App\Models\AppSetting;
-use App\Models\Warehouse;
 use App\Services\LocationService;
+use App\Services\ServiceabilityService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -159,19 +159,13 @@ class DonationRequestController extends Controller
         DB::beginTransaction();
 
         try {
-            $warehouse = $this->findDonationWarehouseByPincode($pincode, $lat, $lng);
+            $resolvedPincode = $this->resolveServiceabilityPincode($pincode, $lat, $lng);
+            $isServiceable = $user->phone === '9999999999' || ServiceabilityService::isServiceable($resolvedPincode);
 
-            if (!$warehouse && $user->phone === '9999999999') {
-                $warehouse = Warehouse::where('status', true)
-                    ->where('accepts_donation', true)
-                    ->orderBy('id')
-                    ->first();
-            }
-
-            if (!$warehouse) {
+            if (!$isServiceable) {
                 DB::rollBack();
                 return $this->validationErrorResponse([
-                    'warehouse' => ['No warehouse is currently enabled for donation bookings in your area.'],
+                    'pincode' => ['We are not currently serving this pincode for donation bookings.'],
                 ]);
             }
 
@@ -181,7 +175,6 @@ class DonationRequestController extends Controller
                 'pickup_code' => 'DON-' . strtoupper(Str::random(6)) . '-' . rand(1000, 9999),
                 'customer_id' => $user->id,
                 'address_id' => $request->address_id,
-                'warehouse_id' => $warehouse ? $warehouse->id : null,
                 'created_by' => $user->id,
                 'customer_name' => $user->name,
                 'customer_phone' => $user->phone,
@@ -303,7 +296,6 @@ class DonationRequestController extends Controller
                 'pickup_code' => 'DON-' . strtoupper(Str::random(6)) . '-' . rand(1000, 9999),
                 'customer_id' => $user->id,
                 'address_id' => $source->address_id,
-                'warehouse_id' => $source->warehouse_id,
                 'created_by' => $user->id,
                 'customer_name' => $user->name,
                 'customer_phone' => $user->phone,
@@ -347,17 +339,17 @@ class DonationRequestController extends Controller
         }
     }
 
-    protected function findDonationWarehouseByPincode(?string $pincode, $lat = null, $lng = null): ?Warehouse
+    protected function resolveServiceabilityPincode(?string $pincode, $lat = null, $lng = null): ?string
     {
-        $normalized = Warehouse::normalizePincode($pincode);
+        $normalized = ServiceabilityService::normalizePincode($pincode);
         $requestLat = is_numeric($lat) ? (float) $lat : null;
         $requestLng = is_numeric($lng) ? (float) $lng : null;
 
         if (!$normalized && $requestLat !== null && $requestLng !== null) {
             $geo = app(LocationService::class)->reverseGeocode($requestLat, $requestLng);
-            $normalized = Warehouse::normalizePincode($geo['pincode'] ?? null);
+            $normalized = ServiceabilityService::normalizePincode($geo['pincode'] ?? null);
         }
 
-        return Warehouse::findBestByPincode($normalized, $requestLat, $requestLng, 'donation');
+        return $normalized;
     }
 }

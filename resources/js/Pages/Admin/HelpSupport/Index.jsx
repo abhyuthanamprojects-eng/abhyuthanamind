@@ -1,123 +1,90 @@
+import { useState } from 'react';
+import { router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
-import { Head, Link, router } from '@inertiajs/react';
-import AdminHeader from '@/Components/Admin/AdminHeader';
-import { AdminTablePagination } from '@/Components/Admin/AdminTable';
-import { ChevronRight, HelpCircle } from 'lucide-react';
+import { Eye, HelpCircle } from 'lucide-react';
+import { PageHeader, StatusBadge, FilterBar, Panel, EmptyState, ActionBtn, Pagination } from '@/Components/Admin/AdminUI';
+import { cn } from '@/lib/utils';
+
+const tabs = ['all', 'pending', 'in_progress', 'resolved', 'closed'];
 
 export default function Index({ tickets, filters, statusCounts }) {
-    const handleFilter = (key, value) => {
-        router.get(route('admin.help-support.index'), { ...filters, [key]: value }, { preserveState: true });
-    };
+    const [search, setSearch] = useState(filters.search || '');
 
-    const statusColors = {
-        pending: 'text-bg-warning',
-        in_progress: 'text-bg-info',
-        resolved: 'text-bg-success',
-        closed: 'text-bg-secondary',
+    const applyFilter = (next) => {
+        router.get(route('admin.help-support.index'), { ...filters, ...next }, { preserveState: true, replace: true });
     };
 
     return (
-        <AdminLayout>
-            <Head title="Help & Support" />
+        <AdminLayout title="Help & Support">
+            <PageHeader title="Help & Support Tickets" subtitle="Customer and partner support queries submitted via the mobile app." />
 
-            <AdminHeader
-                title="Help & Support Tickets"
-                subtitle="Manage customer and partner support queries submitted via mobile app."
-                icon={<HelpCircle size={20} />}
-            />
+            <div className="mb-4 flex flex-wrap gap-2">
+                {tabs.map((s) => {
+                    const active = filters.status === s || (!filters.status && s === 'all');
+                    return (
+                        <button
+                            key={s}
+                            type="button"
+                            onClick={() => applyFilter({ status: s === 'all' ? '' : s })}
+                            className={cn(
+                                'inline-flex items-center gap-2 rounded-2xl px-4 py-2 text-sm font-semibold capitalize transition',
+                                active ? 'bg-brand text-brand-foreground shadow-soft' : 'border border-border bg-card text-navy hover:bg-muted',
+                            )}
+                        >
+                            {s.replace('_', ' ')}
+                            {statusCounts?.[s] !== undefined && (
+                                <span className={cn('rounded-full px-2 py-0.5 text-[0.7rem] font-bold', active ? 'bg-white/25' : 'bg-muted text-muted-foreground')}>{statusCounts[s]}</span>
+                            )}
+                        </button>
+                    );
+                })}
+            </div>
 
-            <div className="card w-100">
-                <div className="card-header bg-transparent d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3">
-                    <div className="btn-group flex-wrap" role="group">
-                        {['all', 'pending', 'in_progress', 'resolved', 'closed'].map((s) => (
-                            <button
-                                key={s}
-                                type="button"
-                                onClick={() => handleFilter('status', s === 'all' ? '' : s)}
-                                className={`btn btn-sm text-capitalize ${
-                                    (filters.status === s || (!filters.status && s === 'all'))
-                                        ? 'btn-primary'
-                                        : 'btn-outline-secondary'
-                                }`}
-                            >
-                                {s.replace('_', ' ')}
-                                {statusCounts?.[s] !== undefined && (
-                                    <span className="badge bg-light text-dark rounded-pill ms-2">{statusCounts[s]}</span>
-                                )}
-                            </button>
-                        ))}
+            <FilterBar query={search} onQuery={(v) => { setSearch(v); applyFilter({ search: v }); }} placeholder="Search tickets…" />
+
+            <Panel className="p-0">
+                {tickets.data.length === 0 ? (
+                    <div className="p-6">
+                        <EmptyState icon={HelpCircle} title="No support tickets found" message="Try adjusting your search or filters." />
                     </div>
-
-                    <input
-                        type="text"
-                        placeholder="Search tickets..."
-                        value={filters.search || ''}
-                        onChange={e => handleFilter('search', e.target.value)}
-                        className="form-control"
-                        style={{ maxWidth: '16rem' }}
-                    />
-                </div>
-
-                <div className="card-body p-0">
-                    <div className="table-responsive">
-                        <table className="table table-hover align-middle mb-0">
-                            <thead className="table-light">
-                                <tr>
-                                    <th>User</th>
-                                    <th>Subject</th>
-                                    <th>Type</th>
-                                    <th>Status</th>
-                                    <th>Date</th>
-                                    <th className="text-end">Action</th>
+                ) : (
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                            <thead>
+                                <tr className="border-b border-border text-left text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                                    <th className="px-5 py-3">User</th>
+                                    <th className="px-5 py-3">Subject</th>
+                                    <th className="px-5 py-3">Type</th>
+                                    <th className="px-5 py-3">Status</th>
+                                    <th className="px-5 py-3">Date</th>
+                                    <th className="px-5 py-3 text-right">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {tickets.data.length === 0 ? (
-                                    <tr>
-                                        <td colSpan="6" className="text-center py-5 text-secondary fst-italic">No support tickets found.</td>
+                                {tickets.data.map((t) => (
+                                    <tr key={t.id} className="border-b border-border last:border-0 hover:bg-eco/40">
+                                        <td className="px-5 py-3">
+                                            <p className="font-semibold text-navy">{t.name || t.user?.name || 'Guest'}</p>
+                                            <p className="text-xs capitalize text-muted-foreground">{t.user_role || 'Visitor'}</p>
+                                        </td>
+                                        <td className="px-5 py-3">
+                                            <p className="max-w-xs truncate font-medium text-navy">{t.subject}</p>
+                                            {t.pickup_request_id && <p className="mt-0.5 text-xs font-bold uppercase text-brand">Order #{t.pickup_request_id}</p>}
+                                        </td>
+                                        <td className="px-5 py-3 capitalize text-muted-foreground">{t.type}</td>
+                                        <td className="px-5 py-3"><StatusBadge status={t.status} /></td>
+                                        <td className="px-5 py-3 text-muted-foreground">{new Date(t.created_at).toLocaleDateString()}</td>
+                                        <td className="px-5 py-3 text-right">
+                                            <ActionBtn icon={Eye} label="View ticket" tone="brand" href={route('admin.help-support.show', t.id)} />
+                                        </td>
                                     </tr>
-                                ) : (
-                                    tickets.data.map((t) => (
-                                        <tr key={t.id}>
-                                            <td>
-                                                <div className="fw-semibold">{t.name || t.user?.name || 'Guest'}</div>
-                                                <div className="text-secondary fs-2 text-capitalize">{t.user_role || 'Visitor'}</div>
-                                            </td>
-                                            <td>
-                                                <div className="text-truncate fw-medium" style={{ maxWidth: '200px' }}>{t.subject}</div>
-                                                {t.pickup_request_id && (
-                                                    <div className="text-info fs-2 fw-bold text-uppercase mt-1">Order #{t.pickup_request_id}</div>
-                                                )}
-                                            </td>
-                                            <td className="text-capitalize">{t.type}</td>
-                                            <td>
-                                                <span className={`badge rounded-pill ${statusColors[t.status]}`}>
-                                                    {t.status.replace('_', ' ')}
-                                                </span>
-                                            </td>
-                                            <td>{new Date(t.created_at).toLocaleDateString()}</td>
-                                            <td className="text-end">
-                                                <Link
-                                                    href={route('admin.help-support.show', t.id)}
-                                                    className="d-inline-flex align-items-center text-primary fw-semibold text-decoration-none"
-                                                >
-                                                    View <ChevronRight size={16} className="ms-1" />
-                                                </Link>
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
+                                ))}
                             </tbody>
                         </table>
                     </div>
-
-                    {tickets.links.length > 3 && (
-                        <div className="card-footer bg-transparent">
-                            <AdminTablePagination links={tickets.links} />
-                        </div>
-                    )}
-                </div>
-            </div>
+                )}
+            </Panel>
+            <Pagination links={tickets.links} />
         </AdminLayout>
     );
 }

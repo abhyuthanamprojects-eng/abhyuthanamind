@@ -31,18 +31,20 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Scrapify — कबाड़ हटाओ, कैश पाओ" },
-      { name: "description", content: "India's smartest doorstep scrap pickup. Book free pickup, get paid instantly." },
-      { name: "author", content: "Scrapify" },
-      { property: "og:title", content: "Scrapify — कबाड़ हटाओ, कैश पाओ" },
-      { property: "og:description", content: "India's smartest doorstep scrap pickup. Book free pickup, get paid instantly." },
+      { title: "ABHYUTHANAM RECYCLER | India's Leading E-Waste Management Company" },
+      {
+        name: "description",
+        content:
+          "ABHYUTHANAM RECYCLER offers secure, sustainable and certified e-waste recycling, ITAD, EPR, reverse logistics and data sanitization across India.",
+      },
+      { name: "author", content: "ABHYUTHANAM RECYCLER" },
+      { property: "og:title", content: "ABHYUTHANAM RECYCLER | India's Leading E-Waste Management Company" },
+      {
+        property: "og:description",
+        content: "Secure, sustainable and certified e-waste recycling and IT asset disposition.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
-      { name: "twitter:title", content: "Scrapify — कबाड़ हटाओ, कैश पाओ" },
-      { name: "twitter:description", content: "India's smartest doorstep scrap pickup. Book free pickup, get paid instantly." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/278cb4fc-1780-4527-9f3b-cc50460b1165/id-preview-ad094c87--98f928f3-596f-4b9a-855a-39956f6bf389.lovable.app-1776970592177.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/278cb4fc-1780-4527-9f3b-cc50460b1165/id-preview-ad094c87--98f928f3-596f-4b9a-855a-39956f6bf389.lovable.app-1776970592177.png" },
     ],
     links: [
       {

@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\AppSetting;
 use App\Models\CategoryType;
 use App\Models\HomeBanner;
-use App\Models\Warehouse;
 use App\Services\LocationService;
+use App\Services\ServiceabilityService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -76,18 +76,15 @@ class AppSettingsController extends Controller
             'service_type' => 'scrap_pickup',
             'location_name' => $request->location_name ?? 'Unknown',
             'pincode' => null,
-            'matched_warehouse_id' => null,
-            'matched_warehouse_name' => null,
-            'matched_warehouses' => [],
             'message' => trans('service.not_available'),
         ];
 
-        $resolvedPincode = Warehouse::normalizePincode($request->input('pincode'));
+        $resolvedPincode = ServiceabilityService::normalizePincode($request->input('pincode'));
 
         if (!$resolvedPincode && $request->latitude && $request->longitude) {
             try {
                 $geo = app(LocationService::class)->reverseGeocode((float) $request->latitude, (float) $request->longitude);
-                $resolvedPincode = Warehouse::normalizePincode($geo['pincode'] ?? null);
+                $resolvedPincode = ServiceabilityService::normalizePincode($geo['pincode'] ?? null);
                 if ($resolvedPincode && !$request->filled('location_name')) {
                     $serviceAvailability['location_name'] = $geo['formatted_address'] ?? "Pincode {$resolvedPincode}";
                 }
@@ -96,78 +93,21 @@ class AppSettingsController extends Controller
             }
         }
 
-        if ($resolvedPincode) {
-            try {
-                $requestLat = $request->filled('latitude') ? (float) $request->latitude : null;
-                $requestLng = $request->filled('longitude') ? (float) $request->longitude : null;
-                $matchingWarehouses = Warehouse::matchingByPincode($resolvedPincode, 'scrap_pickup');
-
-                if ($matchingWarehouses->isNotEmpty()) {
-                    $matchedWarehouses = $matchingWarehouses
-                        ->map(function (Warehouse $warehouse) use ($requestLat, $requestLng) {
-                            $distanceKm = null;
-                            if (
-                                $requestLat !== null && $requestLng !== null &&
-                                $warehouse->latitude !== null && $warehouse->longitude !== null
-                            ) {
-                                $distanceKm = round($this->calculateDistanceKm(
-                                    $requestLat,
-                                    $requestLng,
-                                    (float) $warehouse->latitude,
-                                    (float) $warehouse->longitude
-                                ), 2);
-                            }
-
-                            return [
-                                'id' => $warehouse->id,
-                                'name' => $warehouse->name,
-                                'code' => $warehouse->code,
-                                'pincodes' => $warehouse->service_pincodes ?? [],
-                                'distance_km' => $distanceKm,
-                            ];
-                        })
-                        ->sortBy(fn ($warehouse) => $warehouse['distance_km'] ?? PHP_FLOAT_MAX)
-                        ->values()
-                        ->all();
-
-                    $serviceAvailability = [
-                        'is_serviceable' => true,
-                        'service_type' => 'scrap_pickup',
-                        'location_name' => $serviceAvailability['location_name'] ?: "Pincode {$resolvedPincode}",
-                        'pincode' => $resolvedPincode,
-                        'matched_warehouse_id' => $matchedWarehouses[0]['id'] ?? $matchingWarehouses->first()->id,
-                        'matched_warehouse_name' => $matchedWarehouses[0]['name'] ?? $matchingWarehouses->first()->name,
-                        'matched_warehouses' => $matchedWarehouses,
-                        'message' => trans('service.available'),
-                    ];
-                }
-            } catch (\Exception $e) {
-                $serviceAvailability['message'] = "Service status unavailable (" . $e->getMessage() . "). Please check back later.";
-            }
-        }
+        $isServiceable = ServiceabilityService::isServiceable($resolvedPincode);
 
         // Dummy test customer (9999999999) can access all functionality
         // regardless of location/pincode serviceability.
-        if ($user && $user->phone === '9999999999' && !$serviceAvailability['is_serviceable']) {
-            $fallbackWarehouse = Warehouse::where('status', true)->orderBy('id')->first();
-
-            $serviceAvailability = [
-                'is_serviceable' => true,
-                'service_type' => 'scrap_pickup',
-                'location_name' => $serviceAvailability['location_name'] ?: 'Test Location',
-                'pincode' => $resolvedPincode,
-                'matched_warehouse_id' => $fallbackWarehouse?->id,
-                'matched_warehouse_name' => $fallbackWarehouse?->name,
-                'matched_warehouses' => $fallbackWarehouse ? [[
-                    'id' => $fallbackWarehouse->id,
-                    'name' => $fallbackWarehouse->name,
-                    'code' => $fallbackWarehouse->code,
-                    'pincodes' => $fallbackWarehouse->service_pincodes ?? [],
-                    'distance_km' => null,
-                ]] : [],
-                'message' => trans('service.available'),
-            ];
+        if ($user && $user->phone === '9999999999') {
+            $isServiceable = true;
         }
+
+        $serviceAvailability = [
+            'is_serviceable' => $isServiceable,
+            'service_type' => 'scrap_pickup',
+            'location_name' => $serviceAvailability['location_name'] ?: ($resolvedPincode ? "Pincode {$resolvedPincode}" : 'Unknown'),
+            'pincode' => $resolvedPincode,
+            'message' => $isServiceable ? trans('service.available') : trans('service.not_available'),
+        ];
 
         $data = [
             'language' => $user ? $user->language : App::getLocale(),
@@ -224,24 +164,6 @@ class AppSettingsController extends Controller
         ];
 
         return $this->successResponse('app_settings.fetched', $data);
-    }
-
-    private function calculateDistanceKm(float $lat1, float $lng1, float $lat2, float $lng2): float
-    {
-        $earthRadius = 6371.0;
-
-        $lat1 = deg2rad($lat1);
-        $lng1 = deg2rad($lng1);
-        $lat2 = deg2rad($lat2);
-        $lng2 = deg2rad($lng2);
-
-        $dLat = $lat2 - $lat1;
-        $dLng = $lng2 - $lng1;
-
-        $a = sin($dLat / 2) ** 2 + cos($lat1) * cos($lat2) * sin($dLng / 2) ** 2;
-        $c = 2 * atan2(sqrt($a), sqrt(max(0.0, 1 - $a)));
-
-        return $earthRadius * $c;
     }
 
     #[OA\Post(

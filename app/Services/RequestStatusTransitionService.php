@@ -99,11 +99,6 @@ class RequestStatusTransitionService
 
         // Check specific role permissions
         return match ($newStatus) {
-            // Warehouse operations
-            RequestStatus::PICKUP_BOY_ASSIGNED => in_array($role, [UserRole::WAREHOUSE]),
-            RequestStatus::WAREHOUSE_RECEIVED => in_array($role, [UserRole::WAREHOUSE]),
-            RequestStatus::PAYMENT_PENDING => in_array($role, [UserRole::WAREHOUSE]),
-
             // Pickup boy operations
             RequestStatus::PICKUP_STARTED => in_array($role, [UserRole::PICKUP_BOY]),
             RequestStatus::PICKUP_COMPLETED => in_array($role, [UserRole::PICKUP_BOY]),
@@ -112,17 +107,8 @@ class RequestStatusTransitionService
             RequestStatus::PAYMENT_PROCESSING,
             RequestStatus::PAYMENT_COMPLETED => in_array($role, [UserRole::ADMIN, UserRole::PAYMENT_ADMIN]),
 
-            // Completion
-            RequestStatus::COMPLETED => in_array($role, [UserRole::ADMIN, UserRole::WAREHOUSE]),
-
             // Cancellation
             RequestStatus::CANCELLED => true, // Multiple roles can cancel
-
-            // Estimate operations (corporate only)
-            RequestStatus::ESTIMATE_PENDING => in_array($role, [UserRole::ADMIN, UserRole::WAREHOUSE, UserRole::CUSTOMER]),
-            RequestStatus::ESTIMATE_SHARED => in_array($role, [UserRole::ADMIN, UserRole::WAREHOUSE]),
-            RequestStatus::ESTIMATE_APPROVED,
-            RequestStatus::ESTIMATE_REJECTED => in_array($role, [UserRole::ADMIN, UserRole::WAREHOUSE, UserRole::CUSTOMER]),
 
             // Default - only admin
             default => $role === UserRole::ADMIN,
@@ -245,16 +231,4 @@ class RequestStatusTransitionService
         return $type && $type->requiresEstimate();
     }
 
-    /**
-     * Validate if estimate is approved before pickup assignment (corporate only)
-     */
-    public static function isEstimateApprovedForPickup(PickupRequest $request): bool
-    {
-        if ($request->request_type !== 'corporate') {
-            return true; // Not applicable for non-corporate requests
-        }
-
-        $estimate = $request->corporateEstimate;
-        return $estimate && $estimate->isApproved();
-    }
 }

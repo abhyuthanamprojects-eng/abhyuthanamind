@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AppSetting;
 use App\Models\CategoryType;
 use App\Models\HomeBanner;
+use App\Models\MediaItem;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -46,7 +47,7 @@ class AppSettingsController extends Controller
             'default_city_id' => AppSetting::get('default_city_id', 1),
             'minimum_free_pickup_amount' => AppSetting::get('minimum_free_pickup_amount', 1500),
             'low_value_shipping_charge' => AppSetting::get('low_value_shipping_charge', 100),
-            'warehouse_service_pincodes_limit' => AppSetting::get('warehouse_service_pincodes_limit', 10),
+            'serviceable_pincodes' => AppSetting::get('serviceable_pincodes', []),
             'donation_products' => AppSetting::get('donation_products', ['Cloth', 'Shoes', 'Toys', 'Books']),
             'corporate_categories' => $corporateCategories,
             'corporate_meeting_types' => AppSetting::get('corporate_meeting_types', ['in_person', 'google_meet', 'skype']),
@@ -74,9 +75,15 @@ class AppSettingsController extends Controller
             'supported_languages' => AppSetting::get('supported_languages', ['en', 'hi', 'gu']),
         ];
 
+        $foundersData = AppSetting::get('founders_data', []);
+        $ownerMedia = MediaItem::where('category', 'owner')->ordered()->get(['id', 'title', 'file_path'])
+            ->map(fn($m) => ['id' => $m->id, 'title' => $m->title, 'file_url' => $m->file_url]);
+
         return Inertia::render('Admin/AppSettings/Index', [
             'settings' => $flat,
             'homeBanners' => HomeBanner::orderBy('sort_order')->get(['id', 'image_path', 'text', 'sort_order']),
+            'foundersData' => $foundersData,
+            'ownerMedia' => $ownerMedia,
         ]);
     }
 
@@ -103,7 +110,6 @@ class AppSettingsController extends Controller
             'default_city_id',
             'minimum_free_pickup_amount',
             'low_value_shipping_charge',
-            'warehouse_service_pincodes_limit',
         ];
 
         $stringFields = [
@@ -130,6 +136,7 @@ class AppSettingsController extends Controller
             'donation_products',
             'corporate_meeting_types',
             'scrap_proof_image_labels',
+            'serviceable_pincodes',
         ];
 
         foreach ($booleanFields as $key) {
@@ -157,6 +164,23 @@ class AppSettingsController extends Controller
                     $value = array_values(array_filter(array_map('trim', explode(',', $value))));
                 }
                 AppSetting::set($key, is_array($value) ? $value : [], 'json', 'settings');
+            }
+        }
+
+        if ($request->has('founders_data')) {
+            $founders = $request->input('founders_data');
+            if (is_array($founders)) {
+                $cleaned = array_map(fn($f) => [
+                    'name'        => $f['name'] ?? '',
+                    'role'        => $f['role'] ?? '',
+                    'bio'         => $f['bio'] ?? '',
+                    'leads'       => $f['leads'] ?? '',
+                    'linkedin_url' => $f['linkedin_url'] ?? '',
+                    'tagline'     => $f['tagline'] ?? '',
+                    'message'     => $f['message'] ?? '',
+                    'media_id'    => isset($f['media_id']) ? (int) $f['media_id'] : null,
+                ], $founders);
+                AppSetting::set('founders_data', $cleaned, 'json', 'website');
             }
         }
 

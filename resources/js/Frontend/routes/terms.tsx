@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { ScrollText, ArrowLeft } from "lucide-react";
-import { Navbar } from "@/components/site/Navbar";
-import { Footer } from "@/components/site/Footer";
+import { Header } from "@/Frontend/components/Header";
+import { Footer } from "@/Frontend/components/Footer";
 
 export const Route = createFileRoute("/terms")({
   head: () => ({
@@ -86,7 +86,7 @@ const sections = [
 function TermsPage() {
   return (
     <main className="min-h-screen bg-background">
-      <Navbar />
+      <Header />
       <section className="relative overflow-hidden pt-32 pb-12">
         <div className="absolute inset-0 -z-10 gradient-primary opacity-10" />
         <div className="mx-auto w-[min(900px,94%)] text-center">

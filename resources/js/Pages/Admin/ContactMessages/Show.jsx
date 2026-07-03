@@ -1,98 +1,78 @@
-import { Head, Link, useForm, router } from '@inertiajs/react';
+import { useForm, router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
-import AdminHeader from '@/Components/Admin/AdminHeader';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Trash2 } from 'lucide-react';
+import { PageHeader, StatusBadge, Panel } from '@/Components/Admin/AdminUI';
 
 export default function Show({ message }) {
     const { patch, processing } = useForm({
-        status: message.status === 'pending' ? 'resolved' : 'pending'
+        status: message.status === 'pending' ? 'resolved' : 'pending',
     });
 
     const toggleStatus = () => {
         patch(route('admin.contacts.update-status', message.id));
     };
 
+    const destroy = () => {
+        if (confirm('Are you sure you want to delete this message?')) {
+            router.delete(route('admin.contacts.destroy', message.id));
+        }
+    };
+
     return (
-        <AdminLayout>
-            <Head title="Contact Message Details" />
+        <AdminLayout title="Contact Query Details">
+            <a href={route('admin.contacts.index')} className="mb-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand hover:underline">
+                <ArrowLeft className="size-4" /> Back to Contact Queries
+            </a>
 
-            <AdminHeader
-                title="Message Details"
-                action={{ label: 'Back to List', icon: <ArrowLeft size={16} />, href: route('admin.contacts.index') }}
-            />
+            <PageHeader title={message.subject || 'No Subject'} subtitle={`#${message.id} · Received ${new Date(message.created_at).toLocaleString()}`} action={<StatusBadge status={message.status} />} />
 
-            <div className="card" style={{ maxWidth: '56rem' }}>
-                <div className="card-body p-4">
-                    <div className="row g-4 mb-4 pb-4 border-bottom">
-                        <div className="col-12 col-md-6">
-                            <h6 className="text-secondary mb-2">Sender Information</h6>
-                            <p className="fs-4 fw-semibold mb-1">{message.name}</p>
-                            <p className="text-secondary mb-1">{message.email}</p>
-                            <p className="text-secondary mb-1">{message.phone || 'No phone provided'}</p>
-                            {message.user_role && (
-                                <span className="badge text-bg-secondary">{message.user_role}</span>
-                            )}
-                            {message.user && (
-                                <p className="text-secondary fs-2 mt-1 mb-0">
-                                    User #{message.user.id} ({message.user.phone})
-                                </p>
-                            )}
-                        </div>
-                        <div className="col-12 col-md-6">
-                            <h6 className="text-secondary mb-2">Message Metadata</h6>
-                            <div className="d-flex align-items-center mb-1">
-                                <span className="text-secondary me-2">Status:</span>
-                                <span className={`badge rounded-pill ${message.status === 'resolved' ? 'text-bg-success' : 'text-bg-warning'}`}>
-                                    {message.status.toUpperCase()}
-                                </span>
-                            </div>
-                            <div className="d-flex align-items-center mb-1">
-                                <span className="text-secondary me-2">Type:</span>
-                                <span className={`badge ${message.type === 'order' ? 'text-bg-info' : 'text-bg-light'}`}>{message.type || 'general'}</span>
-                            </div>
-                            {message.pickup_request_id && (
-                                <div className="d-flex align-items-center mb-1">
-                                    <span className="text-secondary me-2">Order:</span>
-                                    <span className="font-monospace">
-                                        #{message.pickup_request_id}
-                                        {message.pickup_request?.pickup_code && ` (${message.pickup_request.pickup_code})`}
-                                    </span>
-                                </div>
-                            )}
-                            <p className="text-secondary mb-1">Received: {new Date(message.created_at).toLocaleString()}</p>
-                            <p className="text-secondary mb-0">ID: #{message.id}</p>
-                        </div>
+            <Panel className="max-w-3xl">
+                <div className="grid grid-cols-1 gap-6 border-b border-border pb-6 sm:grid-cols-2">
+                    <div>
+                        <h3 className="mb-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">Sender Information</h3>
+                        <p className="text-base font-semibold text-navy">{message.name}</p>
+                        <p className="text-sm text-muted-foreground">{message.email}</p>
+                        <p className="text-sm text-muted-foreground">{message.phone || 'No phone provided'}</p>
+                        {message.user_role && (
+                            <span className="mt-2 inline-block rounded-full bg-muted px-2.5 py-1 text-xs font-semibold capitalize text-muted-foreground">{message.user_role}</span>
+                        )}
+                        {message.user && (
+                            <p className="mt-1 text-xs text-muted-foreground">User #{message.user.id} ({message.user.phone})</p>
+                        )}
                     </div>
-
-                    <div className="mb-4 pb-4 border-bottom">
-                        <h6 className="text-secondary mb-2">Subject</h6>
-                        <p className="fs-3 fw-medium mb-0">{message.subject || '(No Subject)'}</p>
-                    </div>
-
-                    <div className="mb-4">
-                        <h6 className="text-secondary mb-2">Message Body</h6>
-                        <div className="bg-light rounded p-3 border" style={{ whiteSpace: 'pre-wrap' }}>
-                            {message.message}
-                        </div>
-                    </div>
-
-                    <div className="d-flex justify-content-end gap-2">
-                        <button className="btn btn-primary" onClick={toggleStatus} disabled={processing}>
-                            Mark as {message.status === 'pending' ? 'Resolved' : 'Pending'}
-                        </button>
-                        <button
-                            className="btn btn-danger"
-                            onClick={() => {
-                                if (confirm('Are you sure you want to delete this message?')) {
-                                    router.delete(route('admin.contacts.destroy', message.id));
-                                }
-                            }}
-                        >
-                            Delete Message
-                        </button>
+                    <div>
+                        <h3 className="mb-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">Message Metadata</h3>
+                        <p className="text-sm text-muted-foreground">Type: <span className="font-medium capitalize text-navy">{message.type || 'general'}</span></p>
+                        {message.pickup_request_id && (
+                            <p className="text-sm text-muted-foreground">
+                                Order: <span className="font-medium text-navy">#{message.pickup_request_id}{message.pickup_request?.pickup_code && ` (${message.pickup_request.pickup_code})`}</span>
+                            </p>
+                        )}
+                        <p className="text-sm text-muted-foreground">ID: #{message.id}</p>
                     </div>
                 </div>
-            </div>
+
+                <div className="mt-6">
+                    <h3 className="mb-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">Message</h3>
+                    <div className="whitespace-pre-wrap rounded-2xl border border-border bg-eco/40 p-4 text-sm text-navy">{message.message}</div>
+                </div>
+
+                <div className="mt-6 flex justify-end gap-3">
+                    <button
+                        onClick={destroy}
+                        className="inline-flex items-center gap-2 rounded-2xl border border-rose-200 px-4 py-2.5 text-sm font-semibold text-rose-600 transition hover:bg-rose-50"
+                    >
+                        <Trash2 className="size-4" /> Delete
+                    </button>
+                    <button
+                        onClick={toggleStatus}
+                        disabled={processing}
+                        className="inline-flex items-center gap-2 rounded-2xl bg-brand px-4 py-2.5 text-sm font-semibold text-brand-foreground shadow-soft transition hover:bg-brand-dark disabled:opacity-60"
+                    >
+                        Mark as {message.status === 'pending' ? 'Resolved' : 'Pending'}
+                    </button>
+                </div>
+            </Panel>
         </AdminLayout>
     );
 }
