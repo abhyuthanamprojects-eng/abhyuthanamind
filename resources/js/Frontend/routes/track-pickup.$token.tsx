@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
-  ArrowLeft, BadgeCheck, Calendar, CheckCircle2, Clock, Download,
+  ArrowLeft, BadgeCheck, Calendar, CheckCircle2, Clock,
   MapPin, Package, Search, ShieldAlert, Truck, FileText, Award, ClipboardList, Recycle,
   Copy, HelpCircle, Phone, Activity, Warehouse, Factory, ScanSearch, ListChecks, Flag,
   PackageCheck, RefreshCcw, Wrench, Info,
@@ -204,9 +204,6 @@ function TrackPickup() {
                 </span>
               </div>
               <div className="flex flex-wrap items-center gap-3">
-                <a href={`/track-pickup/${token}/download`} target="_blank" rel="noreferrer" className="btn-outline">
-                  <Download className="size-4" /> Download Details
-                </a>
                 <a href={`tel:${company.phones[0].replace(/\s/g, "")}`} className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand hover:underline">
                   <HelpCircle className="size-4" /> Need help?
                 </a>
@@ -396,21 +393,13 @@ function TrackPickup() {
             </Reveal>
           )}
 
-          {/* Documents & downloads */}
+          {/* Documents & certificates - View only */}
           <Reveal delay={0.2}>
             <div className="rounded-3xl border border-border bg-card p-6 shadow-soft sm:p-8">
               <h3 className="text-base font-bold text-navy">Documents &amp; Certificates</h3>
-              <p className="mt-1 text-xs text-muted-foreground">Download available paperwork for this pickup, as it becomes ready.</p>
+              <p className="mt-1 text-xs text-muted-foreground">View available certificates for this pickup, as they become ready.</p>
 
               <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                <div className="rounded-2xl border border-border p-4 transition hover:-translate-y-0.5 hover:shadow-soft">
-                  <span className="grid size-9 place-items-center rounded-xl bg-accent text-accent-foreground"><ClipboardList className="size-4" /></span>
-                  <p className="mt-2.5 text-sm font-bold text-navy">Pickup Details</p>
-                  <a href={`/track-pickup/${token}/download`} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-brand hover:underline">
-                    <Download className="size-3.5" /> Download
-                  </a>
-                </div>
-
                 {data.documents.map((doc) => {
                   const Icon = DOCUMENT_ICONS[doc.type] ?? FileText;
                   return (
@@ -421,7 +410,7 @@ function TrackPickup() {
                       <p className="mt-2.5 text-sm font-bold text-navy">{doc.label}</p>
                       {doc.ready ? (
                         <a href={doc.download_url ?? "#"} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-brand hover:underline">
-                          <Download className="size-3.5" /> Download
+                          <FileText className="size-3.5" /> View
                         </a>
                       ) : (
                         <p className="mt-2 text-xs text-muted-foreground">{DOCUMENT_HINTS[doc.type] ?? "Not available yet"}</p>

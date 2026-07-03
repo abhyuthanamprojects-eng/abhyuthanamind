@@ -1694,7 +1694,7 @@
     ]
   },
   "resources/js/frontend.tsx": {
-    "file": "assets/frontend-CdS5JPNz.js",
+    "file": "assets/frontend-BJN1T0vE.js",
     "name": "frontend",
     "src": "resources/js/frontend.tsx",
     "isEntry": true,
@@ -1721,7 +1721,6 @@
       "_triangle-alert-Ca0sYjFR.js",
       "_sparkles-C2Ez0zh-.js",
       "_quote-D7Bx5GKg.js",
-      "_download-BBq_E5UG.js",
       "_activity-dPTH_3Dj.js",
       "_package-BPjr0O0L.js",
       "_calendar-DIpSaTqx.js"
