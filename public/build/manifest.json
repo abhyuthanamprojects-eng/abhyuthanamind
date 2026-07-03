@@ -609,7 +609,7 @@
     "src": "resources/js/Frontend/assets/svc-ewaste.jpg"
   },
   "resources/js/Frontend/assets/svc-exchange.jpg": {
-    "file": "assets/svc-exchange-Dc6usnyN.jpg",
+    "file": "assets/svc-exchange-BzwHznbu.jpg",
     "src": "resources/js/Frontend/assets/svc-exchange.jpg"
   },
   "resources/js/Frontend/assets/svc-itad.jpg": {
@@ -1694,7 +1694,7 @@
     ]
   },
   "resources/js/frontend.tsx": {
-    "file": "assets/frontend-BmzPr7jL.js",
+    "file": "assets/frontend-CdS5JPNz.js",
     "name": "frontend",
     "src": "resources/js/frontend.tsx",
     "isEntry": true,
@@ -1801,7 +1801,7 @@
       "assets/svc-training-CPSjoTI-.jpg",
       "assets/svc-epr-B1CQry_n.jpg",
       "assets/svc-csr-DmrPgXJr.jpg",
-      "assets/svc-exchange-Dc6usnyN.jpg",
+      "assets/svc-exchange-BzwHznbu.jpg",
       "assets/about-main-XTDGDUl0.jpg",
       "assets/about-truck-BBPDySVG.jpg",
       "assets/about-worker-ByfQervj.jpg",
