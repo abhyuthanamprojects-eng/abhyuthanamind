@@ -384,6 +384,114 @@
     "file": "assets/owner-2-BLjcRPH5.jpg",
     "src": "resources/js/Frontend/assets/owner-2.jpg"
   },
+  "resources/js/Frontend/assets/partners/aptara.png": {
+    "file": "assets/c1-Cih0e9U9.png",
+    "src": "resources/js/Frontend/assets/partners/aptara.png"
+  },
+  "resources/js/Frontend/assets/partners/bhagwati.png": {
+    "file": "assets/c1-Cih0e9U9.png",
+    "src": "resources/js/Frontend/assets/partners/aptara.png"
+  },
+  "resources/js/Frontend/assets/partners/bhel.png": {
+    "file": "assets/c1-Cih0e9U9.png",
+    "src": "resources/js/Frontend/assets/partners/aptara.png"
+  },
+  "resources/js/Frontend/assets/partners/bhilwara.png": {
+    "file": "assets/c1-Cih0e9U9.png",
+    "src": "resources/js/Frontend/assets/partners/aptara.png"
+  },
+  "resources/js/Frontend/assets/partners/blubirch.png": {
+    "file": "assets/c1-Cih0e9U9.png",
+    "src": "resources/js/Frontend/assets/partners/aptara.png"
+  },
+  "resources/js/Frontend/assets/partners/c1.png": {
+    "file": "assets/c1-Cih0e9U9.png",
+    "src": "resources/js/Frontend/assets/partners/aptara.png"
+  },
+  "resources/js/Frontend/assets/partners/computerexchange.png": {
+    "file": "assets/c1-Cih0e9U9.png",
+    "src": "resources/js/Frontend/assets/partners/aptara.png"
+  },
+  "resources/js/Frontend/assets/partners/devyani.png": {
+    "file": "assets/c1-Cih0e9U9.png",
+    "src": "resources/js/Frontend/assets/partners/aptara.png"
+  },
+  "resources/js/Frontend/assets/partners/dominos.png": {
+    "file": "assets/c1-Cih0e9U9.png",
+    "src": "resources/js/Frontend/assets/partners/aptara.png"
+  },
+  "resources/js/Frontend/assets/partners/gigroup.png": {
+    "file": "assets/c1-Cih0e9U9.png",
+    "src": "resources/js/Frontend/assets/partners/aptara.png"
+  },
+  "resources/js/Frontend/assets/partners/iffco.png": {
+    "file": "assets/c1-Cih0e9U9.png",
+    "src": "resources/js/Frontend/assets/partners/aptara.png"
+  },
+  "resources/js/Frontend/assets/partners/infozech.png": {
+    "file": "assets/c1-Cih0e9U9.png",
+    "src": "resources/js/Frontend/assets/partners/aptara.png"
+  },
+  "resources/js/Frontend/assets/partners/kfc.png": {
+    "file": "assets/c1-Cih0e9U9.png",
+    "src": "resources/js/Frontend/assets/partners/aptara.png"
+  },
+  "resources/js/Frontend/assets/partners/khd.png": {
+    "file": "assets/c1-Cih0e9U9.png",
+    "src": "resources/js/Frontend/assets/partners/aptara.png"
+  },
+  "resources/js/Frontend/assets/partners/kiwitech.png": {
+    "file": "assets/c1-Cih0e9U9.png",
+    "src": "resources/js/Frontend/assets/partners/aptara.png"
+  },
+  "resources/js/Frontend/assets/partners/paytm.png": {
+    "file": "assets/c1-Cih0e9U9.png",
+    "src": "resources/js/Frontend/assets/partners/aptara.png"
+  },
+  "resources/js/Frontend/assets/partners/pizzahut.png": {
+    "file": "assets/c1-Cih0e9U9.png",
+    "src": "resources/js/Frontend/assets/partners/aptara.png"
+  },
+  "resources/js/Frontend/assets/partners/prospecta.png": {
+    "file": "assets/c1-Cih0e9U9.png",
+    "src": "resources/js/Frontend/assets/partners/aptara.png"
+  },
+  "resources/js/Frontend/assets/partners/pyramid.png": {
+    "file": "assets/c1-Cih0e9U9.png",
+    "src": "resources/js/Frontend/assets/partners/aptara.png"
+  },
+  "resources/js/Frontend/assets/partners/quatrro.png": {
+    "file": "assets/c1-Cih0e9U9.png",
+    "src": "resources/js/Frontend/assets/partners/aptara.png"
+  },
+  "resources/js/Frontend/assets/partners/reliance.png": {
+    "file": "assets/c1-Cih0e9U9.png",
+    "src": "resources/js/Frontend/assets/partners/aptara.png"
+  },
+  "resources/js/Frontend/assets/partners/rspl.png": {
+    "file": "assets/c1-Cih0e9U9.png",
+    "src": "resources/js/Frontend/assets/partners/aptara.png"
+  },
+  "resources/js/Frontend/assets/partners/sis.png": {
+    "file": "assets/c1-Cih0e9U9.png",
+    "src": "resources/js/Frontend/assets/partners/aptara.png"
+  },
+  "resources/js/Frontend/assets/partners/skillnet.png": {
+    "file": "assets/c1-Cih0e9U9.png",
+    "src": "resources/js/Frontend/assets/partners/aptara.png"
+  },
+  "resources/js/Frontend/assets/partners/technip.png": {
+    "file": "assets/c1-Cih0e9U9.png",
+    "src": "resources/js/Frontend/assets/partners/aptara.png"
+  },
+  "resources/js/Frontend/assets/partners/tothenew.png": {
+    "file": "assets/c1-Cih0e9U9.png",
+    "src": "resources/js/Frontend/assets/partners/aptara.png"
+  },
+  "resources/js/Frontend/assets/partners/zeiss.png": {
+    "file": "assets/c1-Cih0e9U9.png",
+    "src": "resources/js/Frontend/assets/partners/aptara.png"
+  },
   "resources/js/Frontend/assets/plant-exterior.jpg": {
     "file": "assets/plant-exterior-D_wbRU-0.jpg",
     "src": "resources/js/Frontend/assets/plant-exterior.jpg"
@@ -1694,7 +1802,7 @@
     ]
   },
   "resources/js/frontend.tsx": {
-    "file": "assets/frontend-B3CnOggg.js",
+    "file": "assets/frontend-PMCyJwJH.js",
     "name": "frontend",
     "src": "resources/js/frontend.tsx",
     "isEntry": true,
@@ -1791,6 +1899,7 @@
       "assets/owner-1-DXdiVj4W.jpg",
       "assets/owner-2-BLjcRPH5.jpg",
       "assets/plant-exterior-D_wbRU-0.jpg",
+      "assets/c1-Cih0e9U9.png",
       "assets/hero-westix-Dc73ZNK2.jpg",
       "assets/recycle-2-D1DcEP2a.jpg",
       "assets/ind-oem-4__D6WxE.jpg",
