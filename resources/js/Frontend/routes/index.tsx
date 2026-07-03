@@ -11,6 +11,7 @@ import {
   company, whyChoose, counters, advanced, founders, scrapify,
 } from "@/Frontend/lib/site-data";
 import { useServices, useIndustries } from "@/Frontend/lib/dynamic-content";
+import { topPartners } from "@/Frontend/lib/partners";
 import heroImg from "@/Frontend/assets/hero-westix.jpg";
 import rec1 from "@/Frontend/assets/recycle-1.jpg";
 import rec2 from "@/Frontend/assets/recycle-2.jpg";
@@ -25,6 +26,7 @@ import svcLogistics from "@/Frontend/assets/svc-logistics.jpg";
 import svcTraining from "@/Frontend/assets/svc-training.jpg";
 import svcEpr from "@/Frontend/assets/svc-epr.jpg";
 import svcCsr from "@/Frontend/assets/svc-csr.jpg";
+import svcExchange from "@/Frontend/assets/svc-exchange.jpg";
 import aboutMain from "@/Frontend/assets/about-main.jpg";
 import aboutTruck from "@/Frontend/assets/about-truck.jpg";
 import aboutWorker from "@/Frontend/assets/about-worker.jpg";
@@ -32,11 +34,12 @@ import owner1 from "@/Frontend/assets/owner-1.jpg";
 import owner2 from "@/Frontend/assets/owner-2.jpg";
 import plantExterior from "@/Frontend/assets/plant-exterior.jpg";
 import plantFloor from "@/Frontend/assets/plant-floor.jpg";
+import exchangePolicy from "@/Frontend/assets/svc-exchange.jpg";
 const ownerImages: Record<string, string> = { owner1, owner2 };
 const leaders = founders.map((f) => ({ ...f, img: ownerImages[f.img] ?? owner1 }));
 
 const serviceIcons: Record<string, typeof Recycle> = {
-  Laptop, Recycle, Truck, GraduationCap, ShieldCheck, HeartHandshake, Gem,
+  Laptop, Recycle, Truck, GraduationCap, ShieldCheck, HeartHandshake, Gem, Smartphone,
 };
 const advIcons: Record<string, typeof Recycle> = { Truck, ShieldCheck, Recycle };
 const indImages: Record<string, string> = { oem, ecommerce, corporate, logistics };
@@ -48,6 +51,7 @@ const serviceImages: Record<string, string> = {
   "reverse-logistics": svcLogistics,
   "epr-csr-services": svcCsr,
   "training-awareness": svcTraining,
+  "exchange-policy": svcExchange,
 };
 
 const marqueeItems = ["REDUCE REUSE RECYCLE", "GREEN FUTURE TOGETHER", "CLEAN EARTH INITIATIVE", "ZERO LANDFILL", "SUSTAINABLE TOMORROW"];
@@ -172,6 +176,17 @@ function Index() {
         </div>
       </div>
 
+      {/* Top partners — auto-scrolling green band */}
+      <div className="overflow-hidden border-b border-brand/20 bg-brand py-5">
+        <div className="marquee-track">
+          {[...topPartners, ...topPartners, ...topPartners, ...topPartners, ...topPartners, ...topPartners].map((p, i) => (
+            <span key={i} className="mx-4 inline-flex h-16 w-40 items-center justify-center rounded-2xl bg-white px-6 shadow-card">
+              <img src={p.logo} alt={p.name} className="max-h-10 max-w-full object-contain" loading="lazy" />
+            </span>
+          ))}
+        </div>
+      </div>
+
       {/* About — Wastex-style collage */}
       <section className="section relative overflow-hidden bg-eco">
         <div className="container-px relative grid items-center gap-12 lg:grid-cols-2">
@@ -269,15 +284,33 @@ function Index() {
           <div className="mx-auto mt-12 grid max-w-3xl gap-8 sm:grid-cols-2">
             {leaders.map((l, i) => (
               <Reveal key={l.name} delay={i * 0.1}>
-                <div className="group overflow-hidden rounded-[2rem] border border-border bg-card shadow-soft transition-all hover:-translate-y-1.5 hover:shadow-card">
+                <div className="group flex h-full flex-col overflow-hidden rounded-[2rem] border border-border bg-card shadow-soft transition-all hover:-translate-y-1.5 hover:shadow-card">
                   <div className="relative overflow-hidden">
-                    <img src={l.img} alt={l.name} loading="lazy" width={1024} height={1024} className="h-72 w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                    <span className="absolute right-4 top-4 grid size-10 place-items-center rounded-full bg-brand text-brand-foreground shadow-card"><Linkedin className="size-5" /></span>
+                    {"linkedin_url" in l && l.linkedin_url ? (
+                      <a href={l.linkedin_url} target="_blank" rel="noopener noreferrer" className="block">
+                        <img src={l.img} alt={l.name} loading="lazy" width={1024} height={1024} className="h-80 w-full object-cover object-[center_18%] transition-transform duration-500 group-hover:scale-105" />
+                      </a>
+                    ) : (
+                      <img src={l.img} alt={l.name} loading="lazy" width={1024} height={1024} className="h-80 w-full object-cover object-[center_18%] transition-transform duration-500 group-hover:scale-105" />
+                    )}
+                    {"linkedin_url" in l && l.linkedin_url ? (
+                      <a href={l.linkedin_url} target="_blank" rel="noopener noreferrer" className="absolute right-4 top-4 grid size-10 place-items-center rounded-full bg-brand text-brand-foreground shadow-card transition hover:bg-navy">
+                        <Linkedin className="size-5" />
+                      </a>
+                    ) : (
+                      <span className="absolute right-4 top-4 grid size-10 place-items-center rounded-full bg-brand/60 text-brand-foreground shadow-card"><Linkedin className="size-5" /></span>
+                    )}
                   </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-navy">{l.name}</h3>
+                  <div className="flex flex-1 flex-col p-6">
+                    {"linkedin_url" in l && l.linkedin_url ? (
+                      <a href={l.linkedin_url} target="_blank" rel="noopener noreferrer" className="w-fit text-xl font-bold text-navy transition-colors hover:text-brand">
+                        {l.name}
+                      </a>
+                    ) : (
+                      <h3 className="text-xl font-bold text-navy">{l.name}</h3>
+                    )}
                     <p className="text-sm font-semibold text-brand">{l.role}</p>
-                    <p className="mt-3 text-sm text-muted-foreground">{l.bio}</p>
+                    <p className="mt-3 flex-1 text-sm leading-8 text-muted-foreground">{l.bio}</p>
                   </div>
                 </div>
               </Reveal>
@@ -382,6 +415,60 @@ function Index() {
                 </Reveal>
               );
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* Exchange Policy */}
+      <section className="section">
+        <div className="container-px">
+          <div className="grid items-center gap-12 lg:grid-cols-2">
+            <Reveal>
+              <div className="relative overflow-hidden rounded-[2rem] shadow-card">
+                <img
+                  src={exchangePolicy}
+                  alt="Abhyuthanam Recyclers exchange your old electronics for new"
+                  loading="lazy"
+                  width={1280}
+                  height={960}
+                  className="h-full w-full object-cover"
+                />
+                <span className="absolute left-5 top-5 rounded-full bg-brand px-4 py-1.5 text-sm font-bold text-brand-foreground shadow-card">
+                  Old for New
+                </span>
+              </div>
+            </Reveal>
+            <Reveal delay={0.1}>
+              <span className="eyebrow"><Recycle className="size-4" /> Exchange Policy</span>
+              <h2 className="mt-4 text-3xl font-extrabold text-navy sm:text-4xl">
+                Give your old, get real value on the new
+              </h2>
+              <p className="mt-4 text-muted-foreground">
+                Don't just scrap it — exchange it. Hand over your old laptops, phones,
+                ACs, TVs and appliances to Abhyuthanam Recyclers and get an instant
+                assessed value adjusted against your replacement. We collect the old,
+                pay you a fair exchange amount, and help you upgrade responsibly.
+              </p>
+              <ul className="mt-6 space-y-3">
+                {[
+                  "Transparent, on-the-spot valuation of your old device",
+                  "Exchange value adjusted towards your new purchase",
+                  "Free doorstep pickup of the old item",
+                  "Certified, zero-landfill recycling of what we collect",
+                ].map((t) => (
+                  <li key={t} className="flex items-start gap-3">
+                    <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-brand" />
+                    <span className="text-navy/80">{t}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link to="/schedule-pickup" className="btn-primary">
+                  Get exchange value <ArrowRight className="size-4" />
+                </Link>
+                <Link to="/scrap-rate" className="btn-outline">View scrap rates</Link>
+              </div>
+            </Reveal>
           </div>
         </div>
       </section>

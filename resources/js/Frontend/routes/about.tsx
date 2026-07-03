@@ -18,6 +18,7 @@ import rec3 from "@/Frontend/assets/recycle-3.jpg";
 import owner1 from "@/Frontend/assets/owner-1.jpg";
 import owner2 from "@/Frontend/assets/owner-2.jpg";
 import plantExterior from "@/Frontend/assets/plant-exterior.jpg";
+import { topPartners, partners } from "@/Frontend/lib/partners";
 
 const staticOwnerFallbacks = [owner1, owner2];
 
@@ -244,9 +245,15 @@ function About() {
               const linkedinHref: string | null = f.linkedin_url || null;
               return (
                 <Reveal key={f.name} delay={i * 0.1}>
-                  <div className="group overflow-hidden rounded-[2rem] border border-border bg-card shadow-soft transition-all hover:-translate-y-1.5 hover:shadow-card">
+                  <div className="group flex h-full flex-col overflow-hidden rounded-[2rem] border border-border bg-card shadow-soft transition-all hover:-translate-y-1.5 hover:shadow-card">
                     <div className="relative overflow-hidden">
-                      <img src={imgSrc} alt={f.name} loading="lazy" width={1024} height={1024} className="h-72 w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                      {linkedinHref ? (
+                        <a href={linkedinHref} target="_blank" rel="noopener noreferrer" className="block">
+                          <img src={imgSrc} alt={f.name} loading="lazy" width={1024} height={1024} className="h-80 w-full object-cover object-[center_18%] transition-transform duration-500 group-hover:scale-105" />
+                        </a>
+                      ) : (
+                        <img src={imgSrc} alt={f.name} loading="lazy" width={1024} height={1024} className="h-80 w-full object-cover object-[center_18%] transition-transform duration-500 group-hover:scale-105" />
+                      )}
                       {linkedinHref ? (
                         <a href={linkedinHref} target="_blank" rel="noopener noreferrer" className="absolute right-4 top-4 grid size-10 place-items-center rounded-full bg-brand text-brand-foreground shadow-card transition hover:bg-navy">
                           <Linkedin className="size-5" />
@@ -257,19 +264,25 @@ function About() {
                         </span>
                       )}
                     </div>
-                    <div className="p-6">
-                      <h3 className="text-xl font-bold text-navy">{f.name}</h3>
+                    <div className="flex flex-1 flex-col p-6">
+                      {linkedinHref ? (
+                        <a href={linkedinHref} target="_blank" rel="noopener noreferrer" className="w-fit text-xl font-bold text-navy transition-colors hover:text-brand">
+                          {f.name}
+                        </a>
+                      ) : (
+                        <h3 className="text-xl font-bold text-navy">{f.name}</h3>
+                      )}
                       <p className="text-sm font-semibold text-brand">{f.role}</p>
                       {f.tagline && (
                         <p className="mt-1 text-xs font-medium italic text-muted-foreground">{f.tagline}</p>
                       )}
-                      <p className="mt-3 text-sm text-muted-foreground">{f.bio}</p>
+                      <p className="mt-3 flex-1 text-sm leading-8 text-muted-foreground">{f.bio}</p>
                       {f.message && (
                         <blockquote className="mt-4 rounded-xl border-l-4 border-brand bg-eco px-4 py-3 text-sm italic text-navy/80">
                           "{f.message}"
                         </blockquote>
                       )}
-                      <p className="mt-4 inline-flex items-center gap-2 rounded-full bg-eco px-3 py-1.5 text-xs font-semibold text-navy"><CheckCircle2 className="size-3.5 text-brand" /> {f.leads}</p>
+                      <p className="mt-4 inline-flex w-fit items-center gap-2 rounded-full bg-eco px-3 py-1.5 text-xs font-semibold text-navy"><CheckCircle2 className="size-3.5 text-brand" /> {f.leads}</p>
                     </div>
                   </div>
                 </Reveal>
@@ -511,6 +524,42 @@ function About() {
           </div>
         </section>
       )}
+
+      {/* Top partners — auto-scrolling green band */}
+      <div className="overflow-hidden border-b border-brand/20 bg-brand py-5">
+        <div className="marquee-track">
+          {[...topPartners, ...topPartners, ...topPartners, ...topPartners, ...topPartners, ...topPartners].map((p, i) => (
+            <span key={i} className="mx-4 inline-flex h-16 w-40 items-center justify-center rounded-2xl bg-white px-6 shadow-card">
+              <img src={p.logo} alt={p.name} className="max-h-10 max-w-full object-contain" loading="lazy" />
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* Partners Grid */}
+      <section className="section bg-eco">
+        <div className="container-px">
+          <Reveal className="mx-auto max-w-2xl text-center">
+            <span className="eyebrow"><Award className="size-4" /> Our Partners</span>
+            <h2 className="mt-4 text-3xl font-extrabold text-navy sm:text-4xl">Trusted by leading organizations</h2>
+            <p className="mt-4 text-muted-foreground">We partner with India's best companies to drive sustainable e-waste management.</p>
+          </Reveal>
+          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {partners.map((partner, i) => (
+              <Reveal key={partner.name} delay={(i % 4) * 0.08}>
+                <div className="flex items-center justify-center rounded-2xl border border-border bg-white p-6 shadow-soft transition-all hover:shadow-card">
+                  <img
+                    src={partner.logo}
+                    alt={partner.name}
+                    className="max-h-12 max-w-full object-contain transition-all duration-300 grayscale hover:grayscale-0"
+                    loading="lazy"
+                  />
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* CTA */}
       <section className="container-px py-16">

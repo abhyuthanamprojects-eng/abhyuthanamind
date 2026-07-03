@@ -16,6 +16,15 @@ const journeyImages: Record<string, string> = {
   capacity: jCapacity, team: jTeam, customers: jCustomers,
 };
 
+const journeyImagePositions: Record<string, string> = {
+  founded: "center 14%",
+  plant: "center center",
+  certifications: "center 30%",
+  capacity: "center center",
+  team: "center 18%",
+  customers: "center 22%",
+};
+
 const journeyIcons: Record<string, LucideIcon> = {
   Flag, Factory, Award, Gauge, Users, TrendingUp,
 };
@@ -83,6 +92,7 @@ function MilestoneRow({ m, i }: { m: Milestone; i: number }) {
               width={800}
               height={600}
               className="h-48 w-full object-cover"
+              style={{ objectPosition: journeyImagePositions[m.img] ?? "center center" }}
               animate={{
                 scale: inView ? 1.06 : 1,
                 filter: inView

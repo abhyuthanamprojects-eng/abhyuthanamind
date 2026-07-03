@@ -10,10 +10,11 @@ import imgRecovery from "@/Frontend/assets/svc-recovery.jpg";
 import imgLogistics from "@/Frontend/assets/svc-logistics.jpg";
 import imgCsr from "@/Frontend/assets/svc-csr.jpg";
 import imgTraining from "@/Frontend/assets/svc-training.jpg";
+import imgExchange from "@/Frontend/assets/svc-exchange.jpg";
 
 const svcImages: Record<string, string> = {
   ewaste: imgEwaste, itad: imgItad, data: imgData, recovery: imgRecovery,
-  logistics: imgLogistics, csr: imgCsr, training: imgTraining,
+  logistics: imgLogistics, csr: imgCsr, training: imgTraining, exchange: imgExchange,
 };
 
 export const Route = createFileRoute("/services/$serviceId")({

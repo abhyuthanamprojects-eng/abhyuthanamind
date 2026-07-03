@@ -69,6 +69,14 @@ class ServiceSeeder extends Seeder
                 'icon' => 'GraduationCap',
                 'image' => 'training-awareness.jpg',
             ],
+            [
+                'slug' => 'exchange-policy',
+                'title' => 'Exchange Policy',
+                'short_description' => 'Trade in old devices and receive fair value toward replacement with newer equipment.',
+                'long_description' => 'Our exchange policy helps businesses and customers replace old or end-of-life devices with newer equipment while recovering fair value from the assets they return. We evaluate the condition of used devices, offer a transparent value assessment, and ensure the collected items are handled through secure, compliant, and environmentally responsible processes.',
+                'icon' => 'Smartphone',
+                'image' => 'exchange-policy.jpg',
+            ],
         ];
 
         $missingImages = [];

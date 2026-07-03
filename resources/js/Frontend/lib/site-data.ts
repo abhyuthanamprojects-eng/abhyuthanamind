@@ -91,14 +91,14 @@ export const founders = [
     name: "Amit Kumar Ojha",
     role: "Co-Founder & Managing Director",
     img: "owner1",
-    bio: "Amit started Abhyuthanam to give Indian businesses a safe, honest way to dispose of e-waste. He leads the company's overall direction and day-to-day operations.",
+    bio: "With a strong focus on operational excellence and long-term business growth, Amit Kumar Ojha leads Abhyuthanam's strategic direction and day-to-day operations. He is committed to building a reliable organization that helps clients manage e-waste responsibly through transparent processes, timely service, and professionally managed recycling solutions that meet both commercial expectations and regulatory standards.",
     leads: "Leads: Strategy & Operations",
   },
   {
     name: "Manju Ojha",
     role: "Co-Founder & Director",
     img: "owner2",
-    bio: "Manju makes sure every pickup, process and report meets our compliance and data-security standards, so customers always know their waste is handled responsibly.",
+    bio: "With a dedicated focus on compliance, sustainability, and responsible business practices, Manju Ojha oversees the standards that guide Abhyuthanam's operations. She works closely across processes to ensure that every pickup, documentation flow, and recycling activity is handled with care, accountability, and full alignment with applicable environmental and data-security requirements, giving clients greater confidence in every engagement.",
     leads: "Leads: Compliance & Sustainability",
   },
 ];
@@ -325,6 +325,23 @@ export const services: Service[] = [
       { title: "Corporate workshops", desc: "Tailored sessions for organizations and their employees." },
       { title: "Best practice adoption", desc: "Guidance on international sustainable materials management." },
       { title: "Documentation support", desc: "Help maintaining records for regulatory readiness." },
+    ],
+  },
+  {
+    slug: "exchange-policy",
+    image: "exchange",
+    title: "Exchange Policy",
+    short: "Trade in old devices and receive fair value toward replacement with newer equipment.",
+    icon: "Smartphone",
+    intro:
+      "Our exchange policy helps businesses and customers replace old or end-of-life devices with newer equipment while recovering fair value from the assets they return. We evaluate the condition of used devices, offer a transparent value assessment, and ensure the collected items are handled through secure, compliant, and environmentally responsible processes.",
+    why: "Why do we require an exchange policy? Many usable devices are replaced before the end of their full value cycle. A structured exchange program helps recover residual value, supports responsible upgrades, reduces e-waste, and gives customers a simple path to move from old equipment to newer devices without unmanaged disposal.",
+    benefits: [
+      { title: "Fair value assessment", desc: "Transparent evaluation of old devices based on condition, model, and recoverable value." },
+      { title: "Old-for-new support", desc: "A smooth replacement process that helps customers move to newer devices with exchange value benefits." },
+      { title: "Secure handling", desc: "Returned devices are collected, checked, and processed through safe and responsible workflows." },
+      { title: "Data protection", desc: "Sensitive device data is managed through secure sanitization before reuse, recycling, or disposition." },
+      { title: "Sustainable upgrading", desc: "Supports circular use of electronics by reducing waste and improving resource recovery." },
     ],
   },
 ];
