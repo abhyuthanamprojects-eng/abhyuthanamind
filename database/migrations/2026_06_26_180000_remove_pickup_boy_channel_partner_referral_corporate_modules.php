@@ -18,12 +18,27 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (Schema::hasTable('referral_coupons') && Schema::hasTable('referrals')) {
-            Schema::table('referral_coupons', function (Blueprint $table) {
-                $table->dropForeign('referral_coupons_referral_id_foreign');
+        Schema::disableForeignKeyConstraints();
+
+        // pickup_requests still holds an FK to referral_coupons. Drop the FK
+        // and its id column (unused by the app); keep coupon_code /
+        // coupon_discount_value which the app still reads.
+        if (Schema::hasColumn('pickup_requests', 'referral_coupon_id')) {
+            Schema::table('pickup_requests', function (Blueprint $table) {
+                try { $table->dropForeign(['referral_coupon_id']); } catch (\Throwable $e) {}
+                $table->dropColumn('referral_coupon_id');
             });
+        }
+
+        // referrals <-> referral_coupons circular FK
+        if (Schema::hasTable('referral_coupons')) {
+            Schema::table('referral_coupons', function (Blueprint $table) {
+                try { $table->dropForeign(['referral_id']); } catch (\Throwable $e) {}
+            });
+        }
+        if (Schema::hasTable('referrals')) {
             Schema::table('referrals', function (Blueprint $table) {
-                $table->dropForeign('referrals_reward_coupon_id_foreign');
+                try { $table->dropForeign(['reward_coupon_id']); } catch (\Throwable $e) {}
             });
         }
 
@@ -41,6 +56,8 @@ return new class extends Migration
         Schema::dropIfExists('pickup_boy_locations');
         Schema::dropIfExists('pickup_boy_warehouse');
         Schema::dropIfExists('assignments');
+
+        Schema::enableForeignKeyConstraints();
     }
 
     /**
