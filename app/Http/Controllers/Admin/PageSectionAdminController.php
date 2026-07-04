@@ -15,11 +15,13 @@ class PageSectionAdminController extends Controller
     {
         $filters = $request->only(['page_key']);
 
+        // Non-paginated: there are only a handful of sections, and paginate()
+        // could land on an out-of-range page (from stale ?page state) and
+        // render an empty list even though rows exist.
         $sections = PageSection::query()
             ->when($filters['page_key'] ?? null, fn ($q, $v) => $q->where('page_key', $v))
             ->ordered()
-            ->paginate(20)
-            ->withQueryString();
+            ->get();
 
         return inertia('Admin/PageSections/Index', [
             'sections' => $sections,

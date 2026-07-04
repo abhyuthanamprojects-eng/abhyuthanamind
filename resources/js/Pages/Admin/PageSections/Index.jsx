@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Pencil, Trash2, LayoutTemplate, Plus } from 'lucide-react';
-import { PageHeader, StatusBadge, FilterSelect, Panel, EmptyState, ActionBtn, Pagination } from '@/Components/Admin/AdminUI';
+import { PageHeader, StatusBadge, FilterSelect, Panel, EmptyState, ActionBtn } from '@/Components/Admin/AdminUI';
 
 export default function Index({ sections, filters, pageKeys }) {
     const applyFilter = (next) => {
@@ -36,7 +36,7 @@ export default function Index({ sections, filters, pageKeys }) {
             </div>
 
             <Panel className="p-0">
-                {sections.data.length === 0 ? (
+                {sections.length === 0 ? (
                     <div className="p-6">
                         <EmptyState icon={LayoutTemplate} title="No page sections found" message="Add content blocks for Home, About, Process or Contact pages." />
                     </div>
@@ -52,7 +52,7 @@ export default function Index({ sections, filters, pageKeys }) {
                                 </tr>
                             </thead>
                             <tbody>
-                                {sections.data.map((s) => (
+                                {sections.map((s) => (
                                     <tr key={s.id} className="border-b border-border last:border-0 hover:bg-eco/40">
                                         <td className="px-5 py-3">
                                             <p className="font-semibold text-navy">{s.page_key} / {s.section_key}</p>
@@ -72,7 +72,6 @@ export default function Index({ sections, filters, pageKeys }) {
                     </div>
                 )}
             </Panel>
-            <Pagination links={sections.links} />
         </AdminLayout>
     );
 }
