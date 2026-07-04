@@ -1,0 +1,10 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Shared-hosting deploy: the domain document root is the project root,
+    # but Laravel's front controller lives in public/. Route every request
+    # into public/ so index.php handles it. (Ignored under `php artisan serve`
+    # and when the docroot is already set to public/.)
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
