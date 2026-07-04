@@ -10,7 +10,7 @@ import { Reveal, Counter, motion } from "@/Frontend/components/anim";
 import {
   company, whyChoose, counters, advanced, founders, scrapify,
 } from "@/Frontend/lib/site-data";
-import { useServices, useIndustries, usePageSection } from "@/Frontend/lib/dynamic-content";
+import { useServices, useIndustries, usePageSection, useFounders } from "@/Frontend/lib/dynamic-content";
 import { topPartners } from "@/Frontend/lib/partners";
 import heroImg from "@/Frontend/assets/hero-westix.jpg";
 import rec1 from "@/Frontend/assets/recycle-1.jpg";
@@ -42,7 +42,14 @@ const SCRAPIFY_APP_STORE_URL = "https://apps.apple.com/us/app/scrapify/id6775160
 const SCRAPIFY_PLAY_STORE_URL =
   "https://play.google.com/store/apps/details?id=com.abhyuthanam.scrapify&pcampaignid=web_share";
 const ownerImages: Record<string, string> = { owner1, owner2 };
-const leaders = founders.map((f) => ({ ...f, img: ownerImages[f.img] ?? owner1 }));
+const staticLeaders = founders.map((f) => ({
+  name: f.name,
+  role: f.role,
+  bio: f.bio,
+  leads: f.leads,
+  linkedin_url: "" as string,
+  img: ownerImages[f.img] ?? owner1,
+}));
 
 const serviceIcons: Record<string, typeof Recycle> = {
   Laptop, Recycle, Truck, GraduationCap, ShieldCheck, HeartHandshake, Gem, Smartphone,
@@ -109,6 +116,19 @@ type ExchangeButton = { label: string; href: string; style?: string };
 function Index() {
   const services = useServices();
   const industries = useIndustries();
+
+  // Admin-managed founders (with LinkedIn URLs) override the static fallback.
+  const dynamicFounders = useFounders();
+  const leaders = dynamicFounders.length > 0
+    ? dynamicFounders.map((f, i) => ({
+        name: f.name,
+        role: f.role,
+        bio: f.bio,
+        leads: f.leads,
+        linkedin_url: f.linkedin_url || "",
+        img: f.image_url || staticLeaders[i]?.img || owner1,
+      }))
+    : staticLeaders;
 
   // Admin-editable Exchange Policy section (falls back to bundled defaults).
   const exchange = usePageSection("home", "exchange_policy");

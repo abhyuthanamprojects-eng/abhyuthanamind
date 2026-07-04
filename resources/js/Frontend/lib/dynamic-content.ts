@@ -146,3 +146,35 @@ export function usePageSection(pageKey: string, sectionKey: string): PageSection
   const sections = useFetched(fetchPageSections, [] as PageSectionView[]);
   return sections.find((s) => s.pageKey === pageKey && s.sectionKey === sectionKey) ?? null;
 }
+
+export type FounderView = {
+  name: string;
+  role: string;
+  bio: string;
+  leads: string;
+  linkedin_url: string;
+  tagline: string;
+  message: string;
+  image_url: string | null;
+};
+
+function mergeFounders(rows: any[]): FounderView[] {
+  return rows.map((row) => ({
+    name: row.name ?? "",
+    role: row.role ?? "",
+    bio: row.bio ?? "",
+    leads: row.leads ?? "",
+    linkedin_url: row.linkedin_url ?? "",
+    tagline: row.tagline ?? "",
+    message: row.message ?? "",
+    image_url: row.image_url ?? null,
+  }));
+}
+
+export function fetchFoundersList(): Promise<FounderView[]> {
+  return fetchRows("/api/founders").then(mergeFounders);
+}
+
+export function useFounders(): FounderView[] {
+  return useFetched(fetchFoundersList, [] as FounderView[]);
+}
