@@ -461,6 +461,14 @@ function Index() {
                   width={1280}
                   height={960}
                   className="h-full w-full object-cover"
+                  onError={(e) => {
+                    // If an admin-uploaded / stale image URL fails, fall back to
+                    // the bundled default instead of showing a broken image.
+                    const img = e.currentTarget;
+                    if (img.dataset.fallback) return;
+                    img.dataset.fallback = "1";
+                    img.src = exchangePolicy;
+                  }}
                 />
                 {exchangeBadge && (
                   <span className="absolute left-5 top-5 rounded-full bg-brand px-4 py-1.5 text-sm font-bold text-brand-foreground shadow-card">
