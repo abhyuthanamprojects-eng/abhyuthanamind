@@ -35,6 +35,12 @@ import owner2 from "@/Frontend/assets/owner-2.jpg";
 import plantExterior from "@/Frontend/assets/plant-exterior.jpg";
 import plantFloor from "@/Frontend/assets/plant-floor.jpg";
 import exchangePolicy from "@/Frontend/assets/svc-exchange.jpg";
+import appStoreBadge from "@/Frontend/assets/app-store-badge.svg";
+import googlePlayBadge from "@/Frontend/assets/google-play-badge.svg";
+
+const SCRAPIFY_APP_STORE_URL = "https://apps.apple.com/us/app/scrapify/id6775160804";
+const SCRAPIFY_PLAY_STORE_URL =
+  "https://play.google.com/store/apps/details?id=com.abhyuthanam.scrapify&pcampaignid=web_share";
 const ownerImages: Record<string, string> = { owner1, owner2 };
 const leaders = founders.map((f) => ({ ...f, img: ownerImages[f.img] ?? owner1 }));
 
@@ -664,6 +670,17 @@ function Index() {
             <div className="mt-8 flex flex-wrap gap-3">
               <Link to="/scrap-rate" className="btn-primary">Check Scrap Rate <ArrowRight className="size-4" /></Link>
               <a href="/schedule-pickup" className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-white/20 px-6 py-3 text-sm font-semibold text-navy-foreground transition-colors hover:bg-white/10">Schedule Pickup</a>
+            </div>
+            <div className="mt-6">
+              <p className="text-xs font-semibold uppercase tracking-wide text-navy-foreground/50">Download the app</p>
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <a href={SCRAPIFY_APP_STORE_URL} target="_blank" rel="noopener noreferrer" aria-label="Download Scrapify on the App Store" className="transition-transform hover:scale-[1.03]">
+                  <img src={appStoreBadge} alt="Download on the App Store" width={135} height={40} className="h-11 w-auto" />
+                </a>
+                <a href={SCRAPIFY_PLAY_STORE_URL} target="_blank" rel="noopener noreferrer" aria-label="Get Scrapify on Google Play" className="transition-transform hover:scale-[1.03]">
+                  <img src={googlePlayBadge} alt="Get it on Google Play" width={135} height={40} className="h-11 w-auto" />
+                </a>
+              </div>
             </div>
           </Reveal>
           <Reveal delay={0.15}>
