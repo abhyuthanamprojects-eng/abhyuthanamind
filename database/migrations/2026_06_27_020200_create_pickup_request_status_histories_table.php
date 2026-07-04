@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('changed_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
 
-            $table->index(['pickup_request_id', 'created_at']);
+            $table->index(['pickup_request_id', 'created_at'], 'prsh_request_created_index');
         });
     }
 
