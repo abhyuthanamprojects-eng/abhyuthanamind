@@ -4,6 +4,17 @@ import { useState } from 'react';
 import { ArrowUp, ArrowDown, Trash2 } from 'lucide-react';
 import { PageHeader, Panel } from '@/Components/Admin/AdminUI';
 import { cn } from '@/lib/utils';
+import { founders as staticFounders } from '@/Frontend/lib/site-data';
+
+const blankFounder = { name: '', role: '', bio: '', leads: '', linkedin_url: '', tagline: '', message: '', media_id: null };
+
+const defaultFounders = staticFounders.map((f) => ({
+    ...blankFounder,
+    name: f.name || '',
+    role: f.role || '',
+    bio: f.bio || '',
+    leads: f.leads || '',
+}));
 
 const tabs = [
     ['features', 'Feature Toggles'],
@@ -201,10 +212,11 @@ export default function Index({ settings, homeBanners = [], foundersData = [], o
 
 function FoundersEditor({ foundersData = [], ownerMedia = [] }) {
     const [founders, setFounders] = useState(
-        foundersData.length > 0 ? foundersData : [
-            { name: '', role: '', bio: '', leads: '', linkedin_url: '', tagline: '', message: '', media_id: null },
-            { name: '', role: '', bio: '', leads: '', linkedin_url: '', tagline: '', message: '', media_id: null },
-        ]
+        foundersData.length > 0
+            ? foundersData
+            : defaultFounders.length > 0
+                ? defaultFounders
+                : [{ ...blankFounder }, { ...blankFounder }]
     );
     const [saving, setSaving] = useState(false);
 
