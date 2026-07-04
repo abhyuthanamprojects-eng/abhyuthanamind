@@ -8,29 +8,48 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
+     *
+     * Removes the warehouse module and every table/column that references
+     * `warehouses`. FK checks are disabled so the drops succeed on strict
+     * engines (MySQL/InnoDB); guards keep it idempotent across engines.
      */
     public function up(): void
     {
-        Schema::table('inventory_logs', function (Blueprint $table) {
-            $table->dropForeign('inventory_logs_warehouse_id_foreign');
-        });
-        Schema::table('pickup_requests', function (Blueprint $table) {
-            $table->dropForeign('pickup_requests_warehouse_id_foreign');
-        });
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropForeign('users_warehouse_id_foreign');
-        });
+        Schema::disableForeignKeyConstraints();
 
+        // Warehouse-only pivot table.
+        Schema::dropIfExists('pickup_boy_warehouse');
+
+        // assignments.warehouse_id
+        if (Schema::hasColumn('assignments', 'warehouse_id')) {
+            Schema::table('assignments', function (Blueprint $table) {
+                try { $table->dropForeign(['warehouse_id']); } catch (\Throwable $e) {}
+                $table->dropColumn('warehouse_id');
+            });
+        }
+
+        // inventory_logs is entirely warehouse-dependent.
         Schema::dropIfExists('inventory_logs');
 
-        Schema::table('pickup_requests', function (Blueprint $table) {
-            $table->dropColumn('warehouse_id');
-        });
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('warehouse_id');
-        });
+        // pickup_requests.warehouse_id
+        if (Schema::hasColumn('pickup_requests', 'warehouse_id')) {
+            Schema::table('pickup_requests', function (Blueprint $table) {
+                try { $table->dropForeign(['warehouse_id']); } catch (\Throwable $e) {}
+                $table->dropColumn('warehouse_id');
+            });
+        }
+
+        // users.warehouse_id
+        if (Schema::hasColumn('users', 'warehouse_id')) {
+            Schema::table('users', function (Blueprint $table) {
+                try { $table->dropForeign(['warehouse_id']); } catch (\Throwable $e) {}
+                $table->dropColumn('warehouse_id');
+            });
+        }
 
         Schema::dropIfExists('warehouses');
+
+        Schema::enableForeignKeyConstraints();
     }
 
     /**
