@@ -10,7 +10,7 @@ import { Reveal, Counter, motion } from "@/Frontend/components/anim";
 import {
   company, whyChoose, counters, advanced, founders, scrapify,
 } from "@/Frontend/lib/site-data";
-import { useServices, useIndustries } from "@/Frontend/lib/dynamic-content";
+import { useServices, useIndustries, usePageSection } from "@/Frontend/lib/dynamic-content";
 import { topPartners } from "@/Frontend/lib/partners";
 import heroImg from "@/Frontend/assets/hero-westix.jpg";
 import rec1 from "@/Frontend/assets/recycle-1.jpg";
@@ -98,9 +98,38 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
+type ExchangeButton = { label: string; href: string; style?: string };
+
 function Index() {
   const services = useServices();
   const industries = useIndustries();
+
+  // Admin-editable Exchange Policy section (falls back to bundled defaults).
+  const exchange = usePageSection("home", "exchange_policy");
+  const exchangeEyebrow = exchange?.subtitle || "Exchange Policy";
+  const exchangeTitle = exchange?.title || "Give your old, get real value on the new";
+  const exchangeContent =
+    exchange?.content ||
+    "Don't just scrap it — exchange it. Hand over your old laptops, phones, ACs, TVs and appliances to Abhyuthanam Recyclers and get an instant assessed value adjusted against your replacement. We collect the old, pay you a fair exchange amount, and help you upgrade responsibly.";
+  const exchangeImage = exchange?.imageUrl || exchangePolicy;
+  const exchangeBadge = (exchange?.json?.badge as string) || "Old for New";
+  const exchangeBullets: string[] =
+    Array.isArray(exchange?.json?.bullets) && exchange!.json!.bullets.length
+      ? (exchange!.json!.bullets as string[])
+      : [
+          "Transparent, on-the-spot valuation of your old device",
+          "Exchange value adjusted towards your new purchase",
+          "Free doorstep pickup of the old item",
+          "Certified, zero-landfill recycling of what we collect",
+        ];
+  const exchangeButtons: ExchangeButton[] =
+    Array.isArray(exchange?.json?.buttons) && exchange!.json!.buttons.length
+      ? (exchange!.json!.buttons as ExchangeButton[])
+      : [
+          { label: "Get exchange value", href: "/schedule-pickup", style: "primary" },
+          { label: "View scrap rates", href: "/scrap-rate", style: "outline" },
+        ];
+
   return (
     <SiteLayout>
       {/* Hero */}
@@ -426,36 +455,28 @@ function Index() {
             <Reveal>
               <div className="relative overflow-hidden rounded-[2rem] shadow-card">
                 <img
-                  src={exchangePolicy}
+                  src={exchangeImage}
                   alt="Abhyuthanam Recyclers exchange your old electronics for new"
                   loading="lazy"
                   width={1280}
                   height={960}
                   className="h-full w-full object-cover"
                 />
-                <span className="absolute left-5 top-5 rounded-full bg-brand px-4 py-1.5 text-sm font-bold text-brand-foreground shadow-card">
-                  Old for New
-                </span>
+                {exchangeBadge && (
+                  <span className="absolute left-5 top-5 rounded-full bg-brand px-4 py-1.5 text-sm font-bold text-brand-foreground shadow-card">
+                    {exchangeBadge}
+                  </span>
+                )}
               </div>
             </Reveal>
             <Reveal delay={0.1}>
-              <span className="eyebrow"><Recycle className="size-4" /> Exchange Policy</span>
+              <span className="eyebrow"><Recycle className="size-4" /> {exchangeEyebrow}</span>
               <h2 className="mt-4 text-3xl font-extrabold text-navy sm:text-4xl">
-                Give your old, get real value on the new
+                {exchangeTitle}
               </h2>
-              <p className="mt-4 text-muted-foreground">
-                Don't just scrap it — exchange it. Hand over your old laptops, phones,
-                ACs, TVs and appliances to Abhyuthanam Recyclers and get an instant
-                assessed value adjusted against your replacement. We collect the old,
-                pay you a fair exchange amount, and help you upgrade responsibly.
-              </p>
+              <p className="mt-4 text-muted-foreground">{exchangeContent}</p>
               <ul className="mt-6 space-y-3">
-                {[
-                  "Transparent, on-the-spot valuation of your old device",
-                  "Exchange value adjusted towards your new purchase",
-                  "Free doorstep pickup of the old item",
-                  "Certified, zero-landfill recycling of what we collect",
-                ].map((t) => (
+                {exchangeBullets.map((t) => (
                   <li key={t} className="flex items-start gap-3">
                     <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-brand" />
                     <span className="text-navy/80">{t}</span>
@@ -463,10 +484,16 @@ function Index() {
                 ))}
               </ul>
               <div className="mt-8 flex flex-wrap gap-3">
-                <Link to="/schedule-pickup" className="btn-primary">
-                  Get exchange value <ArrowRight className="size-4" />
-                </Link>
-                <Link to="/scrap-rate" className="btn-outline">View scrap rates</Link>
+                {exchangeButtons.map((b, i) => (
+                  <Link
+                    key={`${b.href}-${i}`}
+                    to={b.href}
+                    className={b.style === "outline" ? "btn-outline" : "btn-primary"}
+                  >
+                    {b.label}
+                    {b.style !== "outline" && <ArrowRight className="size-4" />}
+                  </Link>
+                ))}
               </div>
             </Reveal>
           </div>

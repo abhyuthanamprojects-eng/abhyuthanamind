@@ -61,6 +61,29 @@ class PageSectionSeeder extends Seeder
                     'address' => 'E-15, UPSIDA Plastic City, Dibiyapur, UP, PIN- 206244',
                 ],
             ],
+            [
+                'page_key' => 'home',
+                'section_key' => 'exchange_policy',
+                'title' => 'Give your old, get real value on the new',
+                // subtitle doubles as the small eyebrow label above the heading.
+                'subtitle' => 'Exchange Policy',
+                'content' => "Don't just scrap it — exchange it. Hand over your old laptops, phones, ACs, TVs and appliances to Abhyuthanam Recyclers and get an instant assessed value adjusted against your replacement. We collect the old, pay you a fair exchange amount, and help you upgrade responsibly.",
+                // image left null so the bundled default renders; admin can upload a replacement.
+                'image' => null,
+                'json_data' => [
+                    'badge' => 'Old for New',
+                    'bullets' => [
+                        'Transparent, on-the-spot valuation of your old device',
+                        'Exchange value adjusted towards your new purchase',
+                        'Free doorstep pickup of the old item',
+                        'Certified, zero-landfill recycling of what we collect',
+                    ],
+                    'buttons' => [
+                        ['label' => 'Get exchange value', 'href' => '/schedule-pickup', 'style' => 'primary'],
+                        ['label' => 'View scrap rates', 'href' => '/scrap-rate', 'style' => 'outline'],
+                    ],
+                ],
+            ],
         ];
 
         $missingImages = [];
