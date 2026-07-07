@@ -333,7 +333,7 @@
     "src": "resources/js/Frontend/assets/about-worker.jpg"
   },
   "resources/js/Frontend/assets/about.jpg": {
-    "file": "assets/about-CemyIS_Z.jpg",
+    "file": "assets/about-dysQXQRT.jpg",
     "src": "resources/js/Frontend/assets/about.jpg"
   },
   "resources/js/Frontend/assets/app-store-badge.svg": {
@@ -345,7 +345,7 @@
     "src": "resources/js/Frontend/assets/google-play-badge.svg"
   },
   "resources/js/Frontend/assets/hero-westix.jpg": {
-    "file": "assets/hero-westix-Dc73ZNK2.jpg",
+    "file": "assets/hero-westix-DvYvuBLF.jpg",
     "src": "resources/js/Frontend/assets/hero-westix.jpg"
   },
   "resources/js/Frontend/assets/ind-corporate.jpg": {
@@ -1709,7 +1709,7 @@
     ]
   },
   "resources/js/frontend.tsx": {
-    "file": "assets/frontend-DlSOGGZp.js",
+    "file": "assets/frontend-cohb4pb1.js",
     "name": "frontend",
     "src": "resources/js/frontend.tsx",
     "isEntry": true,
@@ -1801,12 +1801,12 @@
       "assets/capacity-CMSdAIw-.jpg",
       "assets/team-mzz-J8zv.jpg",
       "assets/customers-UjCW3o3r.jpg",
-      "assets/about-CemyIS_Z.jpg",
+      "assets/about-dysQXQRT.jpg",
       "assets/recycle-3-DPJvcKMw.jpg",
       "assets/owner-1-DXdiVj4W.jpg",
       "assets/owner-2-BLjcRPH5.jpg",
       "assets/plant-exterior--zDYAG59.jpg",
-      "assets/hero-westix-Dc73ZNK2.jpg",
+      "assets/hero-westix-DvYvuBLF.jpg",
       "assets/recycle-2-D1DcEP2a.jpg",
       "assets/ind-oem-4__D6WxE.jpg",
       "assets/ind-ecommerce-CFheM6mF.jpg",
