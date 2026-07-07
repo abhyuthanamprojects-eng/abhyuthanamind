@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import {
   Target, Eye, Gem, Award, CheckCircle2, Factory, ArrowRight, Leaf,
-  Recycle, ShieldCheck, Truck, Sparkles, PlayCircle, Linkedin, Users,
+  Recycle, ShieldCheck, Truck, Sparkles, PlayCircle, Linkedin, Users, Wrench,
   Images, ChevronDown, ChevronUp, X, ExternalLink, FileText, ChevronLeft, ChevronRight, Lock,
 } from "lucide-react";
 import { SiteLayout, PageHero } from "@/Frontend/components/SiteLayout";
@@ -114,8 +114,9 @@ const skills = [
 const process = [
   { icon: Truck, title: "Collection", text: "Doorstep pickup of e-waste scheduled across India with real-time tracking." },
   { icon: Recycle, title: "Segregation", text: "Careful sorting and segregation of every e-waste stream at our facility." },
-  { icon: Factory, title: "Processing", text: "Scientific recycling and metal recovery with a strict zero-dumping policy." },
-  { icon: ShieldCheck, title: "Reporting", text: "Transparent, certified documentation and audit trail for every asset." },
+  { icon: Wrench, title: "Dismantling", text: "Devices are safely dismantled into reusable parts and clean material streams." },
+  { icon: Factory, title: "Processing", text: "Scientific processing and metal recovery with a strict zero-dumping policy." },
+  { icon: Leaf, title: "Recycling", text: "Recovered materials are recycled back into the supply chain with zero landfill." },
 ];
 
 const marqueeItems = ["REDUCE REUSE RECYCLE", "GREEN FUTURE TOGETHER", "CLEAN EARTH INITIATIVE", "ZERO LANDFILL"];
@@ -373,7 +374,7 @@ function About() {
             <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-sm font-semibold text-lime"><Recycle className="size-4" /> Our Process</span>
             <h2 className="mt-4 text-3xl font-extrabold sm:text-4xl">How we work</h2>
           </Reveal>
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
             {process.map(({ icon: Icon, title, text }, i) => (
               <Reveal key={title} delay={i * 0.1}>
                 <div className="relative h-full rounded-3xl bg-white/5 p-7 text-center">
