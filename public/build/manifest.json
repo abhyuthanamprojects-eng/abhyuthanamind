@@ -397,7 +397,7 @@
     "src": "resources/js/Frontend/assets/owner-2.jpg"
   },
   "resources/js/Frontend/assets/plant-exterior.jpg": {
-    "file": "assets/plant-exterior--zDYAG59.jpg",
+    "file": "assets/plant-exterior-C8M5DB5e.jpg",
     "src": "resources/js/Frontend/assets/plant-exterior.jpg"
   },
   "resources/js/Frontend/assets/plant-floor.jpg": {
@@ -621,7 +621,7 @@
     "src": "resources/js/Frontend/assets/svc-ewaste.jpg"
   },
   "resources/js/Frontend/assets/svc-exchange.jpg": {
-    "file": "assets/svc-exchange-CSI-VOK2.jpg",
+    "file": "assets/svc-exchange-BdCl9cXk.jpg",
     "src": "resources/js/Frontend/assets/svc-exchange.jpg"
   },
   "resources/js/Frontend/assets/svc-itad.jpg": {
@@ -1709,7 +1709,7 @@
     ]
   },
   "resources/js/frontend.tsx": {
-    "file": "assets/frontend-Y777wzHv.js",
+    "file": "assets/frontend-BaySQnf8.js",
     "name": "frontend",
     "src": "resources/js/frontend.tsx",
     "isEntry": true,
@@ -1805,7 +1805,7 @@
       "assets/recycle-3-DPJvcKMw.jpg",
       "assets/owner-1-DXdiVj4W.jpg",
       "assets/owner-2-BLjcRPH5.jpg",
-      "assets/plant-exterior--zDYAG59.jpg",
+      "assets/plant-exterior-C8M5DB5e.jpg",
       "assets/hero-westix-DvYvuBLF.jpg",
       "assets/recycle-2-D1DcEP2a.jpg",
       "assets/ind-oem-4__D6WxE.jpg",
@@ -1816,7 +1816,7 @@
       "assets/svc-training-CPSjoTI-.jpg",
       "assets/svc-epr-B1CQry_n.jpg",
       "assets/svc-csr-DmrPgXJr.jpg",
-      "assets/svc-exchange-CSI-VOK2.jpg",
+      "assets/svc-exchange-BdCl9cXk.jpg",
       "assets/about-main-XTDGDUl0.jpg",
       "assets/about-truck-BBPDySVG.jpg",
       "assets/about-worker-ByfQervj.jpg",
