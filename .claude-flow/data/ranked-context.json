@@ -7,9 +7,9 @@
       "content": "name: abhyuthanamind-production-deploy\ndescription: \"How abhyuthanamind.com is deployed on Hostinger (env quirks, gotchas)\"\nmetadata: \n  node_type: memory\n  type: project\n  originSessionId: f72cdf53-2ed8-42f1-97b5-ca8a32f0e42c\n---\n\nProduction site abhyuthanamind.com (Laravel 11 + Inertia/React) runs on Hostinger shared hosting (CloudLinux), deployed manually over SSH — NOT via Hostinger's GitHub auto-deploy (that fails on composer).\n\nKey facts / gotchas (learned during first deploy, 2026-07-04)…",
       "summary": "---",
       "category": "abhyuthanamind-production-deploy",
-      "confidence": 0.5,
+      "confidence": 0.55,
       "pageRank": 1,
-      "accessCount": 0,
+      "accessCount": 1,
       "words": [
         "name",
         "abhyuthanamind-production-deploy",
