@@ -1,18 +1,26 @@
 {
   "version": 1,
-  "updatedAt": 1784274260847,
-  "nodeCount": 1,
+  "updatedAt": 1784289139565,
+  "nodeCount": 2,
   "nodes": {
     "mem-abhyuthanamind-production-deploy-----0": {
       "id": "mem-abhyuthanamind-production-deploy-----0",
       "category": "abhyuthanamind-production-deploy",
-      "confidence": 0.55,
-      "accessCount": 1,
+      "confidence": 0.5,
+      "accessCount": 0,
       "createdAt": 1784274260330
+    },
+    "insight-1784278476565-sb3r": {
+      "id": "insight-1784278476565-sb3r",
+      "category": "insights",
+      "confidence": 0.5,
+      "accessCount": 0,
+      "createdAt": 1784278476565
     }
   },
   "edges": [],
   "pageRanks": {
-    "mem-abhyuthanamind-production-deploy-----0": 1
+    "mem-abhyuthanamind-production-deploy-----0": 0.5,
+    "insight-1784278476565-sb3r": 0.5
   }
 }

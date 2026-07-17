@@ -1,15 +1,15 @@
 {
   "version": 1,
-  "computedAt": 1784274260848,
+  "computedAt": 1784289139566,
   "entries": [
     {
       "id": "mem-abhyuthanamind-production-deploy-----0",
       "content": "name: abhyuthanamind-production-deploy\ndescription: \"How abhyuthanamind.com is deployed on Hostinger (env quirks, gotchas)\"\nmetadata: \n  node_type: memory\n  type: project\n  originSessionId: f72cdf53-2ed8-42f1-97b5-ca8a32f0e42c\n---\n\nProduction site abhyuthanamind.com (Laravel 11 + Inertia/React) runs on Hostinger shared hosting (CloudLinux), deployed manually over SSH — NOT via Hostinger's GitHub auto-deploy (that fails on composer).\n\nKey facts / gotchas (learned during first deploy, 2026-07-04)…",
       "summary": "---",
       "category": "abhyuthanamind-production-deploy",
-      "confidence": 0.55,
-      "pageRank": 1,
-      "accessCount": 1,
+      "confidence": 0.5,
+      "pageRank": 0.5,
+      "accessCount": 0,
       "words": [
         "name",
         "abhyuthanamind-production-deploy",
@@ -61,6 +61,38 @@
         "deploy",
         "2026-07-04",
         "---"
+      ]
+    },
+    {
+      "id": "insight-1784278476565-sb3r",
+      "content": "File /Users/amitsinha/Devzign/ReactJs/abhyuthanamind/resources/js/Frontend/lib/site-data.ts was edited 4 times this session — likely a hot path worth monitoring.",
+      "summary": "Frequently edited: site-data.ts (4x)",
+      "category": "insights",
+      "confidence": 0.5,
+      "pageRank": 0.5,
+      "accessCount": 0,
+      "words": [
+        "file",
+        "users",
+        "amitsinha",
+        "devzign",
+        "reactjs",
+        "abhyuthanamind",
+        "resources",
+        "frontend",
+        "lib",
+        "site-data",
+        "edited",
+        "times",
+        "session",
+        "likely",
+        "hot",
+        "path",
+        "worth",
+        "monitoring",
+        "frequently",
+        "edited",
+        "site-data"
       ]
     }
   ]

@@ -12,8 +12,8 @@ $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
 
 use App\Models\PageSection;
 
-$contactPhones = ['+91 77385 74635', '+91 1800 2030 267', '+91 11-44761731'];
-$footerPhones  = ['+91 77385 74635', '+91 1800 2030 267'];
+$contactPhones = ['+91 70429 89374', '+91 1800 2030 267', '+91 11-44761731'];
+$footerPhones  = ['+91 70429 89374', '+91 1800 2030 267'];
 
 $contact = PageSection::where('page_key', 'contact')->where('section_key', 'info')->first();
 if ($contact) {

@@ -42,7 +42,7 @@ class PageSectionSeeder extends Seeder
                 'image' => null,
                 'json_data' => [
                     'emails' => ['sales@abhyuthanamind.com', 'info@abhyuthanamind.com'],
-                    'phones' => ['+91 77385 74635', '+91 1800 2030 267', '+91 11-44761731'],
+                    'phones' => ['+91 70429 89374', '+91 1800 2030 267', '+91 11-44761731'],
                     'plant_address' => 'E-15, UPSIDA Plastic City, Dibiyapur, Uttar Pradesh - 206244',
                     'corporate_address' => 'E-44/3, 1st Floor, Industrial Area, Phase-II, Okhla, New Delhi - 110020',
                     'hours' => 'Mon – Sat: 9:00 AM – 6:00 PM',
@@ -57,7 +57,7 @@ class PageSectionSeeder extends Seeder
                 'image' => null,
                 'json_data' => [
                     'email' => 'info@abhyuthanamind.com',
-                    'phones' => ['+91 77385 74635', '+91 1800 2030 267'],
+                    'phones' => ['+91 70429 89374', '+91 1800 2030 267'],
                     'address' => 'E-15, UPSIDA Plastic City, Dibiyapur, UP, PIN- 206244',
                 ],
             ],
