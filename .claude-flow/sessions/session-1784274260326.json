@@ -1,0 +1,14 @@
+{
+  "id": "session-1784274260326",
+  "startedAt": "2026-07-17T07:44:20.326Z",
+  "cwd": "/Users/amitsinha/Devzign/ReactJs/abhyuthanamind",
+  "context": {},
+  "metrics": {
+    "edits": 0,
+    "commands": 0,
+    "tasks": 0,
+    "errors": 0
+  },
+  "endedAt": "2026-07-17T07:44:20.849Z",
+  "duration": 524
+}
