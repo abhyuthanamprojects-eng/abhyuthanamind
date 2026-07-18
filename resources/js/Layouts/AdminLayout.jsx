@@ -9,7 +9,7 @@ import axios from 'axios';
 
 function NavLinks({ onNavigate }) {
     const { url, auth } = usePage();
-    const [accessibleMenus, setAccessibleMenus] = useState([]);
+    const [accessibleMenus, setAccessibleMenus] = useState(null);
 
     useEffect(() => {
         fetchAccessibleMenus();
@@ -20,30 +20,12 @@ function NavLinks({ onNavigate }) {
             const { data } = await axios.get('/api/auth/available-menus');
             setAccessibleMenus(data.data.accessible_menus);
         } catch (error) {
-            // Fallback: admin has access to all if API fails
-            if (auth.user?.user_type === 'admin') {
-                const allMenuKeys = adminNav.flatMap(g => g.items.map(i => {
-                    const keyMap = {
-                        'dashboard': 'dashboard',
-                        'admin.pickup-queries.index': 'pickup-queries',
-                        'admin.pickups.index': 'pickup-requests',
-                        'admin.contacts.index': 'contact-queries',
-                        'admin.help-support.index': 'help-support',
-                        'admin.customers.index': 'customers-leads',
-                        'admin.pages.index': 'static-pages',
-                        'admin.page-sections.index': 'page-sections',
-                        'admin.services.index': 'services',
-                        'admin.industries.index': 'industries',
-                        'admin.testimonials.index': 'testimonials',
-                        'admin.certificates.index': 'certificates',
-                        'admin.media.index': 'media-gallery',
-                        'admin.scrap-rate.index': 'scrap-rate',
-                        'admin.reports.index': 'reports',
-                        'admin.app-settings.index': 'app-settings',
-                    };
-                    return keyMap[i.route];
-                }));
-                setAccessibleMenus(allMenuKeys.filter(Boolean));
+            // Fallback: if user is admin (role), show all menus
+            const isAdmin = auth.user?.roles?.[0]?.name === 'admin' || auth.user?.user_type === 'admin';
+            if (isAdmin) {
+                setAccessibleMenus(null); // null = show all
+            } else {
+                setAccessibleMenus([]); // empty = show none (safer)
             }
         }
     };
@@ -52,6 +34,9 @@ function NavLinks({ onNavigate }) {
         <nav className="flex flex-col gap-6 px-3 py-4">
             {adminNav.map((grp) => {
                 const visibleItems = grp.items.filter(item => {
+                    // If accessibleMenus is null, show all (admin fallback)
+                    if (accessibleMenus === null) return true;
+
                     const keyMap = {
                         'dashboard': 'dashboard',
                         'admin.pickup-queries.index': 'pickup-queries',
