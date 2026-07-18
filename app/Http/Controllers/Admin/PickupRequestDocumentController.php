@@ -145,21 +145,10 @@ class PickupRequestDocumentController extends Controller
 
         abort_if(!$view, 404);
 
-        $payload = [
+        return view($view, [
             'pickup' => $pickupRequest,
             'doc' => $document,
             'data' => $document->generated_data ?? [],
-        ];
-
-        // Form 6 is rendered as a real PDF in the official manifest format
-        if ($document->document_type === PickupRequestDocument::TYPE_FORM_6) {
-            $filename = 'Form-6-' . ($document->document_number ?: $pickupRequest->booking_id) . '.pdf';
-
-            return \Barryvdh\DomPDF\Facade\Pdf::loadView($view, $payload)
-                ->setPaper('a4')
-                ->stream($filename);
-        }
-
-        return view($view, $payload);
+        ]);
     }
 }
