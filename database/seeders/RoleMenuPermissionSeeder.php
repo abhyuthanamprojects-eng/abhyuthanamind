@@ -29,6 +29,7 @@ class RoleMenuPermissionSeeder extends Seeder
             ['role_name' => 'admin', 'menu_key' => 'media-gallery', 'can_access' => true, 'can_edit' => true],
             ['role_name' => 'admin', 'menu_key' => 'scrap-rate', 'can_access' => true, 'can_edit' => true],
             ['role_name' => 'admin', 'menu_key' => 'reports', 'can_access' => true, 'can_edit' => true],
+            ['role_name' => 'admin', 'menu_key' => 'user-management', 'can_access' => true, 'can_edit' => true],
             ['role_name' => 'admin', 'menu_key' => 'app-settings', 'can_access' => true, 'can_edit' => true],
 
             // Manager — Main access only

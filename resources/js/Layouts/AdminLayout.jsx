@@ -53,6 +53,7 @@ function NavLinks({ onNavigate }) {
                         'admin.media.index': 'media-gallery',
                         'admin.scrap-rate.index': 'scrap-rate',
                         'admin.reports.index': 'reports',
+                        'admin.users.index': 'user-management',
                         'admin.app-settings.index': 'app-settings',
                     };
                     const menuKey = keyMap[item.route];
