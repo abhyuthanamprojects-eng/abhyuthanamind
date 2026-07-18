@@ -30,6 +30,39 @@ const MENU_ITEMS = [
 
 const DEFAULT_ROLES = ['admin', 'manager', 'accountant'];
 
+const getDefaultPermissions = (role) => {
+    const permsMap = {};
+
+    // Admin gets full access to everything
+    if (role === 'admin') {
+        MENU_ITEMS.forEach(item => {
+            permsMap[item.key] = { can_access: true, can_edit: true };
+        });
+    }
+    // Manager gets Main section + Dashboard
+    else if (role === 'manager') {
+        const managerAccess = ['dashboard', 'pickup-queries', 'pickup-requests', 'contact-queries', 'help-support', 'customers-leads'];
+        MENU_ITEMS.forEach(item => {
+            permsMap[item.key] = {
+                can_access: managerAccess.includes(item.key),
+                can_edit: managerAccess.includes(item.key)
+            };
+        });
+    }
+    // Accountant gets Business Data section
+    else if (role === 'accountant') {
+        const accountantAccess = ['dashboard', 'scrap-rate', 'reports'];
+        MENU_ITEMS.forEach(item => {
+            permsMap[item.key] = {
+                can_access: accountantAccess.includes(item.key),
+                can_edit: accountantAccess.includes(item.key)
+            };
+        });
+    }
+
+    return permsMap;
+};
+
 export default function RolePermissions() {
     const { csrf_token } = usePage().props;
     const [roles, setRoles] = useState([]);
@@ -71,13 +104,21 @@ export default function RolePermissions() {
         setLoading(true);
         try {
             const { data } = await axios.get(`/api/admin/role-permissions/${role}`);
-            const permsMap = {};
-            data.data.forEach(perm => {
-                permsMap[perm.menu_key] = { can_access: perm.can_access, can_edit: perm.can_edit };
-            });
-            setPermissions(permsMap);
+            if (data?.data && Array.isArray(data.data)) {
+                const permsMap = {};
+                data.data.forEach(perm => {
+                    permsMap[perm.menu_key] = { can_access: perm.can_access, can_edit: perm.can_edit };
+                });
+                setPermissions(permsMap);
+            } else {
+                throw new Error('Invalid API response format');
+            }
         } catch (error) {
-            setMessage({ type: 'error', text: 'Failed to load permissions' });
+            console.error(`Failed to fetch permissions for role ${role}:`, error);
+            // Fallback to default permissions for the role
+            const defaultPerms = getDefaultPermissions(role);
+            setPermissions(defaultPerms);
+            setMessage({ type: 'warning', text: `Using default permissions for ${role} (API unavailable)` });
         } finally {
             setLoading(false);
         }
