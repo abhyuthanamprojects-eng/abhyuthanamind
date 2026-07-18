@@ -28,6 +28,8 @@ const MENU_ITEMS = [
     { key: 'app-settings', label: 'App Settings', group: 'Settings' },
 ];
 
+const DEFAULT_ROLES = ['admin', 'manager', 'accountant'];
+
 export default function RolePermissions() {
     const { csrf_token } = usePage().props;
     const [roles, setRoles] = useState([]);
@@ -51,10 +53,15 @@ export default function RolePermissions() {
         setLoading(true);
         try {
             const { data } = await axios.get('/api/admin/roles');
-            setRoles(data.data.roles);
-            setSelectedRole(data.data.roles[0]);
+            const rolesList = data?.data?.roles || DEFAULT_ROLES;
+            setRoles(rolesList);
+            setSelectedRole(rolesList[0]);
         } catch (error) {
-            setMessage({ type: 'error', text: 'Failed to load roles' });
+            console.error('Failed to fetch roles from API, using defaults:', error);
+            // Fallback to default roles if API fails
+            setRoles(DEFAULT_ROLES);
+            setSelectedRole(DEFAULT_ROLES[0]);
+            setMessage({ type: 'warning', text: 'Using default roles (API unavailable)' });
         } finally {
             setLoading(false);
         }
@@ -120,8 +127,10 @@ export default function RolePermissions() {
 
             {message && (
                 <div className={`mb-4 rounded-xl px-4 py-3 ${
-                    message.type === 'success' 
-                        ? 'border border-green-200 bg-green-50 text-green-800' 
+                    message.type === 'success'
+                        ? 'border border-green-200 bg-green-50 text-green-800'
+                        : message.type === 'warning'
+                        ? 'border border-amber-200 bg-amber-50 text-amber-800'
                         : 'border border-red-200 bg-red-50 text-red-800'
                 }`}>
                     {message.text}
