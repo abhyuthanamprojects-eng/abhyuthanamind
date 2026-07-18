@@ -70,6 +70,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::prefix('auth')->group(function () {
         Route::get('profile', [AuthController::class, 'profile']);
+        Route::get('available-menus', [\App\Http\Controllers\Api\Admin\RolePermissionController::class, 'getAvailableMenus']);
         Route::post('logout', [AuthController::class, 'logout']);
 
         // Profile Enhancements
@@ -194,6 +195,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // User Types
         Route::patch('user-types/{code}/visibility', [\App\Http\Controllers\Api\Admin\AdminUserTypeController::class, 'updateVisibility']);
+
+        // Role Menu Permissions
+        Route::get('roles', [\App\Http\Controllers\Api\Admin\RolePermissionController::class, 'getAllRoles']);
+        Route::get('role-permissions/{roleName}', [\App\Http\Controllers\Api\Admin\RolePermissionController::class, 'getByRole']);
+        Route::put('role-permissions/{roleName}', [\App\Http\Controllers\Api\Admin\RolePermissionController::class, 'updatePermissions']);
 
         Route::get('logs', [\App\Http\Controllers\Api\Admin\AdminController::class, 'logs']);
         Route::get('pickups', [\App\Http\Controllers\Api\Admin\AdminController::class, 'listPickups']);

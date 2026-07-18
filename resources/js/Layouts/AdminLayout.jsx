@@ -5,41 +5,107 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Toaster } from 'sonner';
 import { adminNav } from '@/lib/admin-nav';
 import { cn } from '@/lib/utils';
+import axios from 'axios';
 
 function NavLinks({ onNavigate }) {
-    const { url } = usePage();
+    const { url, auth } = usePage();
+    const [accessibleMenus, setAccessibleMenus] = useState([]);
+
+    useEffect(() => {
+        fetchAccessibleMenus();
+    }, []);
+
+    const fetchAccessibleMenus = async () => {
+        try {
+            const { data } = await axios.get('/api/auth/available-menus');
+            setAccessibleMenus(data.data.accessible_menus);
+        } catch (error) {
+            // Fallback: admin has access to all if API fails
+            if (auth.user?.user_type === 'admin') {
+                const allMenuKeys = adminNav.flatMap(g => g.items.map(i => {
+                    const keyMap = {
+                        'dashboard': 'dashboard',
+                        'admin.pickup-queries.index': 'pickup-queries',
+                        'admin.pickups.index': 'pickup-requests',
+                        'admin.contacts.index': 'contact-queries',
+                        'admin.help-support.index': 'help-support',
+                        'admin.customers.index': 'customers-leads',
+                        'admin.pages.index': 'static-pages',
+                        'admin.page-sections.index': 'page-sections',
+                        'admin.services.index': 'services',
+                        'admin.industries.index': 'industries',
+                        'admin.testimonials.index': 'testimonials',
+                        'admin.certificates.index': 'certificates',
+                        'admin.media.index': 'media-gallery',
+                        'admin.scrap-rate.index': 'scrap-rate',
+                        'admin.reports.index': 'reports',
+                        'admin.app-settings.index': 'app-settings',
+                    };
+                    return keyMap[i.route];
+                }));
+                setAccessibleMenus(allMenuKeys.filter(Boolean));
+            }
+        }
+    };
 
     return (
         <nav className="flex flex-col gap-6 px-3 py-4">
-            {adminNav.map((grp) => (
-                <div key={grp.group}>
-                    <p className="px-3 pb-2 text-[0.68rem] font-bold uppercase tracking-wider text-muted-foreground">{grp.group}</p>
-                    <ul className="space-y-1">
-                        {grp.items.map((item) => {
-                            const href = route(item.route);
-                            const active = url === new URL(href, window.location.origin).pathname;
-                            const Icon = item.icon;
-                            return (
-                                <li key={item.label}>
-                                    <Link
-                                        href={href}
-                                        onClick={onNavigate}
-                                        className={cn(
-                                            'group flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium transition-all',
-                                            active
-                                                ? 'bg-brand text-brand-foreground shadow-soft'
-                                                : 'text-navy/80 hover:bg-accent hover:text-accent-foreground',
-                                        )}
-                                    >
-                                        <Icon className={cn('size-[1.15rem] shrink-0', active ? '' : 'text-muted-foreground group-hover:text-accent-foreground')} />
-                                        <span className="flex-1 truncate">{item.label}</span>
-                                    </Link>
-                                </li>
-                            );
-                        })}
-                    </ul>
-                </div>
-            ))}
+            {adminNav.map((grp) => {
+                const visibleItems = grp.items.filter(item => {
+                    const keyMap = {
+                        'dashboard': 'dashboard',
+                        'admin.pickup-queries.index': 'pickup-queries',
+                        'admin.pickups.index': 'pickup-requests',
+                        'admin.contacts.index': 'contact-queries',
+                        'admin.help-support.index': 'help-support',
+                        'admin.customers.index': 'customers-leads',
+                        'admin.pages.index': 'static-pages',
+                        'admin.page-sections.index': 'page-sections',
+                        'admin.services.index': 'services',
+                        'admin.industries.index': 'industries',
+                        'admin.testimonials.index': 'testimonials',
+                        'admin.certificates.index': 'certificates',
+                        'admin.media.index': 'media-gallery',
+                        'admin.scrap-rate.index': 'scrap-rate',
+                        'admin.reports.index': 'reports',
+                        'admin.app-settings.index': 'app-settings',
+                    };
+                    const menuKey = keyMap[item.route];
+                    return !menuKey || accessibleMenus.includes(menuKey);
+                });
+
+                if (visibleItems.length === 0) return null;
+
+                return (
+                    <div key={grp.group}>
+                        <p className="px-3 pb-2 text-[0.68rem] font-bold uppercase tracking-wider text-muted-foreground">{grp.group}</p>
+                        <ul className="space-y-1">
+                            {visibleItems.map((item) => {
+                                const href = route(item.route);
+                                const active = url === new URL(href, window.location.origin).pathname;
+                                const Icon = item.icon;
+                                return (
+                                    <li key={item.label}>
+                                        <Link
+                                            href={href}
+                                            onClick={onNavigate}
+                                            className={cn(
+                                                'group flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium transition-all',
+                                                active
+                                                    ? 'bg-brand text-brand-foreground shadow-soft'
+                                                    : 'text-navy/80 hover:bg-accent hover:text-accent-foreground',
+                                            )}
+                                        >
+                                            <Icon className={cn('size-[1.15rem] shrink-0', active ? '' : 'text-muted-foreground group-hover:text-accent-foreground')} />
+                                            <span className="flex-1 truncate">{item.label}</span>
+                                        </Link>
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    </div>
+                );
+            })}
         </nav>
     );
 }

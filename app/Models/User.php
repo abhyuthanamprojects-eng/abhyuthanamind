@@ -31,6 +31,7 @@ class User extends Authenticatable
         'otp_expires_at',
         'wallet_balance',
         'status',
+        'user_type',
         'profile_photo_path',
         'bank_name',
         'account_number',

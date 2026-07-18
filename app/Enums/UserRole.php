@@ -5,6 +5,8 @@ namespace App\Enums;
 enum UserRole: string
 {
     case ADMIN = 'admin';
+    case MANAGER = 'manager';
+    case ACCOUNTANT = 'accountant';
     case PICKUP_BOY = 'pickup_boy';
     case CUSTOMER = 'customer';
     case CHANNEL_PARTNER = 'channel_partner';
@@ -14,6 +16,8 @@ enum UserRole: string
     {
         return match ($this) {
             self::ADMIN => 'Administrator',
+            self::MANAGER => 'Manager',
+            self::ACCOUNTANT => 'Accountant',
             self::PICKUP_BOY => 'Pickup Partner',
             self::CUSTOMER => 'Customer',
             self::CHANNEL_PARTNER => 'Channel Partner',

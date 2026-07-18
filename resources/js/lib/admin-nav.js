@@ -39,6 +39,7 @@ export const adminNav = [
         group: 'Settings',
         items: [
             { label: 'App Settings', route: 'admin.app-settings.index', icon: Settings },
+            { label: 'Role Permissions', route: 'admin.role-permissions.index', icon: Settings },
             { label: 'Profile', route: 'profile.edit', icon: User },
         ],
     },
