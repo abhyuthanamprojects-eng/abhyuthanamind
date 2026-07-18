@@ -82,9 +82,38 @@ Route::middleware('auth')->group(function () {
 });
 
 // Admin Routes (Now Root)
-// Shared Authenticated Routes
-Route::middleware(['auth', 'role:admin|customer|payment_admin'])->group(function () {
+// Shared Authenticated Routes (Admin, Manager, Customer, Payment Admin)
+Route::middleware(['auth', 'role:admin|manager|customer|payment_admin'])->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class , 'index'])->name('dashboard');
+});
+
+// Admin & Manager Routes (Main section access)
+Route::middleware(['auth', 'role:admin|manager'])->prefix('admin')->group(function () {
+    Route::get('pickup-queries', [\App\Http\Controllers\Admin\PickupQueryAdminController::class, 'index'])->name('admin.pickup-queries.index');
+    Route::get('pickup-queries/{pickupQuery}', [\App\Http\Controllers\Admin\PickupQueryAdminController::class, 'show'])->name('admin.pickup-queries.show');
+    Route::patch('pickup-queries/{pickupQuery}', [\App\Http\Controllers\Admin\PickupQueryAdminController::class, 'update'])->name('admin.pickup-queries.update');
+    Route::post('pickup-queries/{pickupQuery}/accept', [\App\Http\Controllers\Admin\PickupQueryAdminController::class, 'accept'])->name('admin.pickup-queries.accept');
+    Route::post('pickup-queries/{pickupQuery}/reject', [\App\Http\Controllers\Admin\PickupQueryAdminController::class, 'reject'])->name('admin.pickup-queries.reject');
+    Route::delete('pickup-queries/{pickupQuery}', [\App\Http\Controllers\Admin\PickupQueryAdminController::class, 'destroy'])->name('admin.pickup-queries.destroy');
+
+    Route::get('pickup-requests', [\App\Http\Controllers\Admin\PickupRequestAdminController::class, 'index'])->name('admin.pickups.index');
+    Route::get('pickup-requests/{pickupRequest}', [\App\Http\Controllers\Admin\PickupRequestAdminController::class, 'show'])->name('admin.pickups.show');
+    Route::post('pickup-requests/{pickupRequest}/status', [\App\Http\Controllers\Admin\PickupRequestAdminController::class, 'updateStatus'])->name('admin.pickups.update-status');
+    Route::patch('pickup-requests/{pickupRequest}/material-processing', [\App\Http\Controllers\Admin\PickupRequestAdminController::class, 'updateMaterialProcessing'])->name('admin.pickups.material-processing');
+
+    Route::get('help-support', [\App\Http\Controllers\Admin\HelpSupportController::class, 'index'])->name('admin.help-support.index');
+    Route::get('help-support/{id}', [\App\Http\Controllers\Admin\HelpSupportController::class, 'show'])->name('admin.help-support.show');
+    Route::post('help-support/{id}/status', [\App\Http\Controllers\Admin\HelpSupportController::class, 'updateStatus'])->name('admin.help-support.update-status');
+
+    Route::get('customers', [\App\Http\Controllers\Admin\CustomerLeadController::class, 'index'])->name('admin.customers.index');
+});
+
+// Contact Messages (Admin & Manager & Payment Admin)
+Route::middleware(['auth', 'role:admin|manager|payment_admin'])->group(function () {
+    Route::get('contact-messages', [\App\Http\Controllers\Admin\ContactController::class, 'index'])->name('admin.contacts.index');
+    Route::get('contact-messages/{contactMessage}', [\App\Http\Controllers\Admin\ContactController::class, 'show'])->name('admin.contacts.show');
+    Route::patch('contact-messages/{contactMessage}/status', [\App\Http\Controllers\Admin\ContactController::class, 'updateStatus'])->name('admin.contacts.update-status');
+    Route::delete('contact-messages/{contactMessage}', [\App\Http\Controllers\Admin\ContactController::class, 'destroy'])->name('admin.contacts.destroy');
 });
 
 // Admin ONLY Routes
@@ -113,23 +142,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::match(['put', 'patch', 'post'], 'home-banners/{homeBanner}', [\App\Http\Controllers\Admin\HomeBannerController::class, 'update'])->name('admin.home-banners.update');
     Route::delete('home-banners/{homeBanner}', [\App\Http\Controllers\Admin\HomeBannerController::class, 'destroy'])->name('admin.home-banners.destroy');
 
-    Route::get('help-support', [\App\Http\Controllers\Admin\HelpSupportController::class, 'index'])->name('admin.help-support.index');
-    Route::get('help-support/{id}', [\App\Http\Controllers\Admin\HelpSupportController::class, 'show'])->name('admin.help-support.show');
-    Route::post('help-support/{id}/status', [\App\Http\Controllers\Admin\HelpSupportController::class, 'updateStatus'])->name('admin.help-support.update-status');
+    // Additional admin-only help-support actions (deletions)
     Route::delete('help-support/{id}', [\App\Http\Controllers\Admin\HelpSupportController::class, 'destroy'])->name('admin.help-support.destroy');
 
-    // Pickup Queries — pre-pickup negotiation stage, converts into Pickup Requests
-    Route::get('pickup-queries', [\App\Http\Controllers\Admin\PickupQueryAdminController::class, 'index'])->name('admin.pickup-queries.index');
-    Route::get('pickup-queries/{pickupQuery}', [\App\Http\Controllers\Admin\PickupQueryAdminController::class, 'show'])->name('admin.pickup-queries.show');
-    Route::patch('pickup-queries/{pickupQuery}', [\App\Http\Controllers\Admin\PickupQueryAdminController::class, 'update'])->name('admin.pickup-queries.update');
-    Route::post('pickup-queries/{pickupQuery}/accept', [\App\Http\Controllers\Admin\PickupQueryAdminController::class, 'accept'])->name('admin.pickup-queries.accept');
-    Route::post('pickup-queries/{pickupQuery}/reject', [\App\Http\Controllers\Admin\PickupQueryAdminController::class, 'reject'])->name('admin.pickup-queries.reject');
+    // Additional admin-only pickup actions
     Route::delete('pickup-queries/{pickupQuery}', [\App\Http\Controllers\Admin\PickupQueryAdminController::class, 'destroy'])->name('admin.pickup-queries.destroy');
-
-    // Pickup Requests — real backend, manual status workflow + certificates
-    Route::get('pickup-requests', [\App\Http\Controllers\Admin\PickupRequestAdminController::class, 'index'])->name('admin.pickups.index');
-    Route::get('pickup-requests/{pickupRequest}', [\App\Http\Controllers\Admin\PickupRequestAdminController::class, 'show'])->name('admin.pickups.show');
-    Route::post('pickup-requests/{pickupRequest}/status', [\App\Http\Controllers\Admin\PickupRequestAdminController::class, 'updateStatus'])->name('admin.pickups.update-status');
     Route::patch('pickup-requests/{pickupRequest}/material-processing', [\App\Http\Controllers\Admin\PickupRequestAdminController::class, 'updateMaterialProcessing'])->name('admin.pickups.material-processing');
     Route::post('pickup-requests/{pickupRequest}/certificate', [\App\Http\Controllers\Admin\PickupRequestAdminController::class, 'uploadCertificate'])->name('admin.pickups.certificate.upload');
     Route::delete('pickup-requests/{pickupRequest}/certificate', [\App\Http\Controllers\Admin\PickupRequestAdminController::class, 'destroyCertificate'])->name('admin.pickups.certificate.destroy');
@@ -202,8 +219,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::match(['put', 'post'], 'page-sections/{pageSection}', [\App\Http\Controllers\Admin\PageSectionAdminController::class, 'update'])->name('admin.page-sections.update');
     Route::delete('page-sections/{pageSection}', [\App\Http\Controllers\Admin\PageSectionAdminController::class, 'destroy'])->name('admin.page-sections.destroy');
 
-    // Customers / Leads — read-only aggregate of contact enquiries + pickup leads
-    Route::get('customers', [\App\Http\Controllers\Admin\CustomerLeadController::class, 'index'])->name('admin.customers.index');
+    // Reports — admin only
     Route::get('reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('admin.reports.index');
 
     // UI component reference pages (theme showcase)
@@ -216,13 +232,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::inertia('theme/sample-page', 'Admin/Theme/SamplePage')->name('admin.theme.sample-page');
 });
 
-// Contact Messages
-Route::middleware(['auth', 'role:admin|payment_admin'])->group(function () {
-    Route::get('contact-messages', [\App\Http\Controllers\Admin\ContactController::class, 'index'])->name('admin.contacts.index');
-    Route::get('contact-messages/{contactMessage}', [\App\Http\Controllers\Admin\ContactController::class, 'show'])->name('admin.contacts.show');
-    Route::patch('contact-messages/{contactMessage}/status', [\App\Http\Controllers\Admin\ContactController::class, 'updateStatus'])->name('admin.contacts.update-status');
-    Route::delete('contact-messages/{contactMessage}', [\App\Http\Controllers\Admin\ContactController::class, 'destroy'])->name('admin.contacts.destroy');
-});
 
 // API Documentation
 Route::get('/api/documentation', function () {
