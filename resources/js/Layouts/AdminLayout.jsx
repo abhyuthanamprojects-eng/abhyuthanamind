@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, Head, usePage } from '@inertiajs/react';
-import { Bell, Search, Menu, X, ChevronDown, LogOut, User, CheckCircle2, XCircle } from 'lucide-react';
+import { Bell, Search, Menu, X, ChevronDown, LogOut, User, CheckCircle2, XCircle, Settings } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Toaster } from 'sonner';
 import { adminNav } from '@/lib/admin-nav';
@@ -142,6 +142,13 @@ function ProfileMenu({ user, initials, roleLabel }) {
                         transition={{ duration: 0.15 }}
                         className="absolute right-0 z-30 mt-2 w-48 overflow-hidden rounded-2xl border border-border bg-card p-1.5 shadow-card"
                     >
+                        <Link
+                            href={route('admin.app-settings.index')}
+                            onClick={() => setOpen(false)}
+                            className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium text-navy transition hover:bg-muted"
+                        >
+                            <Settings className="size-4 text-muted-foreground" /> Settings
+                        </Link>
                         <Link
                             href={route('profile.edit')}
                             onClick={() => setOpen(false)}

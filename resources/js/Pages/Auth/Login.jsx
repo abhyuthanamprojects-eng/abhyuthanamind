@@ -107,13 +107,6 @@ export default function Login({ status, canResetPassword }) {
                                 {processing && <Loader2 className="size-4 animate-spin" />}
                                 {processing ? 'Signing in…' : 'Sign In'}
                             </button>
-
-                            <p className="pt-1 text-center text-sm text-muted-foreground">
-                                New here?{' '}
-                                <Link className="font-semibold text-brand hover:text-brand-dark" href={route('register')}>
-                                    Create an account
-                                </Link>
-                            </p>
                         </form>
                     </div>
                 </div>
