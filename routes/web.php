@@ -100,6 +100,14 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
 
     // Role & Permission Management
     Route::inertia('role-permissions', 'Admin/RolePermissions')->name('admin.role-permissions.index');
+
+    // User Management
+    Route::get('users', [\App\Http\Controllers\Admin\UserManagementController::class, 'index'])->name('admin.users.index');
+    Route::get('users/create', [\App\Http\Controllers\Admin\UserManagementController::class, 'create'])->name('admin.users.create');
+    Route::post('users', [\App\Http\Controllers\Admin\UserManagementController::class, 'store'])->name('admin.users.store');
+    Route::get('users/{user}/edit', [\App\Http\Controllers\Admin\UserManagementController::class, 'edit'])->name('admin.users.edit');
+    Route::put('users/{user}', [\App\Http\Controllers\Admin\UserManagementController::class, 'update'])->name('admin.users.update');
+    Route::delete('users/{user}', [\App\Http\Controllers\Admin\UserManagementController::class, 'destroy'])->name('admin.users.destroy');
     Route::post('home-banners', [\App\Http\Controllers\Admin\HomeBannerController::class, 'store'])->name('admin.home-banners.store');
     Route::post('home-banners/reorder', [\App\Http\Controllers\Admin\HomeBannerController::class, 'reorder'])->name('admin.home-banners.reorder');
     Route::match(['put', 'patch', 'post'], 'home-banners/{homeBanner}', [\App\Http\Controllers\Admin\HomeBannerController::class, 'update'])->name('admin.home-banners.update');

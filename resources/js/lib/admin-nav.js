@@ -1,7 +1,7 @@
 import {
     LayoutDashboard, Truck, MessageSquare, HelpCircle, FileText, Star, Award, Images,
     IndianRupee, Users, BarChart3, User, Wrench, Factory, LayoutTemplate, ClipboardList,
-    Settings,
+    Settings, Shield,
 } from 'lucide-react';
 
 export const adminNav = [
@@ -38,8 +38,9 @@ export const adminNav = [
     {
         group: 'Settings',
         items: [
+            { label: 'User Management', route: 'admin.users.index', icon: Users },
+            { label: 'Role Permissions', route: 'admin.role-permissions.index', icon: Shield },
             { label: 'App Settings', route: 'admin.app-settings.index', icon: Settings },
-            { label: 'Role Permissions', route: 'admin.role-permissions.index', icon: Settings },
             { label: 'Profile', route: 'profile.edit', icon: User },
         ],
     },
