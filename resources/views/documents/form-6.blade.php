@@ -236,13 +236,24 @@
 <body>
 
 @php
-    $pickupDate = !empty($data['pickup_date']) ? \Carbon\Carbon::parse($data['pickup_date']) : ($doc->issued_at ?? now());
-    // MM - DD - YYYY characters for the date boxes, plus trailing empty box
-    $dateChars = array_merge(
-        str_split($pickupDate->format('m')), ['-'],
-        str_split($pickupDate->format('d')), ['-'],
-        str_split($pickupDate->format('Y'))
-    );
+    // MM - DD - YYYY characters for the date boxes of each signature row.
+    // Each row has its own date field; falls back to pickup date, then blank boxes.
+    $dateBoxChars = function (?string $date) use ($data) {
+        $date = $date ?: ($data['pickup_date'] ?? null);
+        if (!$date) {
+            return array_fill(0, 10, ''); // blank boxes when no date given
+        }
+        $d = \Carbon\Carbon::parse($date);
+        return array_merge(
+            str_split($d->format('m')), ['-'],
+            str_split($d->format('d')), ['-'],
+            str_split($d->format('Y'))
+        );
+    };
+
+    $senderDateChars = $dateBoxChars($data['sender_signature_date'] ?? null);
+    $transporterDateChars = $dateBoxChars($data['transporter_signature_date'] ?? null);
+    $receiverDateChars = $dateBoxChars($data['receiver_signature_date'] ?? null);
 @endphp
 
     <button class="print-btn" onclick="window.print()">🖨️ Print / PDF</button>
@@ -342,7 +353,7 @@
                                 <span class="dh-year">Year</span>
                             </div>
                             <div class="date-boxes">
-                                @foreach ($dateChars as $ch)
+                                @foreach ($senderDateChars as $ch)
                                 <div class="date-box">{{ $ch }}</div>
                                 @endforeach
                                 <div class="date-box empty"></div>
@@ -366,7 +377,7 @@
                                 <span class="dh-year">Year</span>
                             </div>
                             <div class="date-boxes">
-                                @foreach ($dateChars as $ch)
+                                @foreach ($transporterDateChars as $ch)
                                 <div class="date-box">{{ $ch }}</div>
                                 @endforeach
                                 <div class="date-box empty"></div>
@@ -390,7 +401,7 @@
                                 <span class="dh-year">Year</span>
                             </div>
                             <div class="date-boxes">
-                                @foreach ($dateChars as $ch)
+                                @foreach ($receiverDateChars as $ch)
                                 <div class="date-box">{{ $ch }}</div>
                                 @endforeach
                                 <div class="date-box empty"></div>

@@ -35,6 +35,9 @@ class PickupRequestDocumentController extends Controller
                 'receiver_authorization_no' => 'nullable|string|max:100',
                 'ewaste_description' => 'nullable|string|max:1000',
                 'pickup_date' => 'nullable|date',
+                'sender_signature_date' => 'nullable|date',
+                'transporter_signature_date' => 'nullable|date',
+                'receiver_signature_date' => 'nullable|date',
             ],
             PickupRequestDocument::TYPE_FORM_2 => [
                 'client_company_name' => 'nullable|string|max:200',

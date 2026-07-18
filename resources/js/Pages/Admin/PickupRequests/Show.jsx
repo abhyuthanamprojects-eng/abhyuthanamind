@@ -21,6 +21,9 @@ const DOCUMENT_FIELDS = {
             ['receiver_authorization_no', 'Receiver Authorization No.'],
             ['ewaste_description', 'E-Waste Description (Item / Weight / Numbers)', 'textarea'],
             ['pickup_date', 'Pickup Date', 'date'],
+            ['sender_signature_date', 'Sender Signature Date (Field 11)', 'date'],
+            ['transporter_signature_date', 'Transporter Signature Date (Field 12)', 'date'],
+            ['receiver_signature_date', 'Receiver Signature Date (Field 13)', 'date'],
         ],
     },
     form_2: {
