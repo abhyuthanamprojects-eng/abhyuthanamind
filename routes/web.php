@@ -79,6 +79,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class , 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class , 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class , 'destroy'])->name('profile.destroy');
+
+    // Session-authenticated menu permissions for admin sidebar
+    Route::get('/admin/available-menus', [\App\Http\Controllers\Api\Admin\RolePermissionController::class, 'getAvailableMenus'])->name('admin.available-menus');
 });
 
 // Admin Routes (Now Root)
@@ -100,6 +103,11 @@ Route::middleware(['auth', 'role:admin|manager'])->prefix('admin')->group(functi
     Route::get('pickup-requests/{pickupRequest}', [\App\Http\Controllers\Admin\PickupRequestAdminController::class, 'show'])->name('admin.pickups.show');
     Route::post('pickup-requests/{pickupRequest}/status', [\App\Http\Controllers\Admin\PickupRequestAdminController::class, 'updateStatus'])->name('admin.pickups.update-status');
     Route::patch('pickup-requests/{pickupRequest}/material-processing', [\App\Http\Controllers\Admin\PickupRequestAdminController::class, 'updateMaterialProcessing'])->name('admin.pickups.material-processing');
+    Route::post('pickup-requests/{pickupRequest}/certificate', [\App\Http\Controllers\Admin\PickupRequestAdminController::class, 'uploadCertificate'])->name('admin.pickups.certificate.upload');
+    Route::delete('pickup-requests/{pickupRequest}/certificate', [\App\Http\Controllers\Admin\PickupRequestAdminController::class, 'destroyCertificate'])->name('admin.pickups.certificate.destroy');
+    Route::post('pickup-requests/{pickupRequest}/documents', [\App\Http\Controllers\Admin\PickupRequestDocumentController::class, 'store'])->name('admin.pickups.documents.store');
+    Route::get('pickup-requests/{pickupRequest}/documents/{document}/preview', [\App\Http\Controllers\Admin\PickupRequestDocumentController::class, 'preview'])->name('admin.pickups.documents.preview');
+    Route::delete('pickup-requests/{pickupRequest}/documents/{document}', [\App\Http\Controllers\Admin\PickupRequestDocumentController::class, 'destroy'])->name('admin.pickups.documents.destroy');
 
     Route::get('help-support', [\App\Http\Controllers\Admin\HelpSupportController::class, 'index'])->name('admin.help-support.index');
     Route::get('help-support/{id}', [\App\Http\Controllers\Admin\HelpSupportController::class, 'show'])->name('admin.help-support.show');
@@ -144,15 +152,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
 
     // Additional admin-only help-support actions (deletions)
     Route::delete('help-support/{id}', [\App\Http\Controllers\Admin\HelpSupportController::class, 'destroy'])->name('admin.help-support.destroy');
-
-    // Additional admin-only pickup actions
-    Route::delete('pickup-queries/{pickupQuery}', [\App\Http\Controllers\Admin\PickupQueryAdminController::class, 'destroy'])->name('admin.pickup-queries.destroy');
-    Route::patch('pickup-requests/{pickupRequest}/material-processing', [\App\Http\Controllers\Admin\PickupRequestAdminController::class, 'updateMaterialProcessing'])->name('admin.pickups.material-processing');
-    Route::post('pickup-requests/{pickupRequest}/certificate', [\App\Http\Controllers\Admin\PickupRequestAdminController::class, 'uploadCertificate'])->name('admin.pickups.certificate.upload');
-    Route::delete('pickup-requests/{pickupRequest}/certificate', [\App\Http\Controllers\Admin\PickupRequestAdminController::class, 'destroyCertificate'])->name('admin.pickups.certificate.destroy');
-    Route::post('pickup-requests/{pickupRequest}/documents', [\App\Http\Controllers\Admin\PickupRequestDocumentController::class, 'store'])->name('admin.pickups.documents.store');
-    Route::get('pickup-requests/{pickupRequest}/documents/{document}/preview', [\App\Http\Controllers\Admin\PickupRequestDocumentController::class, 'preview'])->name('admin.pickups.documents.preview');
-    Route::delete('pickup-requests/{pickupRequest}/documents/{document}', [\App\Http\Controllers\Admin\PickupRequestDocumentController::class, 'destroy'])->name('admin.pickups.documents.destroy');
 
     // Scrap Rate Management (categories + items) — real backend
     Route::get('scrap-rate-management', [\App\Http\Controllers\Admin\ScrapItemController::class, 'index'])->name('admin.scrap-rate.index');

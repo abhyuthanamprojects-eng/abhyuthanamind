@@ -8,25 +8,36 @@ import { cn } from '@/lib/utils';
 import axios from 'axios';
 
 function NavLinks({ onNavigate }) {
-    const { url, auth } = usePage();
+    const { url, props } = usePage();
+    const auth = props.auth || {};
     const [accessibleMenus, setAccessibleMenus] = useState(null);
 
     useEffect(() => {
         fetchAccessibleMenus();
     }, []);
 
+    const defaultMenusForRole = (userType) => {
+        const defaults = {
+            admin: null, // null = show all
+            manager: ['dashboard', 'pickup-queries', 'pickup-requests', 'contact-queries', 'help-support', 'customers-leads'],
+            accountant: ['dashboard', 'scrap-rate', 'reports'],
+        };
+        return defaults[userType] !== undefined ? defaults[userType] : [];
+    };
+
     const fetchAccessibleMenus = async () => {
+        const userType = auth?.user?.user_type || auth?.user?.roles?.[0]?.name || 'customer';
         try {
-            const { data } = await axios.get('/api/auth/available-menus');
-            setAccessibleMenus(data.data.accessible_menus);
-        } catch (error) {
-            // Fallback: if user is admin (role), show all menus
-            const isAdmin = auth.user?.roles?.[0]?.name === 'admin' || auth.user?.user_type === 'admin';
-            if (isAdmin) {
-                setAccessibleMenus(null); // null = show all
+            const { data } = await axios.get('/admin/available-menus');
+            const menus = data?.data?.accessible_menus;
+            if (Array.isArray(menus) && menus.length > 0) {
+                setAccessibleMenus(menus);
             } else {
-                setAccessibleMenus([]); // empty = show none (safer)
+                // DB permissions not seeded — fall back to role defaults
+                setAccessibleMenus(defaultMenusForRole(userType));
             }
+        } catch (error) {
+            setAccessibleMenus(defaultMenusForRole(userType));
         }
     };
 
@@ -54,6 +65,7 @@ function NavLinks({ onNavigate }) {
                         'admin.scrap-rate.index': 'scrap-rate',
                         'admin.reports.index': 'reports',
                         'admin.users.index': 'user-management',
+                        'admin.role-permissions.index': 'user-management',
                         'admin.app-settings.index': 'app-settings',
                     };
                     const menuKey = keyMap[item.route];
