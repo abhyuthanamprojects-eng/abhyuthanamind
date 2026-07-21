@@ -104,7 +104,7 @@ export const Route = createFileRoute("/")({
     meta: [
       { title: "ABHYUTHANAM RECYCLERS | India's Leading E-Waste Management Company" },
       { name: "description", content: "Secure, sustainable and certified e-waste recycling, ITAD, EPR and data sanitization across India. Schedule a doorstep pickup today." },
-      { property: "og:title", content: "ABHYUTHANAM RECYCLER | E-Waste Management" },
+      { property: "og:title", content: "ABHYUTHANAM RECYCLERS | E-Waste Management" },
       { property: "og:description", content: "Secure, sustainable and certified e-waste recycling and IT asset disposition." },
     ],
   }),

@@ -37,9 +37,9 @@ const fallbackCategories: ScrapCategoryView[] = staticScrapCategories.map((c) =>
 export const Route = createFileRoute("/scrap-rate")({
   head: () => ({
     meta: [
-      { title: "Scrap Rates | ABHYUTHANAM RECYCLER" },
+      { title: "Scrap Rates | ABHYUTHANAM RECYCLERS" },
       { name: "description", content: "Browse current indicative scrap rates for appliances, electronics, metals, batteries and more. Request a bulk quote or schedule a pickup." },
-      { property: "og:title", content: "Scrap Rates | ABHYUTHANAM RECYCLER" },
+      { property: "og:title", content: "Scrap Rates | ABHYUTHANAM RECYCLERS" },
       { property: "og:description", content: "Latest e-waste and scrap rates by category." },
     ],
   }),

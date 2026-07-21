@@ -9,9 +9,9 @@ import { usePageSection } from "@/Frontend/lib/dynamic-content";
 export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
-      { title: "Contact Us | ABHYUTHANAM RECYCLER" },
-      { name: "description", content: "Get in touch with ABHYUTHANAM RECYCLER for secure e-waste recycling, ITAD and bulk pickup enquiries across India." },
-      { property: "og:title", content: "Contact ABHYUTHANAM RECYCLER" },
+      { title: "Contact Us | ABHYUTHANAM RECYCLERS" },
+      { name: "description", content: "Get in touch with ABHYUTHANAM RECYCLERS for secure e-waste recycling, ITAD and bulk pickup enquiries across India." },
+      { property: "og:title", content: "Contact ABHYUTHANAM RECYCLERS" },
       { property: "og:description", content: "Reach our team for e-waste pickup and enquiries." },
     ],
   }),

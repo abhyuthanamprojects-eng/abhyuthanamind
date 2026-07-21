@@ -16,9 +16,9 @@ export const Route = createFileRoute("/schedule-pickup")({
   }),
   head: () => ({
     meta: [
-      { title: "Schedule a Pickup | ABHYUTHANAM RECYCLER" },
-      { name: "description", content: "Book a doorstep scrap or e-waste pickup with ABHYUTHANAM RECYCLER. Share your details and our team will contact you shortly." },
-      { property: "og:title", content: "Schedule a Pickup | ABHYUTHANAM RECYCLER" },
+      { title: "Schedule a Pickup | ABHYUTHANAM RECYCLERS" },
+      { name: "description", content: "Book a doorstep scrap or e-waste pickup with ABHYUTHANAM RECYCLERS. Share your details and our team will contact you shortly." },
+      { property: "og:title", content: "Schedule a Pickup | ABHYUTHANAM RECYCLERS" },
       { property: "og:description", content: "Book a doorstep scrap or e-waste pickup. Certified, secure and transparent recycling." },
     ],
   }),
