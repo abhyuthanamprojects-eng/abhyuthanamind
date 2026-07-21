@@ -31,14 +31,14 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "ABHYUTHANAM RECYCLER | India's Leading E-Waste Management Company" },
+      { title: "ABHYUTHANAM RECYCLERS | India's Leading E-Waste Management Company" },
       {
         name: "description",
         content:
-          "ABHYUTHANAM RECYCLER offers secure, sustainable and certified e-waste recycling, ITAD, EPR, reverse logistics and data sanitization across India.",
+          "ABHYUTHANAM RECYCLERS offers secure, sustainable and certified e-waste recycling, ITAD, EPR, reverse logistics and data sanitization across India.",
       },
-      { name: "author", content: "ABHYUTHANAM RECYCLER" },
-      { property: "og:title", content: "ABHYUTHANAM RECYCLER | India's Leading E-Waste Management Company" },
+      { name: "author", content: "ABHYUTHANAM RECYCLERS" },
+      { property: "og:title", content: "ABHYUTHANAM RECYCLERS | India's Leading E-Waste Management Company" },
       {
         property: "og:description",
         content: "Secure, sustainable and certified e-waste recycling and IT asset disposition.",

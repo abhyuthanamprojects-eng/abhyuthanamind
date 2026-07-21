@@ -19,7 +19,7 @@ export function Footer() {
           <div>
             <Link to="/" className="inline-flex items-center">
               <span className="rounded-xl bg-white/95 px-3 py-2">
-                <img src={logo} alt="ABHYUTHANAM RECYCLER" width={160} height={48} className="h-10 w-auto" />
+                <img src={logo} alt="ABHYUTHANAM RECYCLERS" width={160} height={48} className="h-10 w-auto" />
               </span>
             </Link>
             <p className="mt-5 text-sm leading-relaxed text-navy-foreground/70">
@@ -59,7 +59,7 @@ export function Footer() {
       </div>
       <div className="border-t border-white/10">
         <div className="container-px flex flex-col items-center justify-between gap-2 py-5 text-xs text-navy-foreground/60 sm:flex-row">
-          <p>© {new Date().getFullYear()} ABHYUTHANAM RECYCLER. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} ABHYUTHANAM RECYCLERS. All rights reserved.</p>
           <p>Reduce • Reuse • Recycle</p>
         </div>
       </div>

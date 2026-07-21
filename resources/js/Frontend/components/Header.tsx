@@ -49,7 +49,7 @@ export function Header() {
       <div className={`border-b border-border bg-background/90 backdrop-blur transition-shadow duration-300 ${scrolled ? "shadow-soft" : ""}`}>
         <div className="container-px flex h-[72px] items-center justify-between py-3">
           <Link to="/" className="flex items-center gap-2.5">
-            <img src={logo} alt="ABHYUTHANAM RECYCLER" width={150} height={48} className="h-10 w-auto" />
+            <img src={logo} alt="ABHYUTHANAM RECYCLERS" width={150} height={48} className="h-10 w-auto" />
           </Link>
 
           <nav className="hidden items-center gap-1 lg:flex">
@@ -87,7 +87,7 @@ export function Header() {
           <div className="absolute inset-0 bg-navy/40" onClick={() => setOpen(false)} />
           <div className="absolute right-0 top-0 h-full w-[85%] max-w-sm overflow-y-auto bg-background p-5 shadow-card">
             <div className="flex items-center justify-between">
-              <img src={logo} alt="ABHYUTHANAM RECYCLER" width={130} height={42} className="h-9 w-auto" />
+              <img src={logo} alt="ABHYUTHANAM RECYCLERS" width={130} height={42} className="h-9 w-auto" />
               <button onClick={() => setOpen(false)} aria-label="Close menu"><X className="size-6 text-navy" /></button>
             </div>
             <div className="mt-6 flex flex-col gap-1">
