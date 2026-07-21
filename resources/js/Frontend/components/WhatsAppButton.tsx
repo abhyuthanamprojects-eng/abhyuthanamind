@@ -1,4 +1,4 @@
-const WHATSAPP_NUMBER = "917042989374"; // +91 70429 89374
+const WHATSAPP_NUMBER = "911144761731"; // +91 11-44761731
 const WHATSAPP_MESSAGE =
   "Hi Abhyuthanam Recyclers, I'd like to know more about your e-waste recycling services.";
 

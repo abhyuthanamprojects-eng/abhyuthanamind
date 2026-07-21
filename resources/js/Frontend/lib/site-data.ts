@@ -1,8 +1,8 @@
 export const company = {
-  name: "ABHYUTHANAM RECYCLER",
+  name: "ABHYUTHANAM RECYCLERS",
   shortName: "ABHYUTHANAM",
   email: "info@abhyuthanamind.com",
-  phones: ["+91 70429 89374", "+91 1800 2030 267", "+91 11-44761731"],
+  phones: ["+91 11-44761731", "+91 1800 2030 267", "+91 70429 89374"],
   hours: "Mon – Sat: 9:00 AM – 6:00 PM",
   address: "E-15, UPSIDA Plastic City, Dibiyapur, UP, PIN- 206244",
   pickupForm: "/schedule-pickup",
@@ -15,7 +15,7 @@ export const companyMeta = {
   teamSize: "20+",
   capacity: "8,400 MT / Year",
   emails: ["sales@abhyuthanamind.com", "info@abhyuthanamind.com"],
-  phonesAll: ["+91 70429 89374", "+91 1800 2030 267", "+91 11-44761731"],
+  phonesAll: ["+91 11-44761731", "+91 1800 2030 267", "+91 70429 89374"],
   plantAddress: "E-15, UPSIDA Plastic City, Dibiyapur, Uttar Pradesh - 206244",
   corporateAddress:
     "E-44/3, 1st Floor, Industrial Area, Phase-II, Okhla, New Delhi - 110020",
