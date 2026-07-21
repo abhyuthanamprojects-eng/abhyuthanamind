@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}">
 
-        <title>ABHYUTHANAM RECYCLER | India's Leading E-Waste Management Company</title>
+        <title>ABHYUTHANAM RECYCLERS | India's Leading E-Waste Management Company</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">

@@ -102,7 +102,7 @@ const ecosystem = [
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "ABHYUTHANAM RECYCLER | India's Leading E-Waste Management Company" },
+      { title: "ABHYUTHANAM RECYCLERS | India's Leading E-Waste Management Company" },
       { name: "description", content: "Secure, sustainable and certified e-waste recycling, ITAD, EPR and data sanitization across India. Schedule a doorstep pickup today." },
       { property: "og:title", content: "ABHYUTHANAM RECYCLER | E-Waste Management" },
       { property: "og:description", content: "Secure, sustainable and certified e-waste recycling and IT asset disposition." },
@@ -121,13 +121,13 @@ function Index() {
   const dynamicFounders = useFounders();
   const leaders = dynamicFounders.length > 0
     ? dynamicFounders.map((f, i) => ({
-        name: f.name,
-        role: f.role,
-        bio: f.bio,
-        leads: f.leads,
-        linkedin_url: f.linkedin_url || "",
-        img: f.image_url || staticLeaders[i]?.img || owner1,
-      }))
+      name: f.name,
+      role: f.role,
+      bio: f.bio,
+      leads: f.leads,
+      linkedin_url: f.linkedin_url || "",
+      img: f.image_url || staticLeaders[i]?.img || owner1,
+    }))
     : staticLeaders;
 
   // Admin-editable Exchange Policy section (falls back to bundled defaults).
@@ -143,18 +143,18 @@ function Index() {
     Array.isArray(exchange?.json?.bullets) && exchange!.json!.bullets.length
       ? (exchange!.json!.bullets as string[])
       : [
-          "Transparent, on-the-spot valuation of your old device",
-          "Exchange value adjusted towards your new purchase",
-          "Free doorstep pickup of the old item",
-          "Certified, zero-landfill recycling of what we collect",
-        ];
+        "Transparent, on-the-spot valuation of your old device",
+        "Exchange value adjusted towards your new purchase",
+        "Free doorstep pickup of the old item",
+        "Certified, zero-landfill recycling of what we collect",
+      ];
   const exchangeButtons: ExchangeButton[] =
     Array.isArray(exchange?.json?.buttons) && exchange!.json!.buttons.length
       ? (exchange!.json!.buttons as ExchangeButton[])
       : [
-          { label: "Get exchange value", href: "/schedule-pickup", style: "primary" },
-          { label: "View scrap rates", href: "/scrap-rate", style: "outline" },
-        ];
+        { label: "Get exchange value", href: "/schedule-pickup", style: "primary" },
+        { label: "View scrap rates", href: "/scrap-rate", style: "outline" },
+      ];
 
   return (
     <SiteLayout>
