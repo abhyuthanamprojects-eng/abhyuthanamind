@@ -90,9 +90,9 @@ export const Route = createFileRoute("/about")({
   },
   head: () => ({
     meta: [
-      { title: "About Us | ABHYUTHANAM RECYCLER" },
+      { title: "About Us | ABHYUTHANAM RECYCLERS" },
       { name: "description", content: "Abhyuthanam Recyclers — a certified Indian e-waste recycling company founded in 2023, helping businesses and homes dispose of electronics safely with zero landfill." },
-      { property: "og:title", content: "About ABHYUTHANAM RECYCLER" },
+      { property: "og:title", content: "About ABHYUTHANAM RECYCLERS" },
       { property: "og:description", content: "Certified e-waste management company in India." },
     ],
   }),

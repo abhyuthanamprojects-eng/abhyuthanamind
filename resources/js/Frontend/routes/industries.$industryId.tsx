@@ -19,7 +19,7 @@ export const Route = createFileRoute("/industries/$industryId")({
   head: ({ loaderData }) => ({
     meta: loaderData
       ? [
-          { title: `${loaderData.industry.title} | ABHYUTHANAM RECYCLER` },
+          { title: `${loaderData.industry.title} | ABHYUTHANAM RECYCLERS` },
           { name: "description", content: loaderData.industry.short },
           { property: "og:title", content: loaderData.industry.title },
           { property: "og:description", content: loaderData.industry.short },

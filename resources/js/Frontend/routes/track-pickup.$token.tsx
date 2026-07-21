@@ -14,7 +14,7 @@ import { company } from "@/Frontend/lib/site-data";
 export const Route = createFileRoute("/track-pickup/$token")({
   head: () => ({
     meta: [
-      { title: "Track Your Pickup | ABHYUTHANAM RECYCLER" },
+      { title: "Track Your Pickup | ABHYUTHANAM RECYCLERS" },
       { name: "description", content: "Check the live status of your scrap pickup request." },
     ],
   }),

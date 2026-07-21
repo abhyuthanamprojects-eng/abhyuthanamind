@@ -17,7 +17,7 @@ import imgDisposal from "@/Frontend/assets/recycle-1.jpg";
 export const Route = createFileRoute("/process")({
   head: () => ({
     meta: [
-      { title: "Scrap Recycling Process | ABHYUTHANAM RECYCLER" },
+      { title: "Scrap Recycling Process | ABHYUTHANAM RECYCLERS" },
       { name: "description", content: "Our 7-stage scrap and e-waste recycling process — collection, transportation, sorting, dismantling, advanced separation, material recovery and zero-landfill disposal." },
       { property: "og:title", content: "Scrap Recycling Process | ABHYUTHANAM" },
       { property: "og:description", content: "A transparent, certified, zero-landfill recycling journey." },
