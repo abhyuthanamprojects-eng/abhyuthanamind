@@ -465,6 +465,7 @@ function SubmitTestimonialPage() {
                       id="customerPhoto"
                       type="file"
                       accept="image/png,image/jpeg,image/webp"
+                      capture="environment"
                       className="sr-only"
                       onChange={(e) => setCustomerPhoto(e.target.files?.[0] ?? null)}
                     />
@@ -489,6 +490,7 @@ function SubmitTestimonialPage() {
                       id="images"
                       type="file"
                       accept="image/png,image/jpeg,image/webp"
+                      capture="environment"
                       multiple
                       className="sr-only"
                       onChange={(e) => handleImagesChange(e.target.files)}
